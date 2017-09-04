@@ -85,6 +85,7 @@ namespace Completed
 					
 					//Set the parent of our newly instantiated object instance to boardHolder, this is just organizational to avoid cluttering hierarchy.
 					instance.transform.SetParent (boardHolder);
+					GameManager.instance.AddFloor (instance);
 				}
 			}
 		}
@@ -123,7 +124,9 @@ namespace Completed
 				GameObject tileChoice = tileArray[Random.Range (0, tileArray.Length)];
 				
 				//Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
-				Instantiate(tileChoice, randomPosition, Quaternion.identity);
+				GameObject obj = Instantiate(tileChoice, randomPosition, Quaternion.identity);
+
+				GameManager.instance.AddItem (obj);
 			}
 		}
 		
@@ -131,6 +134,9 @@ namespace Completed
 		//SetupScene initializes our level and calls the previous functions to lay out the game board
 		public void SetupScene (int level)
 		{
+			GameManager.instance.ClearFloors ();
+			GameManager.instance.ClearItems ();
+
 			//Creates the outer walls and floor.
 			BoardSetup ();
 			

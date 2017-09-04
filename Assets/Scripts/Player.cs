@@ -125,11 +125,13 @@ namespace Completed
 				AttemptMove<Wall> (horizontal, vertical);
 			}
 		}
-		
+
 		//AttemptMove overrides the AttemptMove function in the base class MovingObject
 		//AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
 		protected override void AttemptMove <T> (int xDir, int yDir)
 		{
+			Vector3 nextPos = transform.position;
+
 			//Every time player moves, subtract from food points total.
 			food--;
 			
@@ -143,11 +145,16 @@ namespace Completed
 			RaycastHit2D hit;
 			
 			//If Move returns true, meaning Player was able to move into an empty space.
-			if (Move (xDir, yDir, out hit)) 
-			{
+			if (Move (xDir, yDir, out hit)) {
 				//Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
 				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
+
+				nextPos.x += xDir;
+				nextPos.y += yDir;
 			}
+
+			GameManager.instance.ShowObjs (nextPos);
+
 			
 			//Since the player has moved and lost food points, check if the game has ended.
 			CheckIfGameOver ();

@@ -24,8 +24,101 @@ namespace Completed
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
 		
-		
-		
+		private List<GameObject> tiles = new List<GameObject>();
+		private List<GameObject> items = new List<GameObject>();
+
+		public void ShowObjs(Vector3 playerPos)
+		{
+			List<Vector3> showRange = new List<Vector3> {playerPos, 
+				new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+				new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
+				new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
+				new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
+
+			foreach (GameObject obj in tiles)
+			{
+				if (obj == null) continue;
+				bool bShow = false;
+
+				foreach (Vector3 showPos in showRange) 
+				{	
+					if (showPos == obj.transform.position) {
+						bShow = true;
+						break;
+					}
+				}
+
+				Renderer renderer = obj.GetComponent<SpriteRenderer>();
+				if (renderer)
+				{
+					if (bShow)
+					{
+						Color color = renderer.material.color;
+						color.a = 1f;
+						renderer.material.color = color;
+					}
+					else
+					{
+						Color color = renderer.material.color;
+						color.a = 0.6f;
+						renderer.material.color = color;
+					}
+				}
+			}
+
+			foreach (GameObject obj in items)
+			{
+				if (obj == null) continue;
+				bool bShow = false;
+
+				foreach (Vector3 showPos in showRange) 
+				{	
+					if (showPos == obj.transform.position) {
+						bShow = true;
+						break;
+					}
+				}
+
+				Renderer renderer = obj.GetComponent<SpriteRenderer>();
+				if (renderer)
+				{
+					if (bShow)
+					{
+						Color color = renderer.material.color;
+						color.a = 1f;
+						renderer.material.color = color;
+					}
+					else
+					{
+						Color color = renderer.material.color;
+						color.a = 0.0f;
+						renderer.material.color = color;
+					}
+				}
+			}
+		}
+
+		public void ClearFloors()
+		{
+			tiles.Clear ();
+		}
+
+		public void AddFloor(GameObject obj)
+		{
+			tiles.Add (obj);
+		}
+
+
+		public void ClearItems()
+		{
+			items.Clear ();
+		}
+
+		public void AddItem(GameObject obj)
+		{
+			items.Add (obj);
+		}
+
 		//Awake is always called before any Start functions
 		void Awake()
 		{
