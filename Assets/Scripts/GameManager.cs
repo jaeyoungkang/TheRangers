@@ -27,15 +27,80 @@ namespace Completed
 		private List<GameObject> tiles = new List<GameObject>();
 		private List<GameObject> items = new List<GameObject>();
 
-		public void ShowObjs(Vector3 playerPos)
-		{
-			List<Vector3> showRange = new List<Vector3> {playerPos, 
-				new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-				new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
-				new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
-				new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
+        public List<Vector3> GetShowRange(Vector3 playerPos)
+        {
+            int type = 0;
+            foreach (GameObject obj in tiles)
+            {
+                if (obj.transform.position == playerPos)
+                {
+                    type = obj.GetComponent<ExFloor>().type;
+                    break;
+                }
+            }
 
-			foreach (GameObject obj in tiles)
+            switch(type)
+            {               
+                case 0:
+                    return new List<Vector3> {playerPos,
+                    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
+
+                case 1:
+                    return new List<Vector3> {playerPos,
+                    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y+2, playerPos.z),
+                    new Vector3(playerPos.x+1, playerPos.y+1, playerPos.z),
+                    new Vector3(playerPos.x-1, playerPos.y + 1, playerPos.z),
+                    new Vector3(playerPos.x+2, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x-2, playerPos.y, playerPos.z),
+                    new Vector3(playerPos.x-1, playerPos.y-1, playerPos.z),
+                    new Vector3(playerPos.x+1, playerPos.y-1, playerPos.z),
+                    new Vector3(playerPos.x, playerPos.y-2, playerPos.z),};
+
+                //case 2:
+                //    return new List<Vector3> {playerPos,
+                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
+                //   };
+
+                //case 3:
+                //    return new List<Vector3> {playerPos,
+                //    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
+                //    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
+
+                //case 4:
+                //    return new List<Vector3> {playerPos,
+                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
+                //    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),};
+
+                //case 5:
+                //    return new List<Vector3> {playerPos,
+                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
+                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),                    
+                //    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
+
+                case 2:
+                default:
+                    return new List<Vector3> { playerPos, };
+
+            }
+            
+        }
+
+        public void ShowObjs(Vector3 playerPos)
+		{
+            List<Vector3> showRange = GetShowRange(playerPos); 
+
+            
+
+            foreach (GameObject obj in tiles)
 			{
 				if (obj == null) continue;
 				bool bShow = false;
