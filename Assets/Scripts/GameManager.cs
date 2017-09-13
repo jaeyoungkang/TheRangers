@@ -96,9 +96,7 @@ namespace Completed
 
         public void ShowObjs(Vector3 playerPos)
 		{
-            List<Vector3> showRange = GetShowRange(playerPos); 
-
-            
+            List<Vector3> showRange = GetShowRange(playerPos);                        
 
             foreach (GameObject obj in tiles)
 			{

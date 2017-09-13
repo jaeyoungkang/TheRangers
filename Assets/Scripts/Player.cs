@@ -175,7 +175,7 @@ namespace Completed
 			hitWall.DamageWall (wallDamage);
 			
 			//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
-			animator.SetTrigger ("playerChop");
+			//animator.SetTrigger ("playerChop");
 		}
 		
 		
@@ -240,7 +240,7 @@ namespace Completed
 		public void LoseFood (int loss)
 		{
 			//Set the trigger for the player animator to transition to the playerHit animation.
-			animator.SetTrigger ("playerHit");
+			//animator.SetTrigger ("playerHit");
 			
 			//Subtract lost food points from the players total.
 			food -= loss;
