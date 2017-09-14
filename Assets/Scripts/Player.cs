@@ -26,7 +26,9 @@ namespace Completed
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
-		
+
+        public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
+        public MOVE_DIR curDir = MOVE_DIR.RIGHT;
 		
 		//Start overrides the Start function of MovingObject
 		protected override void Start ()
@@ -42,7 +44,9 @@ namespace Completed
 			
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
-		}
+
+            UpdateDirImage();
+        }
 		
 		
 		//This function is called when the behaviour becomes disabled or inactive.
@@ -126,10 +130,82 @@ namespace Completed
 			}
 		}
 
+        public bool CheckDir(int xDir, int yDir)
+        {
+            bool change = true;
+            switch(curDir)
+            {
+                case MOVE_DIR.LEFT:
+                    if (xDir == -1) change = false;
+                    break;
+
+                case MOVE_DIR.RIGHT:
+                    if (xDir == 1) change = false;
+                    break;
+
+                case MOVE_DIR.UP:
+                    if (yDir == 1) change = false;
+                    break;
+
+                case MOVE_DIR.DOWN:
+                    if (yDir == -1) change = false;
+                    break;
+
+            }
+
+            return change;
+        }
+
+        public void ChangeDir(int xDir, int yDir)
+        {
+            if(xDir == 1)
+            {
+                curDir = MOVE_DIR.RIGHT;
+            }
+            else if(xDir == -1)
+            {
+                curDir = MOVE_DIR.LEFT;
+            }
+
+            if (yDir == 1)
+            {
+                curDir = MOVE_DIR.UP;
+            }
+            else if (yDir == -1)
+            {
+                curDir = MOVE_DIR.DOWN;
+            }
+        }
+
+        public Sprite[] dirSprits;
+        public void UpdateDirImage()
+        {
+            SpriteRenderer sRenderer = gameObject.GetComponent<SpriteRenderer>();
+            if (sRenderer == null) return;
+                        
+            switch (curDir)
+            {
+                case MOVE_DIR.RIGHT: sRenderer.sprite = dirSprits[0]; break;
+                case MOVE_DIR.LEFT: sRenderer.sprite = dirSprits[1]; break;
+                case MOVE_DIR.UP: sRenderer.sprite = dirSprits[2]; break;
+                case MOVE_DIR.DOWN: sRenderer.sprite = dirSprits[3]; break;
+            }
+        }
+
 		//AttemptMove overrides the AttemptMove function in the base class MovingObject
 		//AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
 		protected override void AttemptMove <T> (int xDir, int yDir)
 		{
+            //Set the playersTurn boolean of GameManager to false now that players turn is over.
+            GameManager.instance.playersTurn = false;
+
+            if (CheckDir(xDir, yDir))
+            {
+                ChangeDir(xDir, yDir);
+                UpdateDirImage();
+                return;
+            }
+
 			Vector3 nextPos = transform.position;
 
 			//Every time player moves, subtract from food points total.
@@ -157,10 +233,7 @@ namespace Completed
 
 			
 			//Since the player has moved and lost food points, check if the game has ended.
-			CheckIfGameOver ();
-			
-			//Set the playersTurn boolean of GameManager to false now that players turn is over.
-			GameManager.instance.playersTurn = false;
+			CheckIfGameOver ();			
 		}
 		
 		
