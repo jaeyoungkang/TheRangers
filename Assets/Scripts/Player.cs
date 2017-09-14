@@ -29,9 +29,11 @@ namespace Completed
 
         public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
-		
-		//Start overrides the Start function of MovingObject
-		protected override void Start ()
+        public GameObject explosioinInstance;
+        public GameObject exploreEffect;
+
+        //Start overrides the Start function of MovingObject
+        protected override void Start ()
 		{
 			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
@@ -46,6 +48,9 @@ namespace Completed
 			base.Start ();
 
             UpdateDirImage();
+
+            explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
+            explosioinInstance.SetActive(false);
         }
 		
 		
@@ -61,8 +66,21 @@ namespace Completed
 		{
 			//If it's not the player's turn, exit the function.
 			if(!GameManager.instance.playersTurn) return;
-			
-			int horizontal = 0;  	//Used to store the horizontal move direction.
+
+            if (Input.GetKeyDown("1"))
+            {
+                Attack(1);
+            }
+            else if (Input.GetKeyDown("2"))
+            {
+                Attack(2);
+            }
+            else if (Input.GetKeyDown("3"))
+            {
+                Attack(3);
+            }
+
+            int horizontal = 0;  	//Used to store the horizontal move direction.
 			int vertical = 0;		//Used to store the vertical move direction.
 			
 			//Check if we are running either in the Unity editor or in a standalone build.
@@ -192,9 +210,30 @@ namespace Completed
             }
         }
 
-		//AttemptMove overrides the AttemptMove function in the base class MovingObject
-		//AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
-		protected override void AttemptMove <T> (int xDir, int yDir)
+        public void Attack(int distance)
+        {
+            Vector3 targetPos = transform.position;
+            switch (curDir)
+            {
+                case MOVE_DIR.RIGHT: targetPos.x += distance; break;
+                case MOVE_DIR.LEFT: targetPos.x -= distance; break;
+                case MOVE_DIR.UP: targetPos.y += distance; break;
+                case MOVE_DIR.DOWN: targetPos.y -= distance; break;
+            }
+
+            StartCoroutine(ExploreTarget(targetPos));
+        }        
+
+        IEnumerator ExploreTarget(Vector3 targetPos)
+        {
+            explosioinInstance.transform.position = targetPos;
+            explosioinInstance.SetActive(true);
+            yield return new WaitForSeconds(0.5f);
+            explosioinInstance.SetActive(false);
+        }
+        //AttemptMove overrides the AttemptMove function in the base class MovingObject
+        //AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
+        protected override void AttemptMove <T> (int xDir, int yDir)
 		{
             //Set the playersTurn boolean of GameManager to false now that players turn is over.
             GameManager.instance.playersTurn = false;
