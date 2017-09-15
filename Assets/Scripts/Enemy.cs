@@ -14,8 +14,36 @@ namespace Completed
 		private Animator animator;							//Variable of type Animator to store a reference to the enemy's Animator component.
 		private Transform target;							//Transform to attempt to move toward each turn.
 		private bool skipMove;								//Boolean to determine whether or not enemy should skip a turn or move this turn.
-		
-		
+
+		public int hp = 2;
+		public float dodgeRate = 0.3f;
+
+		public bool BeDamaged(int point)
+		{
+			int randomIndex = Random.Range (0, 5);
+			if (randomIndex == 0) {
+				GameManager.instance.UpdateGameMssage ("Dodged!", 1f);
+				return false;
+			} else if (randomIndex == 1) {
+				GameManager.instance.UpdateGameMssage ("Critical Damaged! " + point*2, 1f);
+				UpdateHp (point*2);
+			}
+			else {
+				GameManager.instance.UpdateGameMssage ("Damaged! " + point, 1f);
+				UpdateHp (point);
+			}
+
+			return true;
+		}
+
+		public void UpdateHp(int point)
+		{
+			hp -= point;
+			if (hp <= 0)
+				GameManager.instance.DestroyEnemy (gameObject);
+		}
+			
+
 		//Start overrides the virtual Start function of the base class.
 		protected override void Start ()
 		{

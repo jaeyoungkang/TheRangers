@@ -13,6 +13,8 @@ namespace Completed
 		public int pointsPerSoda = 20;				//Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;					//How much damage a player does to a wall when chopping it.
 		public Text foodText;						//UI Text to display current player food total.
+		public Text ammoText;						//UI Text to display current player food total.
+
 		public AudioClip moveSound1;				//1 of 2 Audio clips to play when player moves.
 		public AudioClip moveSound2;				//2 of 2 Audio clips to play when player moves.
 		public AudioClip eatSound1;					//1 of 2 Audio clips to play when player collects a food object.
@@ -23,6 +25,7 @@ namespace Completed
 		
 		private Animator animator;					//Used to store a reference to the Player's animator component.
 		private int food;                           //Used to store player food points total during level.
+		private int ammo;                           //Used to store player food points total during level.
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
@@ -31,6 +34,8 @@ namespace Completed
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject explosioinInstance;
         public GameObject exploreEffect;
+
+		public int numOfBullets = 10;
 
         //Start overrides the Start function of MovingObject
         protected override void Start ()
@@ -64,6 +69,8 @@ namespace Completed
 		
 		private void Update ()
 		{
+			ammoText.text = "Ammo : " + numOfBullets;
+			
 			//If it's not the player's turn, exit the function.
 			if(!GameManager.instance.playersTurn) return;
 
@@ -212,6 +219,11 @@ namespace Completed
 
         public void Attack(int distance)
         {
+			if (numOfBullets <= 0) {
+				GameManager.instance.UpdateGameMssage ("No Ammo!!!", 1f);
+				return;
+			}
+				
             Vector3 targetPos = transform.position;
             switch (curDir)
             {
@@ -222,6 +234,10 @@ namespace Completed
             }
 
             StartCoroutine(ExploreTarget(targetPos));
+
+			GameManager.instance.AttackEnemy (targetPos);
+
+			numOfBullets--;
         }        
 
         IEnumerator ExploreTarget(Vector3 targetPos)
@@ -324,11 +340,8 @@ namespace Completed
 			else if(other.tag == "Soda")
 			{
 				//Add pointsPerSoda to players food points total
-				food += pointsPerSoda;
-				
-				//Update foodText to represent current total and notify player that they gained points
-				foodText.text = "+" + pointsPerSoda + " Food: " + food;
-				
+				numOfBullets += 5;
+
 				//Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
 				SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
 				

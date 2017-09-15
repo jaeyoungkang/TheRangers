@@ -23,9 +23,37 @@ namespace Completed
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
-		
+
+		public Text gameMessage;
+		public float msgTimer = 0;
+		public void UpdateGameMssage(string msg, float time)
+		{
+			gameMessage.text = msg;
+			msgTimer = time;
+		}
+
 		private List<GameObject> tiles = new List<GameObject>();
 		private List<GameObject> items = new List<GameObject>();
+
+		public void DestroyEnemy(GameObject target)
+		{
+			Enemy en = target.GetComponent<Enemy> ();
+			enemies.Remove (en);
+			target.SetActive (false);
+			items.Remove (target);
+		}
+
+		public void AttackEnemy(Vector3 targetPos)
+		{
+			foreach (GameObject obj in items)
+			{
+				if (obj == null) continue;
+				if (targetPos == obj.transform.position) {
+					obj.GetComponent<Enemy> ().BeDamaged (1);
+					return;
+				}
+			}
+		}
 
         public List<Vector3> GetShowRange(Vector3 playerPos)
         {
@@ -62,30 +90,7 @@ namespace Completed
                     new Vector3(playerPos.x-1, playerPos.y-1, playerPos.z),
                     new Vector3(playerPos.x+1, playerPos.y-1, playerPos.z),
                     new Vector3(playerPos.x, playerPos.y-2, playerPos.z),};
-
-                //case 2:
-                //    return new List<Vector3> {playerPos,
-                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
-                //   };
-
-                //case 3:
-                //    return new List<Vector3> {playerPos,
-                //    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
-                //    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
-
-                //case 4:
-                //    return new List<Vector3> {playerPos,
-                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
-                //    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),};
-
-                //case 5:
-                //    return new List<Vector3> {playerPos,
-                //    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-                //    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),                    
-                //    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
-
+				
                 case 2:
                 default:
                     return new List<Vector3> { playerPos, };
@@ -238,6 +243,8 @@ namespace Completed
 			
 			//Get a reference to our text LevelText's text component by finding it by name and calling GetComponent.
 			levelText = GameObject.Find("LevelText").GetComponent<Text>();
+
+			gameMessage = GameObject.Find("Msg").GetComponent<Text>();
 			
 			//Set the text of levelText to the string "Day" and append the current level number.
 			levelText.text = "Day " + level;
@@ -270,6 +277,14 @@ namespace Completed
 		//Update is called every frame.
 		void Update()
 		{
+			if (msgTimer >= 0) {
+				msgTimer -= Time.deltaTime;
+				if (msgTimer <= 0) {
+					msgTimer = 0;
+					gameMessage.text = "";
+				}
+			}
+			
 			//Check that playersTurn or enemiesMoving or doingSetup are not currently true.
 			if(playersTurn || enemiesMoving || doingSetup)
 				
