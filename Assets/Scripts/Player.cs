@@ -24,8 +24,9 @@ namespace Completed
 		public AudioClip gameOverSound;				//Audio clip to play when player dies.
 		
 		private Animator animator;					//Used to store a reference to the Player's animator component.
-		private int food;                           //Used to store player food points total during level.
-		private int ammo;                           //Used to store player food points total during level.
+		private int food;
+
+
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
@@ -35,7 +36,9 @@ namespace Completed
         public GameObject explosioinInstance;
         public GameObject exploreEffect;
 
-		public int numOfBullets = 10;
+		public int numOfBullets1 = 3;
+        public int numOfBullets2 = 0;
+        public int numOfBullets3 = 0;
 
         //Start overrides the Start function of MovingObject
         protected override void Start ()
@@ -43,11 +46,7 @@ namespace Completed
 			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
 			
-			//Get the current food point total stored in GameManager.instance between levels.
-			food = GameManager.instance.playerFoodPoints;
-			
-			//Set the foodText to reflect the current player food total.
-			foodText.text = "Food: " + food;
+			food = GameManager.instance.playerFoodPoints;            
 			
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
@@ -56,37 +55,37 @@ namespace Completed
 
             explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
             explosioinInstance.SetActive(false);
+
+            playerTime = playerTimeInit;
         }
 		
 		
 		//This function is called when the behaviour becomes disabled or inactive.
 		private void OnDisable ()
 		{
-			//When Player object is disabled, store the current local food total in the GameManager so it can be re-loaded in next level.
 			GameManager.instance.playerFoodPoints = food;
 		}
-		
+
+        public float playerTimeInit = 0.5f ;
+        float playerTime;
 		
 		private void Update ()
 		{
-			ammoText.text = "Ammo : " + numOfBullets;
-			
-			//If it's not the player's turn, exit the function.
-			if(!GameManager.instance.playersTurn) return;
+            foodText.text = "HP : " + food;
+            ammoText.text = "[Ammo1 : " + numOfBullets1 + "] [Ammo2 : " + numOfBullets2 + "] [Ammo3 : " + numOfBullets3 + "]";
 
-            if (Input.GetKeyDown("1"))
+            //If it's not the player's turn, exit the function.
+            if (!GameManager.instance.playersTurn)
             {
-                Attack(1);
+                playerTime -= Time.deltaTime;
+                if(playerTime <= 0)
+                {
+                    GameManager.instance.playersTurn = true;
+                    playerTime = playerTimeInit;
+                }
+                return;
             }
-            else if (Input.GetKeyDown("2"))
-            {
-                Attack(2);
-            }
-            else if (Input.GetKeyDown("3"))
-            {
-                Attack(3);
-            }
-
+            
             int horizontal = 0;  	//Used to store the horizontal move direction.
 			int vertical = 0;		//Used to store the vertical move direction.
 			
@@ -153,7 +152,54 @@ namespace Completed
 				//Pass in horizontal and vertical as parameters to specify the direction to move Player in.
 				AttemptMove<Wall> (horizontal, vertical);
 			}
+            else
+            {
+                AttempAttack();
+            }
 		}
+
+        public void AttempAttack()
+        {
+            if (Input.GetKeyDown("1"))
+            {
+                if (numOfBullets1 <= 0)
+                {
+                    GameManager.instance.UpdateGameMssage("No Ammo1 !!!", 1f);
+                }
+                else
+                {
+                    numOfBullets1--;
+                    Attack(1);
+                }
+                GameManager.instance.playersTurn = false;
+            }
+            else if (Input.GetKeyDown("2"))
+            {
+                if (numOfBullets2 <= 0)
+                {
+                    GameManager.instance.UpdateGameMssage("No Ammo2 !!!", 1f);
+                }
+                else
+                {
+                    numOfBullets2--;
+                    Attack(2);
+                }
+                GameManager.instance.playersTurn = false;
+            }
+            else if (Input.GetKeyDown("3"))
+            {
+                if (numOfBullets3 <= 0)
+                {
+                    GameManager.instance.UpdateGameMssage("No Ammo3 !!!", 1f);
+                }
+                else
+                {
+                    numOfBullets3--;
+                    Attack(3);
+                }
+                GameManager.instance.playersTurn = false;
+            }            
+        }
 
         public bool CheckDir(int xDir, int yDir)
         {
@@ -219,11 +265,6 @@ namespace Completed
 
         public void Attack(int distance)
         {
-			if (numOfBullets <= 0) {
-				GameManager.instance.UpdateGameMssage ("No Ammo!!!", 1f);
-				return;
-			}
-				
             Vector3 targetPos = transform.position;
             switch (curDir)
             {
@@ -235,9 +276,7 @@ namespace Completed
 
             StartCoroutine(ExploreTarget(targetPos));
 
-			GameManager.instance.AttackEnemy (targetPos);
-
-			numOfBullets--;
+			GameManager.instance.AttackEnemy (targetPos);			
         }        
 
         IEnumerator ExploreTarget(Vector3 targetPos)
@@ -262,13 +301,7 @@ namespace Completed
             }
 
 			Vector3 nextPos = transform.position;
-
-			//Every time player moves, subtract from food points total.
-			food--;
-			
-			//Update food text display to reflect current score.
-			foodText.text = "Food: " + food;
-			
+            			
 			//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
 			base.AttemptMove <T> (xDir, yDir);
 			
@@ -285,9 +318,7 @@ namespace Completed
 			}
 
 			GameManager.instance.ShowObjs (nextPos);
-
 			
-			//Since the player has moved and lost food points, check if the game has ended.
 			CheckIfGameOver ();			
 		}
 		
@@ -300,7 +331,7 @@ namespace Completed
 			Wall hitWall = component as Wall;
 			
 			//Call the DamageWall function of the Wall we are hitting.
-			hitWall.DamageWall (wallDamage);
+			//hitWall.DamageWall (wallDamage);
 			
 			//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
 			//animator.SetTrigger ("playerChop");
@@ -323,35 +354,27 @@ namespace Completed
 			//Check if the tag of the trigger collided with is Food.
 			else if(other.tag == "Food")
 			{
-				//Add pointsPerFood to the players current food total.
-				food += pointsPerFood;
-				
-				//Update foodText to represent current total and notify player that they gained points
-				foodText.text = "+" + pointsPerFood + " Food: " + food;
-				
-				//Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
-				SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);
-				
-				//Disable the food object the player collided with.
+				food += pointsPerFood;				
+				SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);				
 				other.gameObject.SetActive (false);
 			}
 			
 			//Check if the tag of the trigger collided with is Soda.
 			else if(other.tag == "Soda")
 			{
-				//Add pointsPerSoda to players food points total
-				numOfBullets += 5;
-
-				//Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
+                switch(other.GetComponent<Scroll>().type)
+                {
+                    case 1: numOfBullets1 += 5; break;
+                    case 2: numOfBullets2 += 5; break;
+                    case 3: numOfBullets3 += 5; break;
+                    default:break;
+                }
 				SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
-				
-				//Disable the soda object the player collided with.
 				other.gameObject.SetActive (false);
 			}
 		}
-		
-		
-		//Restart reloads the scene when called.
+
+
 		private void Restart ()
 		{
 			//Load the last scene loaded, in this case Main, the only scene in the game. And we load it in "Single" mode so it replace the existing one
@@ -360,37 +383,19 @@ namespace Completed
 		}
 		
 		
-		//LoseFood is called when an enemy attacks the player.
-		//It takes a parameter loss which specifies how many points to lose.
-		public void LoseFood (int loss)
+    	public void LoseFood (int loss)
 		{
-			//Set the trigger for the player animator to transition to the playerHit animation.
-			//animator.SetTrigger ("playerHit");
-			
-			//Subtract lost food points from the players total.
 			food -= loss;
-			
-			//Update the food display with the new total.
-			foodText.text = "-"+ loss + " Food: " + food;
-			
-			//Check to see if game has ended.
 			CheckIfGameOver ();
 		}
 		
 		
-		//CheckIfGameOver checks if the player is out of food points and if so, ends the game.
 		private void CheckIfGameOver ()
 		{
-			//Check if food point total is less than or equal to zero.
 			if (food <= 0) 
 			{
-				//Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
 				SoundManager.instance.PlaySingle (gameOverSound);
-				
-				//Stop the background music.
 				SoundManager.instance.musicSource.Stop();
-				
-				//Call the GameOver function of GameManager.
 				GameManager.instance.GameOver ();
 			}
 		}

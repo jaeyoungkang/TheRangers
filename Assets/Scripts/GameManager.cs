@@ -21,7 +21,6 @@ namespace Completed
 		private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
 		private int level = 1;									//Current level number, expressed in game as "Day 1".
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
-		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
 
 		public Text gameMessage;
@@ -45,14 +44,20 @@ namespace Completed
 
 		public void AttackEnemy(Vector3 targetPos)
 		{
-			foreach (GameObject obj in items)
-			{
-				if (obj == null) continue;
-				if (targetPos == obj.transform.position) {
-					obj.GetComponent<Enemy> ().BeDamaged (1);
-					return;
-				}
-			}
+            foreach (GameObject obj in items)
+            {
+                if (targetPos == obj.transform.position)
+                {
+                    if (obj.name.Contains("Wall"))
+                    {
+                        obj.GetComponent<Wall>().DamageWall(1);
+                    }
+                    else if (obj.name.Contains("Enemy"))
+                    {
+                        obj.GetComponent<Enemy>().BeDamaged(1);
+                    }
+                }
+            }
 		}
 
         public List<Vector3> GetShowRange(Vector3 playerPos)
@@ -165,11 +170,9 @@ namespace Completed
                                     bShow = false;
                                     break;
                                 }
-                            }
-                            
+                            }                            
                         }
-
-                        
+                                               
 						break;
 					}
 				}
@@ -312,15 +315,22 @@ namespace Completed
 				}
 			}
 			
-			//Check that playersTurn or enemiesMoving or doingSetup are not currently true.
-			if(playersTurn || enemiesMoving || doingSetup)
-				
-				//If any of these are true, return and do not start MoveEnemies.
+			if(doingSetup)				
 				return;
-			
-			//Start moving enemies.
-			StartCoroutine (MoveEnemies ());
+
+            enemyTime -= Time.deltaTime;
+
+            if(enemyTime <=0 )
+            {
+                for (int i = 0; i < enemies.Count; i++)
+                {
+                    enemies[i].MoveEnemy();
+                }
+                enemyTime = 1.0f;
+            }            
 		}
+
+        float enemyTime = 1.0f;
 		
 		//Call this to add the passed in Enemy to the List of Enemy objects.
 		public void AddEnemyToList(Enemy script)
@@ -341,39 +351,7 @@ namespace Completed
 			
 			//Disable this GameManager.
 			enabled = false;
-		}
-		
-		//Coroutine to move enemies in sequence.
-		IEnumerator MoveEnemies()
-		{
-			//While enemiesMoving is true player is unable to move.
-			enemiesMoving = true;
-			
-			//Wait for turnDelay seconds, defaults to .1 (100 ms).
-			yield return new WaitForSeconds(turnDelay);
-			
-			//If there are no enemies spawned (IE in first level):
-			if (enemies.Count == 0) 
-			{
-				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
-				yield return new WaitForSeconds(turnDelay);
-			}
-			
-			//Loop through List of Enemy objects.
-			for (int i = 0; i < enemies.Count; i++)
-			{
-				//Call the MoveEnemy function of Enemy at index i in the enemies List.
-				enemies[i].MoveEnemy ();
-				
-				//Wait for Enemy's moveTime before moving next Enemy, 
-				yield return new WaitForSeconds(enemies[i].moveTime);
-			}
-			//Once Enemies are done moving, set playersTurn to true so player can move.
-			playersTurn = true;
-			
-			//Enemies are done moving, set enemiesMoving to false.
-			enemiesMoving = false;
-		}
+		}		
 	}
 }
 

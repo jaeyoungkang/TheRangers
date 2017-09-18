@@ -106,10 +106,10 @@ namespace Completed
 			//Return the randomly selected Vector3 position.
 			return randomPosition;
 		}
-		
-		
-		//LayoutObjectAtRandom accepts an array of game objects to choose from along with a minimum and maximum range for the number of objects to create.
-		void LayoutObjectAtRandom (GameObject[] tileArray, int minimum, int maximum)
+
+
+        //LayoutObjectAtRandom accepts an array of game objects to choose from along with a minimum and maximum range for the number of objects to create.
+        void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum, bool addList = false)
 		{
 			//Choose a random number of objects to instantiate within the minimum and maximum limits
 			int objectCount = Random.Range (minimum, maximum+1);
@@ -126,7 +126,7 @@ namespace Completed
 				//Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
 				GameObject obj = Instantiate(tileChoice, randomPosition, Quaternion.identity);
 
-				GameManager.instance.AddItem (obj);
+                if(addList) GameManager.instance.AddItem (obj);
 			}
 		}
 		
@@ -143,18 +143,15 @@ namespace Completed
 			//Reset our list of gridpositions.
 			InitialiseList ();
 			
-			//Instantiate a random number of wall tiles based on minimum and maximum, at randomized positions.
-			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
-			
-			//Instantiate a random number of food tiles based on minimum and maximum, at randomized positions.
-			LayoutObjectAtRandom (foodTiles, 4, 4);
+			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum, true);
+			LayoutObjectAtRandom (foodTiles, 10, 10);
 			
 			//Determine number of enemies based on current level number, based on a logarithmic progression
 //			int enemyCount = (int)Mathf.Log(level, 2f);
-			int enemyCount = 3;
-			
-			//Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
-			LayoutObjectAtRandom (enemyTiles, enemyCount, enemyCount);
+			int enemyCount = 5;
+
+            //Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
+            LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount, true);
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
 //			Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
