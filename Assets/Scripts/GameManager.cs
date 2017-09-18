@@ -67,37 +67,46 @@ namespace Completed
                 }
             }
 
-            switch(type)
-            {               
-                case 0:
-                    return new List<Vector3> {playerPos,
-                    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),};
-
-                case 1:
-                    return new List<Vector3> {playerPos,
-                    new Vector3(playerPos.x+1, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x-1, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y+1, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y-1, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y+2, playerPos.z),
-                    new Vector3(playerPos.x+1, playerPos.y+1, playerPos.z),
-                    new Vector3(playerPos.x-1, playerPos.y + 1, playerPos.z),
-                    new Vector3(playerPos.x+2, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x-2, playerPos.y, playerPos.z),
-                    new Vector3(playerPos.x-1, playerPos.y-1, playerPos.z),
-                    new Vector3(playerPos.x+1, playerPos.y-1, playerPos.z),
-                    new Vector3(playerPos.x, playerPos.y-2, playerPos.z),};
-				
-                case 2:
-                default:
-                    return new List<Vector3> { playerPos, };
-
+            List<Vector3> resultRange = new List<Vector3> { playerPos, };
+            for(int i=0; i<type; i++)
+            {
+                resultRange = MakeRange(resultRange);
             }
-            
+
+            return resultRange;            
         }
+
+        public List<Vector3> Get4way(Vector3 pos)
+        {
+                return new List<Vector3> {pos,
+                new Vector3(pos.x+1, pos.y, pos.z),
+                new Vector3(pos.x-1, pos.y, pos.z),
+                new Vector3(pos.x, pos.y+1, pos.z),
+                new Vector3(pos.x, pos.y-1, pos.z),};
+        }
+
+        public List<Vector3> MakeRange(List<Vector3> range)
+        {
+            List<Vector3> showRange = new List<Vector3>();
+            showRange.AddRange(range);
+
+            foreach (Vector3 pos in range)
+            {
+                List<Vector3> ways =  Get4way(pos);
+
+                foreach (Vector3 pos1 in ways)
+                {
+                    if(showRange.Contains(pos1) == false)
+                    {
+                        showRange.Add(pos1);
+                    }
+                }
+            }
+
+            return showRange;
+        }
+
+        
 
         public void ShowObjs(Vector3 playerPos)
 		{
@@ -109,8 +118,10 @@ namespace Completed
 				bool bShow = false;
 
 				foreach (Vector3 showPos in showRange) 
-				{	
-					if (showPos == obj.transform.position) {
+				{
+                    ExFloor floor = obj.GetComponent<ExFloor>();
+                    if (floor && floor.type == 0) continue; // can't see a type 0 floor
+                    if (showPos == obj.transform.position) {
 						bShow = true;
 						break;
 					}
@@ -140,9 +151,25 @@ namespace Completed
 				bool bShow = false;
 
 				foreach (Vector3 showPos in showRange) 
-				{	
-					if (showPos == obj.transform.position) {
-						bShow = true;
+				{
+                    if (showPos == obj.transform.position) {
+                        bShow = true;
+
+                        foreach (GameObject floor in tiles)
+                        {
+                            if(floor.transform.position == showPos)
+                            {
+                                ExFloor exfloor = obj.GetComponent<ExFloor>();
+                                if (exfloor && exfloor.type == 0)
+                                {
+                                    bShow = false;
+                                    break;
+                                }
+                            }
+                            
+                        }
+
+                        
 						break;
 					}
 				}
