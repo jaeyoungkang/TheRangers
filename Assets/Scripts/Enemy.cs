@@ -79,6 +79,8 @@ namespace Completed
 			
 			//Now that Enemy has moved, set skipMove to true to skip next move.
 			skipMove = true;
+
+            GameManager.instance.ShowObjs(target.position);
 		}
 		
 		

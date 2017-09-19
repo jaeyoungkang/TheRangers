@@ -276,7 +276,7 @@ namespace Completed
 
             StartCoroutine(ExploreTarget(targetPos));
 
-			GameManager.instance.AttackEnemy (targetPos);			
+			GameManager.instance.AttackObj (targetPos);			
         }        
 
         IEnumerator ExploreTarget(Vector3 targetPos)

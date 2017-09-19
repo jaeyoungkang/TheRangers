@@ -32,33 +32,35 @@ namespace Completed
 		}
 
 		private List<GameObject> tiles = new List<GameObject>();
-		private List<GameObject> items = new List<GameObject>();
+		private List<GameObject> walls = new List<GameObject>();
 
 		public void DestroyEnemy(GameObject target)
 		{
-			Enemy en = target.GetComponent<Enemy> ();
+            Enemy en = target.GetComponent<Enemy> ();
 			enemies.Remove (en);
-			target.SetActive (false);
-			items.Remove (target);
+			target.SetActive (false);			
 		}
 
-		public void AttackEnemy(Vector3 targetPos)
+        public void AttackObj(Vector3 targetPos)
 		{
-            foreach (GameObject obj in items)
+            foreach (GameObject obj in walls)
             {
                 if (targetPos == obj.transform.position)
                 {
-                    if (obj.name.Contains("Wall"))
-                    {
-                        obj.GetComponent<Wall>().DamageWall(1);
-                    }
-                    else if (obj.name.Contains("Enemy"))
-                    {
-                        obj.GetComponent<Enemy>().BeDamaged(1);
-                    }
+                    obj.GetComponent<Wall>().DamageWall(1);
+                    return;
                 }
             }
-		}
+
+            foreach (Enemy en in enemies)
+            {
+                if (targetPos == en.transform.position)
+                {
+                    en.BeDamaged(1);
+                    return;
+                }
+            }
+        }
 
         public List<Vector3> GetShowRange(Vector3 playerPos)
         {
@@ -109,9 +111,7 @@ namespace Completed
             }
 
             return showRange;
-        }
-
-        
+        }        
 
         public void ShowObjs(Vector3 playerPos)
 		{
@@ -150,21 +150,20 @@ namespace Completed
 				}
 			}
 
-			foreach (GameObject obj in items)
+			foreach (Enemy en in enemies)
 			{
-				if (obj == null) continue;
 				bool bShow = false;
 
 				foreach (Vector3 showPos in showRange) 
 				{
-                    if (showPos == obj.transform.position) {
+                    if (showPos == en.transform.position) {
                         bShow = true;
 
                         foreach (GameObject floor in tiles)
                         {
                             if(floor.transform.position == showPos)
                             {
-                                ExFloor exfloor = obj.GetComponent<ExFloor>();
+                                ExFloor exfloor = floor.GetComponent<ExFloor>();
                                 if (exfloor && exfloor.type == 0)
                                 {
                                     bShow = false;
@@ -177,7 +176,7 @@ namespace Completed
 					}
 				}
 
-				Renderer renderer = obj.GetComponent<SpriteRenderer>();
+				Renderer renderer = en.GetComponent<SpriteRenderer>();
 				if (renderer)
 				{
 					if (bShow)
@@ -207,14 +206,14 @@ namespace Completed
 		}
 
 
-		public void ClearItems()
+		public void ClearWalls()
 		{
-			items.Clear ();
+			walls.Clear ();
 		}
 
-		public void AddItem(GameObject obj)
+		public void AddWall(GameObject obj)
 		{
-			items.Add (obj);
+			walls.Add (obj);
 		}
 
 		//Awake is always called before any Start functions
@@ -317,15 +316,12 @@ namespace Completed
 			
 			if(doingSetup)				
 				return;
-
+                        
             enemyTime -= Time.deltaTime;
 
-            if(enemyTime <=0 )
+            if(!enemiesMoving && enemyTime <= 0 )
             {
-                for (int i = 0; i < enemies.Count; i++)
-                {
-                    enemies[i].MoveEnemy();
-                }
+                StartCoroutine(MoveEnemies());
                 enemyTime = 1.0f;
             }            
 		}
@@ -351,7 +347,24 @@ namespace Completed
 			
 			//Disable this GameManager.
 			enabled = false;
-		}		
-	}
+		}
+
+        bool enemiesMoving = false;
+        //Coroutine to move enemies in sequence.
+        IEnumerator MoveEnemies()
+        {
+            enemiesMoving = true;
+            //Loop through List of Enemy objects.
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                //Call the MoveEnemy function of Enemy at index i in the enemies List.
+                enemies[i].MoveEnemy();
+
+                //Wait for Enemy's moveTime before moving next Enemy, 
+                yield return new WaitForSeconds(enemies[i].moveTime);
+            }
+            enemiesMoving = false;
+        }
+    }
 }
 

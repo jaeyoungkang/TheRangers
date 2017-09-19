@@ -26,10 +26,10 @@ namespace Completed
 		}
 		
 		
-		public int columns = 8; 										//Number of columns in our game board.
-		public int rows = 8;											//Number of rows in our game board.
-		public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
-		public Count foodCount = new Count (1, 5);						//Lower and upper limit for our random number of food items per level.
+		public int columns = 8; 										
+		public int rows = 8;											
+		public Count wallCount = new Count (5, 9);						
+		public Count foodCount = new Count (1, 5);						
 		public GameObject exit;											//Prefab to spawn for exit.
 		public GameObject[] floorTiles;									//Array of floor prefabs.
 		public GameObject[] wallTiles;									//Array of wall prefabs.
@@ -94,7 +94,6 @@ namespace Completed
 		//RandomPosition returns a random position from our list gridPositions.
 		Vector3 RandomPosition ()
 		{
-			//Declare an integer randomIndex, set it's value to a random number between 0 and the count of items in our List gridPositions.
 			int randomIndex = Random.Range (0, gridPositions.Count);
 			
 			//Declare a variable of type Vector3 called randomPosition, set it's value to the entry at randomIndex from our List gridPositions.
@@ -126,7 +125,7 @@ namespace Completed
 				//Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
 				GameObject obj = Instantiate(tileChoice, randomPosition, Quaternion.identity);
 
-                if(addList) GameManager.instance.AddItem (obj);
+                if(addList) GameManager.instance.AddWall (obj);
 			}
 		}
 		
@@ -135,7 +134,7 @@ namespace Completed
 		public void SetupScene (int level)
 		{
 			GameManager.instance.ClearFloors ();
-			GameManager.instance.ClearItems ();
+			GameManager.instance.ClearWalls ();
 
 			//Creates the outer walls and floor.
 			BoardSetup ();
@@ -151,7 +150,7 @@ namespace Completed
 			int enemyCount = 5;
 
             //Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
-            LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount, true);
+            LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
 //			Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
