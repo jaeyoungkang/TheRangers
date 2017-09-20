@@ -62,17 +62,22 @@ namespace Completed
             }
         }
 
-        public List<Vector3> GetShowRange(Vector3 playerPos)
+        public int GetFloorType(Vector3 playerPos)
         {
-            int type = 0;
             foreach (GameObject obj in tiles)
             {
                 if (obj.transform.position == playerPos)
                 {
-                    type = obj.GetComponent<ExFloor>().type;
-                    break;
+                    return obj.GetComponent<ExFloor>().type;                    
                 }
             }
+
+            return 0;
+        }
+
+        public List<Vector3> GetShowRange(Vector3 playerPos)
+        {
+            int type = GetFloorType(playerPos);
 
             List<Vector3> resultRange = new List<Vector3> { playerPos, };
             for(int i=0; i<type; i++)
