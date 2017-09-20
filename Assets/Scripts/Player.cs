@@ -15,6 +15,8 @@ namespace Completed
 		public Text foodText;						
 		public Text ammoText;
         public Text coolTimeText;
+        public Text shotTimeText;
+        
 
         public AudioClip moveSound1;				
 		public AudioClip moveSound2;				
@@ -44,12 +46,9 @@ namespace Completed
         //Start overrides the Start function of MovingObject
         protected override void Start ()
 		{
-			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
 			
 			food = GameManager.instance.playerFoodPoints;            
-			
-			//Call the Start function of the MovingObject base class.
 			base.Start ();
 
             UpdateDirImage();
@@ -58,6 +57,7 @@ namespace Completed
             explosioinInstance.SetActive(false);
 
             playerTime = playerTimeInit;
+            shotTime = shotTimeInit;
         }
 		
 		
@@ -68,16 +68,37 @@ namespace Completed
 		}
 
         public float playerTimeInit = 0.5f ;
+        public float shotTimeInit = 0.5f;
         float playerTime;
-		
-		private void Update ()
+        float shotTime;
+
+        bool canShot = true;
+
+        private void Update ()
 		{
             foodText.text = "HP : " + food;
             ammoText.text = "[Ammo1 : " + numOfBullets1 + "]\n\n[Ammo2 : " + numOfBullets2 + "]\n\n[Ammo3 : " + numOfBullets3 + "]";
             GameManager.instance.ShowObjs(transform.position);
             coolTimeText.text = Mathf.FloorToInt(playerTime*100).ToString();
+            shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
 
-            //If it's not the player's turn, exit the function.
+            if (canShot)
+            {
+                if(AttempAttack())
+                    canShot = false;
+            }
+            else
+            {
+                shotTime -= Time.deltaTime;
+                if(shotTime <=0)
+                {
+                    shotTime = shotTimeInit;
+                    canShot = true;
+                }                
+            }
+
+            
+
             if (!GameManager.instance.playersTurn)
             {
                 playerTime -= Time.deltaTime;
@@ -146,53 +167,55 @@ namespace Completed
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
-            else
-            {
-                AttempAttack();                
-            }
 		}
 
-        public void AttempAttack()
+        public bool AttempAttack()
         {
             if (Input.GetKeyDown("1"))
             {
                 if (numOfBullets1 <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo1 !!!", 1f);
+                    return false;
                 }
                 else
                 {
                     numOfBullets1--;
                     Attack(1);
+                    return true;
                 }
-                GameManager.instance.playersTurn = false;
+
             }
             else if (Input.GetKeyDown("2"))
             {
                 if (numOfBullets2 <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo2 !!!", 1f);
+                    return false;
                 }
                 else
                 {
                     numOfBullets2--;
                     Attack(2);
+                    return true;
                 }
-                GameManager.instance.playersTurn = false;
             }
             else if (Input.GetKeyDown("3"))
             {
                 if (numOfBullets3 <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo3 !!!", 1f);
+                    return false;
                 }
                 else
                 {
                     numOfBullets3--;
                     Attack(3);
+                    return true;
                 }
-                GameManager.instance.playersTurn = false;
-            }            
+            }
+
+            return false;
         }
 
         public bool CheckDir(int xDir, int yDir)
@@ -337,14 +360,15 @@ namespace Completed
 			//Check if the tag of the trigger collided with is Soda.
 			else if(other.tag == "Soda")
 			{
-                switch(other.GetComponent<Scroll>().type)
+                switch (other.GetComponent<Scroll>().type)
                 {
                     case 1: numOfBullets1 += 5; break;
                     case 2: numOfBullets2 += 5; break;
                     case 3: numOfBullets3 += 5; break;
-                    default:break;
+                    default: break;
                 }
-				SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
+
+                SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
 				other.gameObject.SetActive (false);
 			}
 		}

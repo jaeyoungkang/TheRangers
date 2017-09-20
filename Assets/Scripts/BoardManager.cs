@@ -23,19 +23,26 @@ namespace Completed
 				minimum = min;
 				maximum = max;
 			}
-		}
-		
+		}		
 		
 		public int columns = 5; 										
 		public int rows = 5;											
 		public Count wallCount = new Count (5, 9);						
 		public Count foodCount = new Count (1, 5);
+        public Count ammo1Count = new Count(1, 5);
+        public Count ammo2Count = new Count(1, 5);
+        public Count ammo3Count = new Count(1, 5);
+
         public Count enemiyCount = new Count(1, 5);
         public GameObject exit;											
 		public GameObject[] floorTiles;									
 		public GameObject[] wallTiles;									
-		public GameObject[] foodTiles;									
-		public GameObject[] enemyTiles;									
+		public GameObject[] foodTiles;
+        public GameObject ammo1Tile;
+        public GameObject ammo2Tile;
+        public GameObject ammo3Tile;
+
+        public GameObject[] enemyTiles;									
 		public GameObject[] outerWallTiles;								
 		
 		private Transform boardHolder;									
@@ -86,6 +93,17 @@ namespace Completed
 			return randomPosition;
 		}
 
+        void LayoutObjectAtRandom(GameObject tile, int minimum, int maximum, bool addList = false)
+        {
+            int objectCount = Random.Range(minimum, maximum + 1);
+
+            for (int i = 0; i < objectCount; i++)
+            {
+                Vector3 randomPosition = RandomPosition();
+                GameObject obj = Instantiate(tile, randomPosition, Quaternion.identity);
+            }
+        }
+
         void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum, bool addList = false)
 		{
 			int objectCount = Random.Range (minimum, maximum+1);
@@ -109,7 +127,11 @@ namespace Completed
 			InitialiseList ();
 			
 			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum, true);
-			LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);			
+			LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
+            LayoutObjectAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
+            LayoutObjectAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
+            LayoutObjectAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
+
             LayoutObjectAtRandom(enemyTiles, enemiyCount.minimum, enemiyCount.maximum);			
 		}
 	}

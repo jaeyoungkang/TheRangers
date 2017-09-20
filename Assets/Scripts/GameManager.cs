@@ -9,25 +9,28 @@ namespace Completed
 	
 	public class GameManager : MonoBehaviour
 	{
-		public float levelStartDelay = 2f;						//Time to wait before starting level, in seconds.
-		public float turnDelay = 0.1f;							//Delay between each Player turn.
-		public int playerFoodPoints = 100;						//Starting value for Player food points.
-		public static GameManager instance = null;				//Static instance of GameManager which allows it to be accessed by any other script.
-		[HideInInspector] public bool playersTurn = true;		//Boolean to check if it's players turn, hidden in inspector but public.
-		
-		
-		private Text levelText;									//Text to display current level number.
-		private GameObject levelImage;							//Image to block out level as levels are being set up, background for levelText.
-		private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
-		private int level = 1;									//Current level number, expressed in game as "Day 1".
-		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
-		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
+		public float levelStartDelay = 2f;						
+		public float turnDelay = 0.1f;							
+		public int playerFoodPoints = 100;						
+		public static GameManager instance = null;				
+		[HideInInspector] public bool playersTurn = true;
+                
+        private Text levelText;									
+		private GameObject levelImage;							
+		private BoardManager boardScript;						
+		private int level = 1;									
+		private List<Enemy> enemies;							
+		private bool doingSetup = true;
 
-		public Text gameMessage;
+        private Text enemyText;
+        public Text gameMessage;
 		public float msgTimer = 0;
+
 		public void UpdateGameMssage(string msg, float time)
 		{
-			gameMessage.text = msg;
+            gameMessage.gameObject.SetActive(true);
+
+            gameMessage.text = msg;
 			msgTimer = time;
 		}
 
@@ -39,6 +42,11 @@ namespace Completed
             Enemy en = target.GetComponent<Enemy> ();
 			enemies.Remove (en);
 			target.SetActive (false);			
+
+            if(enemies.Count == 0)
+            {
+                Win();
+            }
 		}
 
         public void AttackObj(Vector3 targetPos)
@@ -278,10 +286,11 @@ namespace Completed
 			//Get a reference to our text LevelText's text component by finding it by name and calling GetComponent.
 			levelText = GameObject.Find("LevelText").GetComponent<Text>();
 
-			gameMessage = GameObject.Find("Msg").GetComponent<Text>();
+            enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
+            gameMessage = GameObject.Find("Msg").GetComponent<Text>();
 			
 			//Set the text of levelText to the string "Day" and append the current level number.
-			levelText.text = "Day " + level;
+			levelText.text = "the rangers";
 			
 			//Set levelImage to active blocking player's view of the game board during setup.
 			levelImage.SetActive(true);
@@ -316,7 +325,8 @@ namespace Completed
 				if (msgTimer <= 0) {
 					msgTimer = 0;
 					gameMessage.text = "";
-				}
+                    gameMessage.gameObject.SetActive(false);
+                }
 			}
 			
 			if(doingSetup)				
@@ -328,8 +338,10 @@ namespace Completed
             {
                 StartCoroutine(MoveEnemies());
                 enemyTime = 1.0f;
-            }            
-		}
+            }
+
+            enemyText.text = "Enemy: " + enemies.Count;
+        }
 
         float enemyTime = 1.0f;
 		
@@ -339,18 +351,18 @@ namespace Completed
 			//Add Enemy to List enemies.
 			enemies.Add(script);
 		}
-		
-		
-		//GameOver is called when the player reaches 0 food points
-		public void GameOver()
+        
+        public void Win()
+        {
+            levelText.text = "You win!";
+            levelImage.SetActive(true);
+            enabled = false;
+        }
+
+        public void GameOver()
 		{
-			//Set levelText to display number of levels passed and game over message
-			levelText.text = "After " + level + " days, you starved.";
-			
-			//Enable black background image gameObject.
+			levelText.text = "You died.";
 			levelImage.SetActive(true);
-			
-			//Disable this GameManager.
 			enabled = false;
 		}
 
