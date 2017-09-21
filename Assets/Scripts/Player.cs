@@ -5,8 +5,9 @@ using UnityEngine.SceneManagement;
 
 namespace Completed
 {
-	//Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
-	public class Player : MovingObject
+    public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
+
+    public class Player : MovingObject
 	{
 		public float restartLevelDelay = 1f;		
 		public int pointsPerFood = 10;				
@@ -33,8 +34,7 @@ namespace Completed
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
-
-        public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
+                
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject explosioinInstance;
         public GameObject exploreEffect;

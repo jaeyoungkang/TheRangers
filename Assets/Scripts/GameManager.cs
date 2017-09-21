@@ -128,7 +128,21 @@ namespace Completed
 
         public void ShowObjs(Vector3 playerPos)
 		{
-            List<Vector3> showRange = GetShowRange(playerPos);                        
+            List<Vector3> showRange = GetShowRange(playerPos);
+
+            if(GetFloorType(playerPos) == 0)
+            {
+                Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+                Vector3 viewPos = playerPos;
+                switch (player.curDir)
+                {
+                    case MOVE_DIR.RIGHT: viewPos.x += 1; break;
+                    case MOVE_DIR.LEFT: viewPos.x -= 1; break;
+                    case MOVE_DIR.UP: viewPos.y += 1; break;
+                    case MOVE_DIR.DOWN: viewPos.y -= 1; break;
+                }
+                showRange.Add(viewPos);
+            }
 
             foreach (GameObject obj in tiles)
 			{
