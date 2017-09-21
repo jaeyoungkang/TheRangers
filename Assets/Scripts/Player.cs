@@ -39,9 +39,11 @@ namespace Completed
         public GameObject explosioinInstance;
         public GameObject exploreEffect;
 
-		public int numOfBullets1 = 3;
-        public int numOfBullets2 = 0;
-        public int numOfBullets3 = 0;
+        public int[] numOfBullets = new int[3];
+
+        public int maxNumOfBullets1 = 5;
+        public int maxNumOfBullets2 = 5;
+        public int maxNumOfBullets3 = 5;
 
         //Start overrides the Start function of MovingObject
         protected override void Start ()
@@ -77,7 +79,10 @@ namespace Completed
         private void Update ()
 		{
             foodText.text = "HP : " + food;
-            ammoText.text = "[Ammo1 : " + numOfBullets1 + "]\n\n[Ammo2 : " + numOfBullets2 + "]\n\n[Ammo3 : " + numOfBullets3 + "]";
+            ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets1 + "]\n\n" +
+                            "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets2 + "]\n\n" +
+                            "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets3 + "]";
+
             GameManager.instance.ShowObjs(transform.position);
             coolTimeText.text = Mathf.FloorToInt(playerTime*100).ToString();
             shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
@@ -173,14 +178,14 @@ namespace Completed
         {
             if (Input.GetKeyDown("1"))
             {
-                if (numOfBullets1 <= 0)
+                if (numOfBullets[0] <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo1 !!!", 1f);
                     return false;
                 }
                 else
                 {
-                    numOfBullets1--;
+                    numOfBullets[0]--;
                     Attack(1);
                     return true;
                 }
@@ -188,28 +193,28 @@ namespace Completed
             }
             else if (Input.GetKeyDown("2"))
             {
-                if (numOfBullets2 <= 0)
+                if (numOfBullets[1] <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo2 !!!", 1f);
                     return false;
                 }
                 else
                 {
-                    numOfBullets2--;
+                    numOfBullets[1]--;
                     Attack(2);
                     return true;
                 }
             }
             else if (Input.GetKeyDown("3"))
             {
-                if (numOfBullets3 <= 0)
+                if (numOfBullets[2] <= 0)
                 {
                     GameManager.instance.UpdateGameMssage("No Ammo3 !!!", 1f);
                     return false;
                 }
                 else
                 {
-                    numOfBullets3--;
+                    numOfBullets[2]--;
                     Attack(3);
                     return true;
                 }
@@ -360,16 +365,52 @@ namespace Completed
 			//Check if the tag of the trigger collided with is Soda.
 			else if(other.tag == "Soda")
 			{
-                switch (other.GetComponent<Scroll>().type)
+                Scroll ammoObj = other.GetComponent<Scroll>();
+                switch (ammoObj.type)
                 {
-                    case 1: numOfBullets1 += 5; break;
-                    case 2: numOfBullets2 += 5; break;
-                    case 3: numOfBullets3 += 5; break;
+                    case 1:
+                        if(numOfBullets[0] + ammoObj.num > maxNumOfBullets1)
+                        {
+                            int temp = maxNumOfBullets1 - numOfBullets[0];
+                            ammoObj.UpdateNumber(ammoObj.num - temp);
+                        }
+                        else
+                            ammoObj.UpdateNumber(0);
+
+                        numOfBullets[0] += ammoObj.num;
+                        break;
+                    case 2:
+                        if (numOfBullets[1] + ammoObj.num > maxNumOfBullets2)
+                        {
+                            int temp = maxNumOfBullets2 - numOfBullets[1];
+                            ammoObj.UpdateNumber(ammoObj.num - temp);
+                        }
+                        else
+                            ammoObj.UpdateNumber(0);
+                        numOfBullets[1] += ammoObj.num;
+                        break;
+                    case 3:
+                        if (numOfBullets[2] + ammoObj.num > maxNumOfBullets3)
+                        {
+                            int temp = maxNumOfBullets3 - numOfBullets[2];
+                            ammoObj.UpdateNumber(ammoObj.num - temp);
+                        }
+                        else
+                        {
+                            ammoObj.UpdateNumber(0);
+                        }
+                        numOfBullets[2] += ammoObj.num;
+                        break;
                     default: break;
                 }
 
-                SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
-				other.gameObject.SetActive (false);
+                if (numOfBullets[0] > maxNumOfBullets1) numOfBullets[0] = maxNumOfBullets1;
+                if (numOfBullets[1] > maxNumOfBullets2) numOfBullets[1] = maxNumOfBullets2;
+                if (numOfBullets[2] > maxNumOfBullets3) numOfBullets[2] = maxNumOfBullets3;
+
+                if(ammoObj.num <= 0)
+                    other.gameObject.SetActive(false);
+                
 			}
 		}
 
