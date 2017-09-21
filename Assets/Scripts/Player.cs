@@ -40,12 +40,8 @@ namespace Completed
         public GameObject exploreEffect;
 
         public int[] numOfBullets = new int[3];
-
-        public int maxNumOfBullets1 = 5;
-        public int maxNumOfBullets2 = 5;
-        public int maxNumOfBullets3 = 5;
-
-        //Start overrides the Start function of MovingObject
+        public int[] maxNumOfBullets = new int[3];
+        
         protected override void Start ()
 		{
 			animator = GetComponent<Animator>();
@@ -79,9 +75,9 @@ namespace Completed
         private void Update ()
 		{
             foodText.text = "HP : " + food;
-            ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets1 + "]\n\n" +
-                            "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets2 + "]\n\n" +
-                            "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets3 + "]";
+            ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
+                            "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets[1] + "]\n\n" +
+                            "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets[2] + "]";
 
             GameManager.instance.ShowObjs(transform.position);
             coolTimeText.text = Mathf.FloorToInt(playerTime*100).ToString();
@@ -335,7 +331,7 @@ namespace Completed
 		
 		protected override void OnCantMove <T> (T component)
 		{
-			Wall hitWall = component as Wall;
+			//Wall hitWall = component as Wall;
 			
 		//animator.SetTrigger ("playerChop");
 		}
@@ -366,48 +362,27 @@ namespace Completed
 			else if(other.tag == "Soda")
 			{
                 Scroll ammoObj = other.GetComponent<Scroll>();
-                switch (ammoObj.type)
+
+                int index = ammoObj.type - 1;
+                if(index < numOfBullets.Length)
                 {
-                    case 1:
-                        if(numOfBullets[0] + ammoObj.num > maxNumOfBullets1)
-                        {
-                            int temp = maxNumOfBullets1 - numOfBullets[0];
-                            ammoObj.UpdateNumber(ammoObj.num - temp);
-                        }
-                        else
-                            ammoObj.UpdateNumber(0);
+                    int addAmmo = ammoObj.num;
+                    if (numOfBullets[index] + ammoObj.num > maxNumOfBullets[index])
+                    {
+                        addAmmo = maxNumOfBullets[index] - numOfBullets[index];
+                        ammoObj.UpdateNumber(ammoObj.num - addAmmo);
+                    }
+                    else
+                    {                        
+                        ammoObj.UpdateNumber(0);                        
+                    }
 
-                        numOfBullets[0] += ammoObj.num;
-                        break;
-                    case 2:
-                        if (numOfBullets[1] + ammoObj.num > maxNumOfBullets2)
-                        {
-                            int temp = maxNumOfBullets2 - numOfBullets[1];
-                            ammoObj.UpdateNumber(ammoObj.num - temp);
-                        }
-                        else
-                            ammoObj.UpdateNumber(0);
-                        numOfBullets[1] += ammoObj.num;
-                        break;
-                    case 3:
-                        if (numOfBullets[2] + ammoObj.num > maxNumOfBullets3)
-                        {
-                            int temp = maxNumOfBullets3 - numOfBullets[2];
-                            ammoObj.UpdateNumber(ammoObj.num - temp);
-                        }
-                        else
-                        {
-                            ammoObj.UpdateNumber(0);
-                        }
-                        numOfBullets[2] += ammoObj.num;
-                        break;
-                    default: break;
+                    numOfBullets[index] += addAmmo;
+
+                    if (numOfBullets[index] > maxNumOfBullets[index])
+                        numOfBullets[index] = maxNumOfBullets[index];
                 }
-
-                if (numOfBullets[0] > maxNumOfBullets1) numOfBullets[0] = maxNumOfBullets1;
-                if (numOfBullets[1] > maxNumOfBullets2) numOfBullets[1] = maxNumOfBullets2;
-                if (numOfBullets[2] > maxNumOfBullets3) numOfBullets[2] = maxNumOfBullets3;
-
+                
                 if(ammoObj.num <= 0)
                     other.gameObject.SetActive(false);
                 

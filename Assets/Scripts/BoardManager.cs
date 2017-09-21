@@ -100,7 +100,7 @@ namespace Completed
             for (int i = 0; i < objectCount; i++)
             {
                 Vector3 randomPosition = RandomPosition();
-                GameObject obj = Instantiate(tile, randomPosition, Quaternion.identity);
+                Instantiate(tile, randomPosition, Quaternion.identity);
             }
         }
 
