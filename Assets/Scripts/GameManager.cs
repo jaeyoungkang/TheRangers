@@ -195,79 +195,40 @@ namespace Completed
             foreach (GameObject obj in tiles)
 			{
 				if (obj == null) continue;
-				bool bShow = false;
-
-				foreach (Vector3 showPos in showRange) 
-				{
-                    ExFloor floor = obj.GetComponent<ExFloor>();
-                    if (floor && floor.type == 0) continue; // can't see a type 0 floor
-                    if (showPos == obj.transform.position) {
-						bShow = true;
-						break;
-					}
-				}
-
-				Renderer renderer = obj.GetComponent<SpriteRenderer>();
-				if (renderer)
-				{
-					if (bShow)
-					{
-						Color color = renderer.material.color;
-						color.a = 1f;
-						renderer.material.color = color;
-					}
-					else
-					{
-						Color color = renderer.material.color;
-						color.a = 0.6f;
-						renderer.material.color = color;
-					}
-				}
-			}
-
-			foreach (Enemy en in enemies)
-			{
-				bool bShow = false;
-
-				foreach (Vector3 showPos in showRange) 
-				{
-                    if (showPos == en.transform.position) {
+				bool bShow = false;                
+                ExFloor floor = obj.GetComponent<ExFloor>();
+                                
+                foreach (Vector3 showPos in showRange)
+                {
+                    if (showPos == obj.transform.position)
+                    {
                         bShow = true;
+                        break;
+                    }
+                }
 
-                        foreach (GameObject floor in tiles)
-                        {
-                            if(floor.transform.position == showPos)
-                            {
-                                ExFloor exfloor = floor.GetComponent<ExFloor>();
-                                if (exfloor && exfloor.type == 0)
-                                {
-                                    bShow = false;
-                                    break;
-                                }
-                            }                            
-                        }
-                                               
-						break;
-					}
-				}
-
-				Renderer renderer = en.GetComponent<SpriteRenderer>();
+                Renderer renderer = obj.GetComponent<SpriteRenderer>();
 				if (renderer)
 				{
-					if (bShow)
-					{
-						Color color = renderer.material.color;
-						color.a = 1f;
-						renderer.material.color = color;
-					}
-					else
-					{
-						Color color = renderer.material.color;
-						color.a = 0.0f;
-						renderer.material.color = color;
-					}
+                    if (bShow) renderer.sortingLayerName = "Floor";
+                    else renderer.sortingLayerName = "Fog";
+
+                    Color color = renderer.material.color;
+                    if (bShow) color = Color.white;                    
+                    else color = Color.gray;
+                    renderer.material.color = color;
+
+                    switch (floor.type)
+                    {
+                        case 0:
+                            if (playerPos == obj.transform.position) renderer.sortingLayerName = "Floor";
+                            else renderer.sortingLayerName = "Fog";
+                            break;
+                    }
+
+                    
 				}
-			}
+			}            
 		}
 
 		public void ClearFloors()
