@@ -36,9 +36,7 @@ namespace Completed
 #endif
                 
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
-        public GameObject explosioinInstance;
-        public GameObject exploreEffect;
-
+        
         public int[] numOfBullets = new int[3];
         public int[] maxNumOfBullets = new int[3];
         
@@ -51,9 +49,7 @@ namespace Completed
 
             UpdateDirImage();
 
-            explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
-            explosioinInstance.SetActive(false);
-
+            
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
         }
@@ -292,18 +288,12 @@ namespace Completed
                 case MOVE_DIR.DOWN: targetPos.y -= distance; break;
             }
 
-            StartCoroutine(ExploreTarget(targetPos));
+            StartCoroutine(GameManager.instance.ExploreTarget(targetPos));
 
 			GameManager.instance.AttackObj (targetPos);			
         }        
 
-        IEnumerator ExploreTarget(Vector3 targetPos)
-        {
-            explosioinInstance.transform.position = targetPos;
-            explosioinInstance.SetActive(true);
-            yield return new WaitForSeconds(0.5f);
-            explosioinInstance.SetActive(false);
-        }
+       
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
             GameManager.instance.playersTurn = false;
@@ -316,14 +306,19 @@ namespace Completed
             }
 
 			Vector3 nextPos = transform.position;
-            			
+			nextPos.x += xDir;
+			nextPos.y += yDir;
+
+			if (GameManager.instance.GetMapValue (nextPos) == 1)
+				return;
+					
 			base.AttemptMove <T> (xDir, yDir);
 			RaycastHit2D hit;
 			if (Move (xDir, yDir, out hit)) {
 				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
 
-				nextPos.x += xDir;
-				nextPos.y += yDir;
+				GameManager.instance.SetMap (transform.position, 0);
+				GameManager.instance.SetMap (nextPos, 1);
 			}		
 			
 			CheckIfGameOver ();			
@@ -398,9 +393,12 @@ namespace Completed
 		}
 		
 		
-    	public void LoseFood (int loss)
+    	public void LoseHP (int loss)
 		{
 			food -= loss;
+
+			GameManager.instance.UpdateGameMssage ("공격 받았다!!!!", 0.5f);
+
 			CheckIfGameOver ();
 		}
 		

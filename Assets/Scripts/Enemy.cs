@@ -38,14 +38,17 @@ namespace Completed
 		public void UpdateHp(int point)
 		{
 			hp -= point;
-			if (hp <= 0)
+			if (hp <= 0) {
 				GameManager.instance.DestroyEnemy (gameObject);
+				GameManager.instance.SetMap (transform.position, 0);
+			}
 		}
 			
 
 		protected override void Start ()
 		{
 			GameManager.instance.AddEnemyToList (this);
+			GameManager.instance.SetMap (transform.position, 1);
 			
 			animator = GetComponent<Animator> ();
 			
@@ -57,7 +60,17 @@ namespace Completed
 		
 		protected override void AttemptMove <T> (int xDir, int yDir)
 		{
-			base.AttemptMove <T> (xDir, yDir);			
+			Vector3 nextPos = transform.position;
+			nextPos.x += xDir;
+			nextPos.y += yDir;
+
+			if (GameManager.instance.GetMapValue (nextPos) == 1)
+				return;
+				
+			base.AttemptMove <T> (xDir, yDir);
+
+			GameManager.instance.SetMap (transform.position, 0);
+			GameManager.instance.SetMap (nextPos, 1);
 		}
 		
 
@@ -82,20 +95,20 @@ namespace Completed
             if (SearchEnemy(deltaX, deltaY, type))
             {
                 int rand = Random.Range(0, 3);
-                if (rand == 0)
-                {
-                    if (deltaX < float.Epsilon)
-                        yDir = target.position.y > transform.position.y ? 1 : -1;
-                    else
-                        xDir = target.position.x > transform.position.x ? 1 : -1;
-                }
-                else if (rand == 1)
-                {
-                    if (deltaY < float.Epsilon)
-                        xDir = target.position.x > transform.position.x ? 1 : -1;
-                    else
-                        yDir = target.position.y > transform.position.y ? 1 : -1;                    
-                }                
+				if (rand == 0) {
+					if (deltaX < float.Epsilon)
+						yDir = target.position.y > transform.position.y ? 1 : -1;
+					else
+						xDir = target.position.x > transform.position.x ? 1 : -1;
+				} else if (rand == 1) {
+					if (deltaY < float.Epsilon)
+						xDir = target.position.x > transform.position.x ? 1 : -1;
+					else
+						yDir = target.position.y > transform.position.y ? 1 : -1;                    
+				} else {
+					if(deltaX == 0 || deltaY == 0)
+						Attack ();
+				}
             }
             else
             {
@@ -113,22 +126,21 @@ namespace Completed
 
 			AttemptMove <Player> (xDir, yDir);
 		}
-		
-		
+
+		void Attack() {
+			GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>().LoseHP (playerDamage);
+			StartCoroutine(GameManager.instance.ExploreTarget(target.position));
+
+			//Set the attack trigger of animator to trigger Enemy attack animation.
+			animator.SetTrigger ("enemyAttack");
+		}
+
 		//OnCantMove is called if Enemy attempts to move into a space occupied by a Player, it overrides the OnCantMove function of MovingObject 
 		//and takes a generic parameter T which we use to pass in the component we expect to encounter, in this case Player
 		protected override void OnCantMove <T> (T component)
 		{
-			//Declare hitPlayer and set it to equal the encountered component.
-			Player hitPlayer = component as Player;
-			
-			//Call the LoseFood function of hitPlayer passing it playerDamage, the amount of foodpoints to be subtracted.
-			hitPlayer.LoseFood (playerDamage);
-			
-			//Set the attack trigger of animator to trigger Enemy attack animation.
-			animator.SetTrigger ("enemyAttack");
-			
-			//Call the RandomizeSfx function of SoundManager passing in the two audio clips to choose randomly between.
+			Attack ();
+
 			SoundManager.instance.RandomizeSfx (attackSound1, attackSound2);
 		}
 	}

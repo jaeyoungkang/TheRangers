@@ -25,6 +25,43 @@ namespace Completed
         private Text enemyText;
         public Text gameMessage;
 		public float msgTimer = 0;
+		public int[,] map;
+
+		public void MakeGameMap (int columns, int rows)
+		{
+			map = new int[columns,rows];
+			for (int i = 0; i < columns; i++) {
+				for (int j = 0; j < rows; j++) {
+					map [i, j] = 0;
+				}
+			}
+		}
+
+		public void SetMap(Vector3 pos, int value)
+		{
+			int x = (int)pos.x;
+			int y = (int)pos.y;
+
+			if (x<0 || map.GetUpperBound (0) < x)
+				return;
+			if (y<0 || map.GetUpperBound (1) < y)
+				return;
+
+			map [x,y] = value;
+		}
+
+		public int GetMapValue(Vector3 pos)
+		{
+			int x = (int)pos.x;
+			int y = (int)pos.y;
+
+			if (x<0 || map.GetUpperBound (0) < x)
+				return 1;
+			if (y<0 || map.GetUpperBound (1) < y)
+				return 1;
+			
+			return map [x,y];
+		}
 
 		public void UpdateGameMssage(string msg, float time)
 		{
@@ -36,6 +73,17 @@ namespace Completed
 
 		private List<GameObject> tiles = new List<GameObject>();
 		private List<GameObject> walls = new List<GameObject>();
+
+		public GameObject explosioinInstance;
+		public GameObject exploreEffect;
+
+		public IEnumerator ExploreTarget(Vector3 targetPos)
+		{
+			explosioinInstance.transform.position = targetPos;
+			explosioinInstance.SetActive(true);
+			yield return new WaitForSeconds(0.5f);
+			explosioinInstance.SetActive(false);
+		}
 
 		public void DestroyEnemy(GameObject target)
 		{
@@ -291,7 +339,9 @@ namespace Completed
 		//Initializes the game for each level.
 		void InitGame()
 		{
-			//While doingSetup is true the player can't move, prevent player from moving while title card is up.
+			explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
+			explosioinInstance.SetActive(false);
+
 			doingSetup = true;
 			
 			//Get a reference to our image LevelImage by finding it by name.
@@ -351,13 +401,13 @@ namespace Completed
             if(!enemiesMoving && enemyTime <= 0 )
             {
                 StartCoroutine(MoveEnemies());
-                enemyTime = 1.0f;
+                enemyTime = 2.0f;
             }
 
             enemyText.text = "Enemy: " + enemies.Count;
         }
 
-        float enemyTime = 1.0f;
+        float enemyTime = 2.0f;
 		
 		//Call this to add the passed in Enemy to the List of Enemy objects.
 		public void AddEnemyToList(Enemy script)
