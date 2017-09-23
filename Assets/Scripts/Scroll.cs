@@ -10,7 +10,12 @@ public class Scroll : MonoBehaviour {
     public int maxNum;
 
     void Start() {
-        UpdateNumber(Random.Range(minNum, maxNum+1));
+        
+    }
+    
+    public void GenerateNumber()
+    {
+        UpdateNumber(Random.Range(minNum, maxNum + 1));
     }
 
     public void UpdateNumber(int input)
@@ -18,6 +23,11 @@ public class Scroll : MonoBehaviour {
         if (numbers.Length < num) return;
         num = input;
         transform.Find("NumberImage").GetComponent<SpriteRenderer>().sprite = numbers[num];
+        if(transform.childCount ==2)
+        {
+            Transform child = transform.GetChild(1);
+            if (child) child.GetComponent<Scroll>().UpdateNumber(input);
+        }        
     }
 	
 	// Update is called once per frame

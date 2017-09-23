@@ -95,14 +95,44 @@ namespace Completed
 			return randomPosition;
 		}
 
-        void LayoutObjectAtRandom(GameObject tile, int minimum, int maximum, bool addList = false)
+        void LayoutItemsAtRandom(GameObject tile, int minimum, int maximum)
         {
             int objectCount = Random.Range(minimum, maximum + 1);
 
             for (int i = 0; i < objectCount; i++)
             {
-                Vector3 randomPosition = RandomPosition();
-                Instantiate(tile, randomPosition, Quaternion.identity);
+                LayoutItemAtRandom(tile);
+            }
+        }
+
+        void LayoutItemsAtRandom(GameObject[] tileArray, int minimum, int maximum)
+        {
+            int objectCount = Random.Range(minimum, maximum + 1);
+
+            for (int i = 0; i < objectCount; i++)
+            {                
+                GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
+                LayoutItemAtRandom(tileChoice);
+            }
+        }
+
+        void LayoutItemAtRandom(GameObject tile)
+        {
+            Vector3 randomPosition = RandomPosition();
+            GameObject obj = Instantiate(tile, randomPosition, Quaternion.identity);
+            GameObject objToShow = Instantiate(tile, randomPosition, Quaternion.identity);
+            Renderer renderer = objToShow.GetComponent<SpriteRenderer>();
+            if (renderer)
+            {
+                renderer.sortingLayerName = "Map";
+                objToShow.transform.SetParent(obj.transform);
+                BoxCollider2D boxCol = objToShow.GetComponent<BoxCollider2D>();
+                boxCol.enabled = false;
+            }
+            Scroll scrollItem = obj.GetComponent<Scroll>();
+            if (scrollItem)
+            {
+                scrollItem.GenerateNumber();
             }
         }
 
@@ -127,12 +157,11 @@ namespace Completed
 
 			BoardSetup ();
 			InitialiseList ();
-			
-			LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum, true);
-			LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
-            LayoutObjectAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
-            LayoutObjectAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
-            LayoutObjectAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
+
+            LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
+            LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
+            LayoutItemsAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
+            LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
 
             LayoutObjectAtRandom(enemyTiles, enemiyCount.minimum, enemiyCount.maximum);			
 		}
