@@ -224,12 +224,30 @@ namespace Completed
                             if (playerPos == obj.transform.position) renderer.sortingLayerName = "Floor";
                             else renderer.sortingLayerName = "Fog";
                             break;
-                    }
-
-                    
+                    }                    
 				}
-			}            
-		}
+			}
+
+            foreach (Enemy en in enemies)
+            {
+                bool bShow = false;
+                foreach (Vector3 showPos in showRange)
+                {
+                    if (showPos == en.transform.position)
+                    {
+                        bShow = true;
+                        break;
+                    }
+                }
+
+                Renderer renderer = en.GetComponent<SpriteRenderer>();
+                if (renderer)
+                {
+                    if (bShow) renderer.sortingLayerName = "Player";
+                    else renderer.sortingLayerName = "Enemy";                    
+                }
+            }
+        }
 
 		public void ClearFloors()
 		{
