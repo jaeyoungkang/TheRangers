@@ -61,9 +61,51 @@ namespace Completed
 				}
 			}
 		}
-		
-		
-		void BoardSetup ()
+
+        void BoardSetup2()
+        {
+            boardHolder = new GameObject("Board").transform;
+
+            GameManager.instance.MakeGameMap(columns, rows);
+
+            int[][] mapInfo = new int[][] {
+                new int[]{ 1, 2, 2, 2, 3, 2, 0, 0, 1, 1 },
+                new int[]{ 1, 2, 3, 2, 2, 1, 2, 2, 2, 2 },
+                new int[]{ 1, 0, 3, 2, 1, 1, 2, 3, 3, 2 },
+                new int[]{ 2, 0, 2, 3, 2, 1, 2, 2, 2, 2 },
+                new int[]{ 2, 1, 2, 2, 2, 2, 1, 1, 0, 3 },
+
+                new int[]{ 3, 1, 2, 3, 0, 3, 1, 2, 2, 2 },
+                new int[]{ 2, 2, 2, 2, 0, 2, 1, 2, 3, 2 },
+                new int[]{ 2, 3, 3, 2, 2, 1, 1, 2, 3, 2 },
+                new int[]{ 2, 2, 2, 2, 1, 2, 1, 2, 2, 2 },
+                new int[]{ 3, 2, 1, 0, 2, 3, 2, 1, 1, 0 },
+                
+                
+            };
+
+            for (int x = -1; x < columns + 1; x++)
+            {
+                for (int y = -1; y < rows + 1; y++)
+                {
+                    GameObject toInstantiate = null;
+                    if (x == -1 || x == columns || y == -1 || y == rows)
+                    {
+                        toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
+                    }
+                    else
+                    {
+                        toInstantiate = floorTiles[mapInfo[y][x]];
+                        GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+                        instance.transform.SetParent(boardHolder);
+                        GameManager.instance.AddFloor(instance);
+                    }                    
+                }
+            }
+        }
+
+
+        void BoardSetup ()
 		{
 			boardHolder = new GameObject ("Board").transform;
 
@@ -155,8 +197,10 @@ namespace Completed
 			GameManager.instance.ClearFloors ();
 			GameManager.instance.ClearWalls ();
 
-			BoardSetup ();
-			InitialiseList ();
+			//BoardSetup ();
+            BoardSetup2();
+
+            InitialiseList ();
 
             LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
             LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
