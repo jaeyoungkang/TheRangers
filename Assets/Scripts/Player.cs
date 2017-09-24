@@ -15,6 +15,7 @@ namespace Completed
 		public int wallDamage = 1;					
 		public Text foodText;						
 		public Text ammoText;
+        public Text moneyText;
         public Text coolTimeText;
         public Text shotTimeText;
         
@@ -29,12 +30,13 @@ namespace Completed
 		
 		private Animator animator;					                      
 		private int food;
+        private int money = 0;
 
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
 #endif
-                
+
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         
         public int[] numOfBullets = new int[3];
@@ -78,6 +80,7 @@ namespace Completed
             GameManager.instance.ShowObjs(transform.position);
             coolTimeText.text = Mathf.FloorToInt(playerTime*100).ToString();
             shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
+            moneyText.text = "Money : " + money + " $";
 
             if (canShot)
             {
@@ -380,9 +383,14 @@ namespace Completed
                 
                 if(ammoObj.num <= 0)
                     other.gameObject.SetActive(false);
-                
 			}
-		}
+            else if (other.tag == "Money")
+            {
+                money += 100;
+                other.gameObject.SetActive(false);
+            }
+
+        }
 
 
 		private void Restart ()

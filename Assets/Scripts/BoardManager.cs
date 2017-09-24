@@ -32,6 +32,8 @@ namespace Completed
         public Count ammo1Count = new Count(1, 5);
         public Count ammo2Count = new Count(1, 5);
         public Count ammo3Count = new Count(1, 5);
+        public Count goldCount = new Count(1, 5);
+        public Count gemCount = new Count(1, 5);
 
         public Count enemiyCount = new Count(1, 5);
         public GameObject exit;											
@@ -41,6 +43,8 @@ namespace Completed
         public GameObject ammo1Tile;
         public GameObject ammo2Tile;
         public GameObject ammo3Tile;
+        public GameObject goldTile;
+        public GameObject gemTile;
 
         public GameObject[] enemyTiles;									
 		public GameObject[] outerWallTiles;								
@@ -206,6 +210,9 @@ namespace Completed
             LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
             LayoutItemsAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
             LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
+
+            LayoutItemsAtRandom(goldTile, goldCount.minimum, goldCount.maximum);
+            LayoutItemsAtRandom(gemTile, gemCount.minimum, gemCount.maximum);
 
             LayoutObjectAtRandom(enemyTiles, enemiyCount.minimum, enemiyCount.maximum);			
 		}
