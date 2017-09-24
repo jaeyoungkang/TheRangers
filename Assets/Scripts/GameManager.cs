@@ -171,7 +171,46 @@ namespace Completed
                 }
             }
 
-            return showRange;
+            List<Vector3> showRangeOneSideView = new List<Vector3>();
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            float x, y = 0;
+            
+            foreach (Vector3 pos in showRange)
+            {
+                switch (player.curDir)
+                {
+                    case MOVE_DIR.LEFT:
+                        if(pos.x <= player.transform.position.x)
+                        {
+                            showRangeOneSideView.Add(pos);
+                        }
+                        break;
+
+                    case MOVE_DIR.RIGHT:
+                        if (pos.x >= player.transform.position.x)
+                        {
+                            showRangeOneSideView.Add(pos);
+                        }
+                        break;
+
+                    case MOVE_DIR.UP:
+                        if (pos.y >= player.transform.position.y)
+                        {
+                            showRangeOneSideView.Add(pos);
+                        }
+                        break;
+
+                    case MOVE_DIR.DOWN:
+                        if (pos.y <= player.transform.position.y)
+                        {
+                            showRangeOneSideView.Add(pos);
+                        }
+                        break;
+                }
+            }
+
+            return showRangeOneSideView;
+//            return showRange;
         }        
 
         public void ShowObjs(Vector3 playerPos)
@@ -200,6 +239,7 @@ namespace Completed
                                 
                 foreach (Vector3 showPos in showRange)
                 {
+                    if (floor && floor.type == 0) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -240,7 +280,17 @@ namespace Completed
                     }
                 }
 
-                Renderer renderer = en.GetComponent<SpriteRenderer>();
+                foreach (GameObject obj in tiles)
+                {
+                    if (obj == null) continue;
+                    if(obj.transform.position == en.transform.position)
+                    {
+                        ExFloor floor = obj.GetComponent<ExFloor>();
+                        if (floor && floor.type == 0) bShow = false;
+                    }                    
+                }
+
+                 Renderer renderer = en.GetComponent<SpriteRenderer>();
                 if (renderer)
                 {
                     if (bShow) renderer.sortingLayerName = "Player";
