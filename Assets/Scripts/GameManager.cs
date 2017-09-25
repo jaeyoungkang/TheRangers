@@ -20,7 +20,7 @@ namespace Completed
 		private BoardManager boardScript;						
 		private int level = 1;									
 		private List<Enemy> enemies;							
-		private bool doingSetup = true;
+		public bool doingSetup = true;
 
         private Text enemyText;
         public Text gameMessage;
@@ -403,10 +403,8 @@ namespace Completed
 		//Hides black image used between levels
 		void HideLevelImage()
 		{
-			//Disable the levelImage gameObject.
 			levelImage.SetActive(false);
 			
-			//Set doingSetup to false allowing player to move again.
 			doingSetup = false;
 		}
 		

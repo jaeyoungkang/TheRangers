@@ -95,20 +95,18 @@ namespace Completed
             if (SearchEnemy(deltaX, deltaY, type))
             {
                 int rand = Random.Range(0, 3);
-				if (rand == 0) {
-					if (deltaX < float.Epsilon)
-						yDir = target.position.y > transform.position.y ? 1 : -1;
-					else
-						xDir = target.position.x > transform.position.x ? 1 : -1;
-				} else if (rand == 1) {
-					if (deltaY < float.Epsilon)
-						xDir = target.position.x > transform.position.x ? 1 : -1;
-					else
-						yDir = target.position.y > transform.position.y ? 1 : -1;                    
-				} else {
-					if(deltaX == 0 || deltaY == 0)
-						Attack ();
-				}
+                if (deltaX == 0 || deltaY == 0)
+                {
+                    Attack();
+                }
+                else if (deltaX < deltaY)
+                {
+                    xDir = target.position.x > transform.position.x ? 1 : -1;
+                }
+                else
+                {
+                    yDir = target.position.y > transform.position.y ? 1 : -1;
+                }                
             }
             else
             {

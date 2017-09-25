@@ -38,7 +38,8 @@ namespace Completed
 #endif
 
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
-        
+        public GameObject[] dirSprits;
+
         public int[] numOfBullets = new int[3];
         public int[] maxNumOfBullets = new int[3];
         
@@ -72,6 +73,7 @@ namespace Completed
 
         private void Update ()
 		{
+            if (GameManager.instance.doingSetup) return;
             foodText.text = "HP : " + food;
             ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
                             "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets[1] + "]\n\n" +
@@ -265,19 +267,29 @@ namespace Completed
             }
         }
 
-        public Sprite[] dirSprits;
+        
         public void UpdateDirImage()
         {
-            SpriteRenderer sRenderer = gameObject.GetComponent<SpriteRenderer>();
-            if (sRenderer == null) return;
-                        
+            Vector3 rotation = new Vector3();
             switch (curDir)
             {
-                case MOVE_DIR.RIGHT: sRenderer.sprite = dirSprits[0]; break;
-                case MOVE_DIR.LEFT: sRenderer.sprite = dirSprits[1]; break;
-                case MOVE_DIR.UP: sRenderer.sprite = dirSprits[2]; break;
-                case MOVE_DIR.DOWN: sRenderer.sprite = dirSprits[3]; break;
+                case MOVE_DIR.RIGHT: rotation.z = -90; break;
+                case MOVE_DIR.LEFT: rotation.z = 90; break;
+                case MOVE_DIR.UP: rotation.z = 0; break;
+                case MOVE_DIR.DOWN: rotation.z = 180; break;
             }
+            transform.localEulerAngles = rotation;
+
+            //SpriteRenderer sRenderer = gameObject.GetComponent<SpriteRenderer>();
+            //if (sRenderer == null) return;
+            
+            //switch (curDir)
+            //{
+            //    case MOVE_DIR.RIGHT: sRenderer.sprite = dirSprits[0]; break;
+            //    case MOVE_DIR.LEFT: sRenderer.sprite = dirSprits[1]; break;
+            //    case MOVE_DIR.UP: sRenderer.sprite = dirSprits[2]; break;
+            //    case MOVE_DIR.DOWN: sRenderer.sprite = dirSprits[3]; break;
+            //}
         }
 
         public void Attack(int distance)
