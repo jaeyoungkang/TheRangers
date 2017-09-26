@@ -17,8 +17,9 @@ namespace Completed
                 
         private Text levelText;									
 		private GameObject levelImage;							
-		private BoardManager boardScript;						
-		private int level = 1;									
+		private BoardManager boardScript;
+
+        private int level = 1;									
 		private List<Enemy> enemies;							
 		public bool doingSetup = true;
 
@@ -134,8 +135,17 @@ namespace Completed
         public List<Vector3> GetShowRange(Vector3 playerPos)
         {
             int type = GetFloorType(playerPos);
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            Vector3 pos = playerPos;
+            switch(player.curDir)
+            {
+                case MOVE_DIR.LEFT: pos.x -= type; break;
+                case MOVE_DIR.RIGHT: pos.x += type; break;
+                case MOVE_DIR.UP: pos.y += type; break;
+                case MOVE_DIR.DOWN: pos.y -= type; break;
+            }
 
-            List<Vector3> resultRange = new List<Vector3> { playerPos, };
+            List<Vector3> resultRange = new List<Vector3> { pos, };
             for(int i=0; i<type; i++)
             {
                 resultRange = MakeRange(resultRange);
@@ -173,35 +183,35 @@ namespace Completed
 
             List<Vector3> showRangeOneSideView = new List<Vector3>();
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            float x, y = 0;
-            
+            int type = GetFloorType(player.transform.position);
+
             foreach (Vector3 pos in showRange)
             {
                 switch (player.curDir)
                 {
                     case MOVE_DIR.LEFT:
-                        if(pos.x <= player.transform.position.x)
+                        if ( pos.x >= player.transform.position.x - type)
                         {
                             showRangeOneSideView.Add(pos);
                         }
                         break;
 
                     case MOVE_DIR.RIGHT:
-                        if (pos.x >= player.transform.position.x)
+                        if ( pos.x <= player.transform.position.x + type)
                         {
                             showRangeOneSideView.Add(pos);
                         }
                         break;
 
                     case MOVE_DIR.UP:
-                        if (pos.y >= player.transform.position.y)
+                        if (pos.y <= player.transform.position.y + type) 
                         {
                             showRangeOneSideView.Add(pos);
                         }
                         break;
 
                     case MOVE_DIR.DOWN:
-                        if (pos.y <= player.transform.position.y)
+                        if ( pos.y >= player.transform.position.y - type)
                         {
                             showRangeOneSideView.Add(pos);
                         }

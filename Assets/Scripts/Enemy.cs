@@ -11,7 +11,7 @@ namespace Completed
 		public AudioClip attackSound2;						//Second of two audio clips to play when attacking the player.
 		
 		
-		private Animator animator;							//Variable of type Animator to store a reference to the enemy's Animator component.
+		private Animator animator;
 		private Transform target;							//Transform to attempt to move toward each turn.
 
 		public int hp = 2;
@@ -50,7 +50,7 @@ namespace Completed
 			GameManager.instance.AddEnemyToList (this);
 			GameManager.instance.SetMap (transform.position, 1);
 			
-			animator = GetComponent<Animator> ();
+//			animator = GetComponent<Animator> ();
 			
 			target = GameObject.FindGameObjectWithTag ("Player").transform;
 			
@@ -129,8 +129,7 @@ namespace Completed
 			GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>().LoseHP (playerDamage);
 			StartCoroutine(GameManager.instance.ExploreTarget(target.position));
 
-			//Set the attack trigger of animator to trigger Enemy attack animation.
-			animator.SetTrigger ("enemyAttack");
+//			animator.SetTrigger ("enemyAttack");
 		}
 
 		//OnCantMove is called if Enemy attempts to move into a space occupied by a Player, it overrides the OnCantMove function of MovingObject 

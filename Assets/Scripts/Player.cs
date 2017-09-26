@@ -9,27 +9,20 @@ namespace Completed
 
     public class Player : MovingObject
 	{
-		public float restartLevelDelay = 1f;		
-		public int pointsPerFood = 10;				
-		public int pointsPerSoda = 20;				
-		public int wallDamage = 1;					
-		public Text foodText;						
-		public Text ammoText;
-        public Text moneyText;
-        public Text coolTimeText;
-        public Text shotTimeText;
-        
+        public bool myPlayer;
+        public GameObject display;
+        public AudioClip moveSound1;
+        public AudioClip moveSound2;
+        public AudioClip eatSound1;
+        public AudioClip eatSound2;
+        public AudioClip drinkSound1;
+        public AudioClip drinkSound2;
+        public AudioClip gameOverSound;
 
-        public AudioClip moveSound1;				
-		public AudioClip moveSound2;				
-		public AudioClip eatSound1;					
-		public AudioClip eatSound2;					
-		public AudioClip drinkSound1;				
-		public AudioClip drinkSound2;				
-		public AudioClip gameOverSound;				
-		
-		private Animator animator;					                      
-		private int food;
+        public float restartLevelDelay = 1f;		
+		public int pointsPerFood = 10;				
+
+		private int HP;
         private int money = 0;
 
 
@@ -45,9 +38,7 @@ namespace Completed
         
         protected override void Start ()
 		{
-			animator = GetComponent<Animator>();
-			
-			food = GameManager.instance.playerFoodPoints;            
+            HP = GameManager.instance.playerFoodPoints;            
 			base.Start ();
 
             UpdateDirImage();
@@ -61,7 +52,7 @@ namespace Completed
 		//This function is called when the behaviour becomes disabled or inactive.
 		private void OnDisable ()
 		{
-			GameManager.instance.playerFoodPoints = food;
+			GameManager.instance.playerFoodPoints = HP;
 		}
 
         public float playerTimeInit = 0.5f ;
@@ -70,19 +61,29 @@ namespace Completed
         float shotTime;
 
         bool canShot = true;
+        
+        private void UpdateDisplay()
+        {
+            if (display == null) return;
+            PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
-        private void Update ()
-		{
-            if (GameManager.instance.doingSetup) return;
-            foodText.text = "HP : " + food;
-            ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
+            playerInfo.foodText.text = "HP : " + HP;
+            playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
                             "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets[1] + "]\n\n" +
                             "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets[2] + "]";
 
             GameManager.instance.ShowObjs(transform.position);
-            coolTimeText.text = Mathf.FloorToInt(playerTime*100).ToString();
-            shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
-            moneyText.text = "Money : " + money + " $";
+            playerInfo.coolTimeText.text = Mathf.FloorToInt(playerTime * 100).ToString();
+            playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
+            playerInfo.moneyText.text = "Money : " + money + " $";
+        }
+
+
+        private void Update ()
+		{
+            if (GameManager.instance.doingSetup) return;
+            UpdateDisplay();
+            
 
             if (canShot)
             {
@@ -97,9 +98,7 @@ namespace Completed
                     shotTime = shotTimeInit;
                     canShot = true;
                 }                
-            }
-
-            
+            }            
 
             if (!GameManager.instance.playersTurn)
             {
@@ -171,53 +170,29 @@ namespace Completed
 			}
 		}
 
+        public int GetAttackInput()
+        {
+            if (Input.GetKeyDown("1")) return 0;
+            if (Input.GetKeyDown("2")) return 1;
+            if (Input.GetKeyDown("3")) return 2;
+            
+            return -1;
+        }
+
         public bool AttempAttack()
         {
-            if (Input.GetKeyDown("1"))
-            {
-                if (numOfBullets[0] <= 0)
-                {
-                    GameManager.instance.UpdateGameMssage("No Ammo1 !!!", 1f);
-                    return false;
-                }
-                else
-                {
-                    numOfBullets[0]--;
-                    Attack(1);
-                    return true;
-                }
+            int input = GetAttackInput();
+            if (input == -1) return false;
 
-            }
-            else if (Input.GetKeyDown("2"))
+            if (numOfBullets[input] <= 0)
             {
-                if (numOfBullets[1] <= 0)
-                {
-                    GameManager.instance.UpdateGameMssage("No Ammo2 !!!", 1f);
-                    return false;
-                }
-                else
-                {
-                    numOfBullets[1]--;
-                    Attack(2);
-                    return true;
-                }
-            }
-            else if (Input.GetKeyDown("3"))
-            {
-                if (numOfBullets[2] <= 0)
-                {
-                    GameManager.instance.UpdateGameMssage("No Ammo3 !!!", 1f);
-                    return false;
-                }
-                else
-                {
-                    numOfBullets[2]--;
-                    Attack(3);
-                    return true;
-                }
+                GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
+                return false;
             }
 
-            return false;
+            numOfBullets[input]--;
+            Attack(1);
+            return true;
         }
 
         public bool CheckDir(int xDir, int yDir)
@@ -266,7 +241,6 @@ namespace Completed
                 curDir = MOVE_DIR.DOWN;
             }
         }
-
         
         public void UpdateDirImage()
         {
@@ -278,18 +252,7 @@ namespace Completed
                 case MOVE_DIR.UP: rotation.z = 0; break;
                 case MOVE_DIR.DOWN: rotation.z = 180; break;
             }
-            transform.localEulerAngles = rotation;
-
-            //SpriteRenderer sRenderer = gameObject.GetComponent<SpriteRenderer>();
-            //if (sRenderer == null) return;
-            
-            //switch (curDir)
-            //{
-            //    case MOVE_DIR.RIGHT: sRenderer.sprite = dirSprits[0]; break;
-            //    case MOVE_DIR.LEFT: sRenderer.sprite = dirSprits[1]; break;
-            //    case MOVE_DIR.UP: sRenderer.sprite = dirSprits[2]; break;
-            //    case MOVE_DIR.DOWN: sRenderer.sprite = dirSprits[3]; break;
-            //}
+            transform.localEulerAngles = rotation;            
         }
 
         public void Attack(int distance)
@@ -341,34 +304,25 @@ namespace Completed
 		
 		protected override void OnCantMove <T> (T component)
 		{
-			//Wall hitWall = component as Wall;
-			
-		//animator.SetTrigger ("playerChop");
+
 		}
 		
 		
-		//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
 		private void OnTriggerEnter2D (Collider2D other)
 		{
-			//Check if the tag of the trigger collided with is Exit.
-			if(other.tag == "Exit")
-			{
-				//Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
-				Invoke ("Restart", restartLevelDelay);
+			//if(other.tag == "Exit")
+			//{
+			//	Invoke ("Restart", restartLevelDelay);
 				
-				//Disable the player object since level is over.
-				enabled = false;
-			}
-			
-			//Check if the tag of the trigger collided with is Food.
-			else if(other.tag == "Food")
+			//	enabled = false;
+			//}
+			//else 
+            if(other.tag == "Food")
 			{
-				food += pointsPerFood;				
+                HP += pointsPerFood;				
 				SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);				
 				other.gameObject.SetActive (false);
 			}
-			
-			//Check if the tag of the trigger collided with is Soda.
 			else if(other.tag == "Soda")
 			{
                 Scroll ammoObj = other.GetComponent<Scroll>();
@@ -407,25 +361,24 @@ namespace Completed
 
 		private void Restart ()
 		{
-			//Load the last scene loaded, in this case Main, the only scene in the game. And we load it in "Single" mode so it replace the existing one
-            //and not load all the scene object in the current scene.
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
 		}
 		
 		
     	public void LoseHP (int loss)
 		{
-			food -= loss;
+            HP -= loss;
 
-			GameManager.instance.UpdateGameMssage ("공격 받았다!!!!", 0.5f);
-
-			CheckIfGameOver ();
+            if(myPlayer)
+            {
+                GameManager.instance.UpdateGameMssage("공격 받았다!!!!", 0.5f);
+                CheckIfGameOver();
+            }			
 		}
-		
 		
 		private void CheckIfGameOver ()
 		{
-			if (food <= 0) 
+			if (HP <= 0) 
 			{
 				SoundManager.instance.PlaySingle (gameOverSound);
 				SoundManager.instance.musicSource.Stop();
