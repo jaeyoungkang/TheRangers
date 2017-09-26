@@ -202,7 +202,7 @@ namespace Completed
             return -1;
         }
 
-        private GameObject target = null; 
+        private Vector3 MainPlayerPos = Vector3.zero; 
         public void AutoMove()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir);
@@ -214,6 +214,7 @@ namespace Completed
                 if(player.transform.position == pos)
                 {
                     found = true;
+                    MainPlayerPos = pos;
                     break;
                 }
             }
@@ -248,23 +249,23 @@ namespace Completed
                     AttemptMove<Player>(xDir, yDir);
                 }
             }
-            else if(target)
+            else if(MainPlayerPos != Vector3.zero)
             {
-                float deltaX = Mathf.Abs(transform.position.x - target.transform.position.x);
-                float deltaY = Mathf.Abs(transform.position.y - target.transform.position.y);
+                float deltaX = Mathf.Abs(transform.position.x - MainPlayerPos.x);
+                float deltaY = Mathf.Abs(transform.position.y - MainPlayerPos.y);
                 int xDir = 0;
                 int yDir = 0;
                 if (deltaX < deltaY)
                 {
-                    xDir = target.transform.position.x > transform.position.x ? 1 : -1;
+                    xDir = MainPlayerPos.x > transform.position.x ? 1 : -1;
                 }
                 else
                 {
-                    yDir = target.transform.position.y > transform.position.y ? 1 : -1;
+                    yDir = MainPlayerPos.y > transform.position.y ? 1 : -1;
                 }
 
                 AttemptMove<Player>(xDir, yDir);
-                if (deltaX + deltaY <= 2 + Mathf.Epsilon) target = null;
+                if (deltaX + deltaY <= 2 + Mathf.Epsilon) MainPlayerPos = Vector3.zero;
             }
             else
             {
