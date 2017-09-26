@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;	//Allows us to use UI.
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 namespace Completed
 {
@@ -9,6 +8,7 @@ namespace Completed
 
     public class Player : MovingObject
 	{
+        public bool autoMode = true;
         public bool myPlayer = false;
         public GameObject display;
         public AudioClip moveSound1;
@@ -58,9 +58,16 @@ namespace Completed
 
                 Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
                 renderer.sortingLayerName = "Enemy";
+
+                if(autoMode)
+                {
+                    for (int i = 0; i < numOfBullets.Length; i++)
+                    {
+                        numOfBullets[i] = 2;
+                    }
+                }                
             }
         }
-		
 		
 		//This function is called when the behaviour becomes disabled or inactive.
 		private void OnDisable ()
@@ -80,8 +87,7 @@ namespace Completed
             playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
                             "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets[1] + "]\n\n" +
                             "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets[2] + "]";
-
-            GameManager.instance.ShowObjs(transform.position);
+            
             playerInfo.coolTimeText.text = Mathf.FloorToInt(playerTime * 100).ToString();
             playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
             playerInfo.moneyText.text = "Money : " + money + " $";
@@ -92,12 +98,15 @@ namespace Completed
 		{
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
-            
+            if(myPlayer) GameManager.instance.ShowObjs(transform.position, curDir);
 
             if (canShot)
             {
-                if(AttempAttack())
-                    canShot = false;
+                if(myPlayer)
+                {
+                    int input = GetAttackInput();
+                    if (input != -1) AttempAttack(input);
+                }
             }
             else
             {
@@ -173,24 +182,15 @@ namespace Completed
 			}
 			
 #endif 
-            if(!myPlayer)
-            {
-                int rand = Random.Range(0, 3);
-
-                if (rand == 0)
-                {
-                    horizontal = Random.Range(0, 2) == 0 ? 1 : -1;
-                }
-                else if (rand == 1)
-                {
-                    vertical = Random.Range(0, 2) == 0 ? 1 : -1;
-                }
-            }
-
 			if(horizontal != 0 || vertical != 0)
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
+
+            if(!myPlayer && autoMode)
+            {
+                AutoMove();
+            }
 		}
 
         public int GetAttackInput()
@@ -202,20 +202,100 @@ namespace Completed
             return -1;
         }
 
-        public bool AttempAttack()
+        private GameObject target = null; 
+        public void AutoMove()
         {
-            int input = GetAttackInput();
-            if (input == -1) return false;
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir);
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
+            bool found = false;
+            foreach(Vector3 pos in showRange)
+            {
+                if(player.transform.position == pos)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+
+            if(found)
+            {
+                float deltaX = Mathf.Abs(transform.position.x - player.transform.position.x);
+                float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
+                if (deltaX < Mathf.Epsilon|| deltaY < Mathf.Epsilon)
+                {
+                    canShot = false;
+                    if(canShot)
+                    {
+                        StartCoroutine(GameManager.instance.ExploreTarget(player.transform.position));
+                        player.LoseHP(10);
+                    }                    
+                }
+                else
+                {
+                    int xDir = 0;
+                    int yDir = 0;
+                    if (deltaX < deltaY)
+                    {
+                        xDir = player.transform.position.x > transform.position.x ? 1 : -1;
+                    }
+                    else
+                    {
+                        yDir = player.transform.position.y > transform.position.y ? 1 : -1;
+                    }
+
+                    AttemptMove<Player>(xDir, yDir);
+                }
+            }
+            else if(target)
+            {
+                float deltaX = Mathf.Abs(transform.position.x - target.transform.position.x);
+                float deltaY = Mathf.Abs(transform.position.y - target.transform.position.y);
+                int xDir = 0;
+                int yDir = 0;
+                if (deltaX < deltaY)
+                {
+                    xDir = target.transform.position.x > transform.position.x ? 1 : -1;
+                }
+                else
+                {
+                    yDir = target.transform.position.y > transform.position.y ? 1 : -1;
+                }
+
+                AttemptMove<Player>(xDir, yDir);
+                if (deltaX + deltaY <= 2 + Mathf.Epsilon) target = null;
+            }
+            else
+            {
+                int xDir = 0;
+                int yDir = 0;
+
+                int rand = Random.Range(0, 3);
+
+                if (rand == 0)
+                {
+                    xDir = Random.Range(0, 2) == 0 ? 1 : -1;
+                }
+                else if (rand == 1)
+                {
+                    yDir = Random.Range(0, 2) == 0 ? 1 : -1;
+                }
+                AttemptMove<Player>(xDir, yDir);
+            }
+        }
+
+        public void  AttempAttack(int input)
+        {
             if (numOfBullets[input] <= 0)
             {
-                GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
-                return false;
+                if(myPlayer) GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
+                return;
             }
 
             numOfBullets[input]--;
-            Attack(1);
-            return true;
+            Attack(input+1);
+            canShot = false;
         }
 
         public bool CheckDir(int xDir, int yDir)
@@ -291,7 +371,7 @@ namespace Completed
 
             StartCoroutine(GameManager.instance.ExploreTarget(targetPos));
 
-			GameManager.instance.AttackObj (targetPos);			
+            GameManager.instance.AttackObj (targetPos);
         }        
 
        
@@ -396,7 +476,14 @@ namespace Completed
             {
                 GameManager.instance.UpdateGameMssage("공격 받았다!!!!", 0.5f);
                 CheckIfGameOver();
-            }			
+            }
+            else
+            {
+                if(HP<=0)
+                {
+                    GameManager.instance.DestroyOtherPlayer(gameObject);
+                }
+            }
 		}
 		
 		private void CheckIfGameOver ()

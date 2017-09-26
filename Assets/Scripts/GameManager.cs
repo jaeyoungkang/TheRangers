@@ -113,20 +113,11 @@ namespace Completed
 
         public void AttackObj(Vector3 targetPos)
 		{
-            foreach (GameObject obj in walls)
+            foreach (Player other in otherPlayers)
             {
-                if (targetPos == obj.transform.position)
+                if (targetPos == other.transform.position)
                 {
-                    obj.GetComponent<Wall>().DamageWall(1);
-                    return;
-                }
-            }
-
-            foreach (Enemy en in enemies)
-            {
-                if (targetPos == en.transform.position)
-                {
-                    en.BeDamaged(1);
+                    other.LoseHP(1);
                     return;
                 }
             }
@@ -145,12 +136,11 @@ namespace Completed
             return 0;
         }
 
-        public List<Vector3> GetShowRange(Vector3 playerPos)
+        public List<Vector3> GetShowRange(Vector3 playerPos, MOVE_DIR dir)
         {
-            int type = GetFloorType(playerPos);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            int type = GetFloorType(playerPos);            
             Vector3 pos = playerPos;
-            switch(player.curDir)
+            switch(dir)
             {
                 case MOVE_DIR.LEFT: pos.x -= type; break;
                 case MOVE_DIR.RIGHT: pos.x += type; break;
@@ -161,7 +151,7 @@ namespace Completed
             List<Vector3> resultRange = new List<Vector3> { pos, };
             for(int i=0; i<type; i++)
             {
-                resultRange = MakeRange(resultRange);
+                resultRange = MakeRange(resultRange, dir, playerPos);
             }
 
             return resultRange;            
@@ -176,7 +166,7 @@ namespace Completed
                 new Vector3(pos.x, pos.y-1, pos.z),};
         }
 
-        public List<Vector3> MakeRange(List<Vector3> range)
+        public List<Vector3> MakeRange(List<Vector3> range, MOVE_DIR dir, Vector3 playerPos)
         {
             List<Vector3> showRange = new List<Vector3>();
             showRange.AddRange(range);
@@ -195,40 +185,17 @@ namespace Completed
             }
 
             List<Vector3> showRangeOneSideView = new List<Vector3>();
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            int type = GetFloorType(player.transform.position);
+            
+            int type = GetFloorType(playerPos);
 
             foreach (Vector3 pos in showRange)
             {
-                switch (player.curDir)
+                switch (dir)
                 {
-                    case MOVE_DIR.LEFT:
-                        if ( pos.x >= player.transform.position.x - type)
-                        {
-                            showRangeOneSideView.Add(pos);
-                        }
-                        break;
-
-                    case MOVE_DIR.RIGHT:
-                        if ( pos.x <= player.transform.position.x + type)
-                        {
-                            showRangeOneSideView.Add(pos);
-                        }
-                        break;
-
-                    case MOVE_DIR.UP:
-                        if (pos.y <= player.transform.position.y + type) 
-                        {
-                            showRangeOneSideView.Add(pos);
-                        }
-                        break;
-
-                    case MOVE_DIR.DOWN:
-                        if ( pos.y >= player.transform.position.y - type)
-                        {
-                            showRangeOneSideView.Add(pos);
-                        }
-                        break;
+                    case MOVE_DIR.LEFT: if ( pos.x >= playerPos.x - type) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.RIGHT: if ( pos.x <= playerPos.x + type) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.UP: if (pos.y <= playerPos.y + type) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.DOWN: if ( pos.y >= playerPos.y - type) showRangeOneSideView.Add(pos); break;
                 }
             }
 
@@ -236,15 +203,14 @@ namespace Completed
 //            return showRange;
         }        
 
-        public void ShowObjs(Vector3 playerPos)
+        public void ShowObjs(Vector3 playerPos, MOVE_DIR dir)
 		{
-            List<Vector3> showRange = GetShowRange(playerPos);
+            List<Vector3> showRange = GetShowRange(playerPos, dir);
 
             if(GetFloorType(playerPos) == 0)
             {
-                Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
                 Vector3 viewPos = playerPos;
-                switch (player.curDir)
+                switch (dir)
                 {
                     case MOVE_DIR.RIGHT: viewPos.x += 1; break;
                     case MOVE_DIR.LEFT: viewPos.x -= 1; break;
