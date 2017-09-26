@@ -202,7 +202,7 @@ namespace Completed
             return -1;
         }
 
-        private Vector3 MainPlayerPos = Vector3.zero; 
+        private Vector3 foundedPlayerPos = Vector3.zero; 
         public void AutoMove()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir);
@@ -214,11 +214,10 @@ namespace Completed
                 if(player.transform.position == pos)
                 {
                     found = true;
-                    MainPlayerPos = pos;
+                    foundedPlayerPos = pos;
                     break;
                 }
             }
-
 
             if(found)
             {
@@ -239,33 +238,33 @@ namespace Completed
                     int yDir = 0;
                     if (deltaX < deltaY)
                     {
-                        xDir = player.transform.position.x > transform.position.x ? 1 : -1;
+                        xDir = player.transform.position.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
                     }
                     else
                     {
-                        yDir = player.transform.position.y > transform.position.y ? 1 : -1;
+                        yDir = player.transform.position.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
                     }
 
                     AttemptMove<Player>(xDir, yDir);
                 }
             }
-            else if(MainPlayerPos != Vector3.zero)
+            else if(foundedPlayerPos != Vector3.zero)
             {
-                float deltaX = Mathf.Abs(transform.position.x - MainPlayerPos.x);
-                float deltaY = Mathf.Abs(transform.position.y - MainPlayerPos.y);
+                float deltaX = Mathf.Abs(transform.position.x - foundedPlayerPos.x);
+                float deltaY = Mathf.Abs(transform.position.y - foundedPlayerPos.y);
                 int xDir = 0;
                 int yDir = 0;
                 if (deltaX < deltaY)
                 {
-                    xDir = MainPlayerPos.x > transform.position.x ? 1 : -1;
+                    xDir = foundedPlayerPos.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
                 }
                 else
                 {
-                    yDir = MainPlayerPos.y > transform.position.y ? 1 : -1;
+                    yDir = foundedPlayerPos.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
                 }
 
                 AttemptMove<Player>(xDir, yDir);
-                if (deltaX + deltaY <= 2 + Mathf.Epsilon) MainPlayerPos = Vector3.zero;
+                if (deltaX + deltaY <= 2 + Mathf.Epsilon) foundedPlayerPos = Vector3.zero;
             }
             else
             {
