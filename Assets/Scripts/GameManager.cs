@@ -13,19 +13,20 @@ namespace Completed
 		public float turnDelay = 0.1f;							
 		public int playerFoodPoints = 100;						
 		public static GameManager instance = null;				
-		[HideInInspector] public bool playersTurn = true;
                 
         private Text levelText;									
-		private GameObject levelImage;							
-		private BoardManager boardScript;
-
-        private int level = 1;									
-		private List<Enemy> enemies;							
-		public bool doingSetup = true;
-
+		private GameObject levelImage;
         private Text enemyText;
         public Text gameMessage;
-		public float msgTimer = 0;
+        public float msgTimer = 0;
+
+        private BoardManager boardScript;
+
+		private List<Enemy> enemies;
+        private List<Player> otherPlayers;
+
+        public bool doingSetup = true;        
+		
 		public int[,] map;
 
 		public void MakeGameMap (int columns, int rows)
@@ -86,17 +87,29 @@ namespace Completed
 			explosioinInstance.SetActive(false);
 		}
 
-		public void DestroyEnemy(GameObject target)
-		{
-            Enemy en = target.GetComponent<Enemy> ();
-			enemies.Remove (en);
-			target.SetActive (false);			
+        public void DestroyEnemy(GameObject target)
+        {
+            Enemy en = target.GetComponent<Enemy>();
+            enemies.Remove(en);
+            target.SetActive(false);
 
-            if(enemies.Count == 0)
+            if (enemies.Count == 0)
             {
                 Win();
             }
-		}
+        }
+
+        public void DestroyOtherPlayer(GameObject target)
+        {
+            Player otherPlayer = target.GetComponent<Player>();
+            otherPlayers.Remove(otherPlayer);
+            target.SetActive(false);
+            if(otherPlayers.Count == 0 )
+            {
+                Win();
+            }
+        }
+
 
         public void AttackObj(Vector3 targetPos)
 		{
@@ -335,26 +348,16 @@ namespace Completed
 		{
             //Check if instance already exists
             if (instance == null)
-
-                //if not, set instance to this
                 instance = this;
-
-            //If instance already exists and it's not this:
             else if (instance != this)
-
-                //Then destroy this. This enforces our singleton pattern, meaning there can only ever be one instance of a GameManager.
                 Destroy(gameObject);	
 			
-			//Sets this to not be destroyed when reloading scene
 			DontDestroyOnLoad(gameObject);
 			
-			//Assign enemies to a new List of Enemy objects.
 			enemies = new List<Enemy>();
-			
-			//Get a component reference to the attached BoardManager script
-			boardScript = GetComponent<BoardManager>();
-			
-			//Call the InitGame function to initialize the first level 
+            otherPlayers = new List<Player>();
+            
+            boardScript = GetComponent<BoardManager>();			
 			InitGame();
 		}
 
@@ -370,12 +373,11 @@ namespace Completed
         //This is called each time a scene is loaded.
         static private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
-            instance.level++;
+//            instance.level++;
             instance.InitGame();
         }
 
 		
-		//Initializes the game for each level.
 		void InitGame()
 		{
 			explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
@@ -383,34 +385,20 @@ namespace Completed
 
 			doingSetup = true;
 			
-			//Get a reference to our image LevelImage by finding it by name.
-			levelImage = GameObject.Find("LevelImage");
-			
-			//Get a reference to our text LevelText's text component by finding it by name and calling GetComponent.
+			levelImage = GameObject.Find("LevelImage");			
 			levelText = GameObject.Find("LevelText").GetComponent<Text>();
-
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
-			
-			//Set the text of levelText to the string "Day" and append the current level number.
 			levelText.text = "the rangers";
-			
-			//Set levelImage to active blocking player's view of the game board during setup.
 			levelImage.SetActive(true);
-			
-			//Call the HideLevelImage function with a delay in seconds of levelStartDelay.
 			Invoke("HideLevelImage", levelStartDelay);
 			
-			//Clear any Enemy objects in our List to prepare for next level.
 			enemies.Clear();
+            otherPlayers.Clear();
 			
-			//Call the SetupScene function of the BoardManager script, pass it current level number.
-			boardScript.SetupScene(level);
-			
+			boardScript.SetupScene();			
 		}
-		
-		
-		//Hides black image used between levels
+
 		void HideLevelImage()
 		{
 			levelImage.SetActive(false);
@@ -418,7 +406,23 @@ namespace Completed
 			doingSetup = false;
 		}
 		
-		//Update is called every frame.
+		void UpdateOthers()
+        {
+            if (doingSetup)
+                return;
+
+            enemyTime -= Time.deltaTime;
+
+            if (!enemiesMoving && enemyTime <= 0)
+            {                
+//                StartCoroutine(MoveEnemies());
+                enemyTime = 2.0f;
+            }
+
+//            enemyText.text = "Enemy: " + enemies.Count;
+            enemyText.text = "Enemy: " + otherPlayers.Count;
+        }
+
 		void Update()
 		{
 			if (msgTimer >= 0) {
@@ -429,30 +433,20 @@ namespace Completed
                     gameMessage.gameObject.SetActive(false);
                 }
 			}
-			
-			if(doingSetup)				
-				return;
-                        
-            enemyTime -= Time.deltaTime;
-
-            if(!enemiesMoving && enemyTime <= 0 )
-            {
-                StartCoroutine(MoveEnemies());
-                enemyTime = 2.0f;
-            }
-
-            enemyText.text = "Enemy: " + enemies.Count;
         }
 
         float enemyTime = 2.0f;
 		
-		//Call this to add the passed in Enemy to the List of Enemy objects.
 		public void AddEnemyToList(Enemy script)
 		{
-			//Add Enemy to List enemies.
 			enemies.Add(script);
 		}
-        
+
+        public void AddOtherPlayerToList(Player script)
+        {
+            otherPlayers.Add(script);
+        }
+
         public void Win()
         {
             levelText.text = "You win!";
@@ -468,17 +462,12 @@ namespace Completed
 		}
 
         bool enemiesMoving = false;
-        //Coroutine to move enemies in sequence.
         IEnumerator MoveEnemies()
         {
             enemiesMoving = true;
-            //Loop through List of Enemy objects.
             for (int i = 0; i < enemies.Count; i++)
             {
-                //Call the MoveEnemy function of Enemy at index i in the enemies List.
                 enemies[i].MoveEnemy();
-
-                //Wait for Enemy's moveTime before moving next Enemy, 
                 yield return new WaitForSeconds(enemies[i].moveTime);
             }
             enemiesMoving = false;

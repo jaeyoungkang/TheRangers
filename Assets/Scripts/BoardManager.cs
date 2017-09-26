@@ -46,7 +46,7 @@ namespace Completed
         public GameObject goldTile;
         public GameObject gemTile;
 
-        public GameObject[] enemyTiles;									
+        public GameObject[] enemyTiles;
 		public GameObject[] outerWallTiles;								
 		
 		private Transform boardHolder;									
@@ -196,7 +196,7 @@ namespace Completed
 			}
 		}
 
-        public void SetupScene (int level)
+        public void SetupScene ()
 		{
 			GameManager.instance.ClearFloors ();
 			GameManager.instance.ClearWalls ();

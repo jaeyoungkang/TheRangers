@@ -9,7 +9,7 @@ namespace Completed
 
     public class Player : MovingObject
 	{
-        public bool myPlayer;
+        public bool myPlayer = false;
         public GameObject display;
         public AudioClip moveSound1;
         public AudioClip moveSound2;
@@ -24,6 +24,12 @@ namespace Completed
 
 		private int HP;
         private int money = 0;
+
+        public float playerTimeInit = 0.5f;
+        public float shotTimeInit = 0.5f;
+        float playerTime;
+        float shotTime;
+        bool playersTurn = true;
 
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
@@ -42,10 +48,17 @@ namespace Completed
 			base.Start ();
 
             UpdateDirImage();
-
-            
+                        
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
+
+            if(!myPlayer)
+            {
+                GameManager.instance.AddOtherPlayerToList(this);
+
+                Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
+                renderer.sortingLayerName = "Enemy";
+            }
         }
 		
 		
@@ -54,11 +67,7 @@ namespace Completed
 		{
 			GameManager.instance.playerFoodPoints = HP;
 		}
-
-        public float playerTimeInit = 0.5f ;
-        public float shotTimeInit = 0.5f;
-        float playerTime;
-        float shotTime;
+               
 
         bool canShot = true;
         
@@ -100,12 +109,12 @@ namespace Completed
                 }                
             }            
 
-            if (!GameManager.instance.playersTurn)
+            if (!playersTurn)
             {
                 playerTime -= Time.deltaTime;
                 if(playerTime <= 0)
                 {
-                    GameManager.instance.playersTurn = true;
+                    playersTurn = true;
                     playerTime = playerTimeInit;
                 }
                 return;
@@ -164,6 +173,20 @@ namespace Completed
 			}
 			
 #endif 
+            if(!myPlayer)
+            {
+                int rand = Random.Range(0, 3);
+
+                if (rand == 0)
+                {
+                    horizontal = Random.Range(0, 2) == 0 ? 1 : -1;
+                }
+                else if (rand == 1)
+                {
+                    vertical = Random.Range(0, 2) == 0 ? 1 : -1;
+                }
+            }
+
 			if(horizontal != 0 || vertical != 0)
 			{
 				AttemptMove<Wall> (horizontal, vertical);
@@ -274,7 +297,7 @@ namespace Completed
        
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
-            GameManager.instance.playersTurn = false;
+            playersTurn = false;
 
             if (CheckDir(xDir, yDir))
             {
