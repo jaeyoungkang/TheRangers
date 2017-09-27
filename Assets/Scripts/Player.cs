@@ -227,7 +227,7 @@ namespace Completed
                 {                    
                     if(canShot)
                     {
-                        StartCoroutine(GameManager.instance.ExploreTarget(player.transform.position));
+                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
                         player.LoseHP(10);
                         canShot = false;
                     }                    
@@ -369,7 +369,7 @@ namespace Completed
                 case MOVE_DIR.DOWN: attackPos.y -= distance; break;
             }
 
-            StartCoroutine(GameManager.instance.ExploreTarget(attackPos));
+            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos));
 
             GameManager.instance.AttackObj (attackPos);
         }        

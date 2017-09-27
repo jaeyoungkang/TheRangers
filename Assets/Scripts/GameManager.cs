@@ -76,19 +76,32 @@ namespace Completed
 		private List<GameObject> tiles = new List<GameObject>();
 		private List<GameObject> walls = new List<GameObject>();
 
-		public GameObject explosioinInstance;
-		public GameObject exploreEffect;
+        public GameObject shotInstance;
+        public GameObject shotTile;
 
-		public IEnumerator ExploreTarget(Vector3 targetPos)
+        public GameObject explosionInstance;
+		public GameObject explosionTile;
+
+		public IEnumerator ShowExplosionEffect(Vector3 targetPos)
 		{
-			explosioinInstance.transform.position = targetPos;
-			explosioinInstance.SetActive(true);
+            explosionInstance.transform.position = targetPos;
+            explosionInstance.SetActive(true);
 			yield return new WaitForSeconds(0.5f);
-			explosioinInstance.SetActive(false);
+            explosionInstance.SetActive(false);
 		}
+
+        public IEnumerator ShowShotEffect(Vector3 targetPos)
+        {
+            shotInstance.transform.position = targetPos;
+            shotInstance.SetActive(true);
+            yield return new WaitForSeconds(0.5f);
+            shotInstance.SetActive(false);
+        }
 
         public void DestroyEnemy(GameObject target)
         {
+            StartCoroutine(ShowExplosionEffect(target.transform.position));
+
             Enemy en = target.GetComponent<Enemy>();
             enemies.Remove(en);
             target.SetActive(false);
@@ -347,10 +360,13 @@ namespace Completed
 		
 		void InitGame()
 		{
-			explosioinInstance = Instantiate(exploreEffect, transform.position, Quaternion.identity);
-			explosioinInstance.SetActive(false);
+            shotInstance = Instantiate(shotTile, transform.position, Quaternion.identity);
+            shotInstance.SetActive(false);
 
-			doingSetup = true;
+            explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
+            explosionInstance.SetActive(false);
+
+            doingSetup = true;
 			
 			levelImage = GameObject.Find("LevelImage");			
 			levelText = GameObject.Find("LevelText").GetComponent<Text>();

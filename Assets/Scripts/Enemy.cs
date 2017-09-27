@@ -127,7 +127,7 @@ namespace Completed
 
 		void Attack() {
 			GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>().LoseHP (playerDamage);
-			StartCoroutine(GameManager.instance.ExploreTarget(target.position));
+			StartCoroutine(GameManager.instance.ShowExplosionEffect(target.position));
 
 //			animator.SetTrigger ("enemyAttack");
 		}
