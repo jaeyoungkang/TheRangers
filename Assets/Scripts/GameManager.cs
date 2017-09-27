@@ -104,6 +104,7 @@ namespace Completed
             Player otherPlayer = target.GetComponent<Player>();
             otherPlayers.Remove(otherPlayer);
             target.SetActive(false);
+
             if(otherPlayers.Count == 0 )
             {
                 Win();
@@ -117,7 +118,7 @@ namespace Completed
             {
                 if (targetPos == other.transform.position)
                 {
-                    other.LoseHP(1);
+                    other.LoseHP(10);
                     return;
                 }
             }
@@ -386,7 +387,7 @@ namespace Completed
             }
 
 //            enemyText.text = "Enemy: " + enemies.Count;
-            enemyText.text = "Enemy: " + otherPlayers.Count;
+            
         }
 
 		void Update()
@@ -399,6 +400,8 @@ namespace Completed
                     gameMessage.gameObject.SetActive(false);
                 }
 			}
+
+            enemyText.text = "Enemy: " + otherPlayers.Count;
         }
 
         float enemyTime = 2.0f;

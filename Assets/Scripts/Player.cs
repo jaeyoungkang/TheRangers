@@ -202,7 +202,7 @@ namespace Completed
             return -1;
         }
 
-        private Vector3 foundedPlayerPos = Vector3.zero; 
+        private Vector3 targetPos = Vector3.zero; 
         public void AutoMove()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir);
@@ -214,7 +214,7 @@ namespace Completed
                 if(player.transform.position == pos)
                 {
                     found = true;
-                    foundedPlayerPos = pos;
+                    targetPos = pos;
                     break;
                 }
             }
@@ -224,12 +224,12 @@ namespace Completed
                 float deltaX = Mathf.Abs(transform.position.x - player.transform.position.x);
                 float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
                 if (deltaX < Mathf.Epsilon|| deltaY < Mathf.Epsilon)
-                {
-                    canShot = false;
+                {                    
                     if(canShot)
                     {
                         StartCoroutine(GameManager.instance.ExploreTarget(player.transform.position));
                         player.LoseHP(10);
+                        canShot = false;
                     }                    
                 }
                 else
@@ -248,23 +248,23 @@ namespace Completed
                     AttemptMove<Player>(xDir, yDir);
                 }
             }
-            else if(foundedPlayerPos != Vector3.zero)
+            else if(targetPos != Vector3.zero)
             {
-                float deltaX = Mathf.Abs(transform.position.x - foundedPlayerPos.x);
-                float deltaY = Mathf.Abs(transform.position.y - foundedPlayerPos.y);
+                float deltaX = Mathf.Abs(transform.position.x - targetPos.x);
+                float deltaY = Mathf.Abs(transform.position.y - targetPos.y);
                 int xDir = 0;
                 int yDir = 0;
                 if (deltaX < deltaY)
                 {
-                    xDir = foundedPlayerPos.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
+                    xDir = targetPos.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
                 }
                 else
                 {
-                    yDir = foundedPlayerPos.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
+                    yDir = targetPos.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
                 }
 
                 AttemptMove<Player>(xDir, yDir);
-                if (deltaX + deltaY <= 2 + Mathf.Epsilon) foundedPlayerPos = Vector3.zero;
+                if (deltaX + deltaY <= 2 + Mathf.Epsilon) targetPos = Vector3.zero;
             }
             else
             {
@@ -360,18 +360,18 @@ namespace Completed
 
         public void Attack(int distance)
         {
-            Vector3 targetPos = transform.position;
+            Vector3 attackPos = transform.position;
             switch (curDir)
             {
-                case MOVE_DIR.RIGHT: targetPos.x += distance; break;
-                case MOVE_DIR.LEFT: targetPos.x -= distance; break;
-                case MOVE_DIR.UP: targetPos.y += distance; break;
-                case MOVE_DIR.DOWN: targetPos.y -= distance; break;
+                case MOVE_DIR.RIGHT: attackPos.x += distance; break;
+                case MOVE_DIR.LEFT: attackPos.x -= distance; break;
+                case MOVE_DIR.UP: attackPos.y += distance; break;
+                case MOVE_DIR.DOWN: attackPos.y -= distance; break;
             }
 
-            StartCoroutine(GameManager.instance.ExploreTarget(targetPos));
+            StartCoroutine(GameManager.instance.ExploreTarget(attackPos));
 
-            GameManager.instance.AttackObj (targetPos);
+            GameManager.instance.AttackObj (attackPos);
         }        
 
        
@@ -482,6 +482,7 @@ namespace Completed
                 if(HP<=0)
                 {
                     GameManager.instance.DestroyOtherPlayer(gameObject);
+                    GameManager.instance.SetMap(gameObject.transform.position, 0);
                 }
             }
 		}
