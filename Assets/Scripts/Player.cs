@@ -27,8 +27,10 @@ namespace Completed
 
         public float playerTimeInit = 0.5f;
         public float shotTimeInit = 0.5f;
+        public float reloadTimeInit = 3.0f;
         float playerTime;
         float shotTime;
+        float reloadTime;
         bool playersTurn = true;
 
 
@@ -40,7 +42,7 @@ namespace Completed
         public GameObject[] dirSprits;
 
         public int[] numOfBullets = new int[3];
-        public int[] maxNumOfBullets = new int[3];
+        public int[] totalBullets = new int[3];
         
         protected override void Start ()
 		{
@@ -51,8 +53,9 @@ namespace Completed
                         
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
+            reloadTime = reloadTimeInit;
 
-            if(!myPlayer)
+            if (!myPlayer)
             {
                 GameManager.instance.AddOtherPlayerToList(this);
 
@@ -84,12 +87,14 @@ namespace Completed
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
             playerInfo.foodText.text = "HP : " + HP;
-            playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + maxNumOfBullets[0] + "]\n\n" +
-                            "[Ammo2 : " + numOfBullets[1] + "/" + maxNumOfBullets[1] + "]\n\n" +
-                            "[Ammo3 : " + numOfBullets[2] + "/" + maxNumOfBullets[2] + "]";
+            playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + totalBullets[0] + "]\n\n" +
+                            "[Ammo2 : " + numOfBullets[1] + "/" + totalBullets[1] + "]\n\n" +
+                            "[Ammo3 : " + numOfBullets[2] + "/" + totalBullets[2] + "]";
             
             playerInfo.coolTimeText.text = Mathf.FloorToInt(playerTime * 100).ToString();
-            playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
+            if(startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(reloadTime * 100).ToString();
+            else playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
+
             playerInfo.moneyText.text = "Money : " + money + " $";
         }
 
@@ -100,7 +105,22 @@ namespace Completed
             UpdateDisplay();
             if(myPlayer) GameManager.instance.ShowObjs(transform.position, curDir);
 
-            if (canShot)
+            if(startReload)
+            {
+                reloadTime -= Time.deltaTime;
+                if (reloadTime <= 0)
+                {
+                    reloadTime = reloadTimeInit;
+                    startReload = false;
+
+                    int relaodNum = 1;
+                    if(totalBullets[indexReload]>2) relaodNum = 2;
+
+                    totalBullets[indexReload] -= relaodNum;
+                    numOfBullets[indexReload] += relaodNum;
+                }
+            }
+            else if (canShot)
             {
                 if(myPlayer)
                 {
@@ -197,7 +217,7 @@ namespace Completed
         {
             if (Input.GetKeyDown("1")) return 0;
             if (Input.GetKeyDown("2")) return 1;
-            if (Input.GetKeyDown("3")) return 2;
+//            if (Input.GetKeyDown("3")) return 2;
             
             return -1;
         }
@@ -285,16 +305,33 @@ namespace Completed
             }
         }
 
+        bool startReload = false;
+        int indexReload = 0;
+        void StartReload(int index)
+        {
+            startReload = true;
+            indexReload = index;
+        }
+
         public void  AttempAttack(int input)
         {
             if (numOfBullets[input] <= 0)
             {
-                if(myPlayer) GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
+                if(totalBullets[input] > 0)
+                {
+                    StartReload(input);
+                }
+                else
+                {
+                    if (myPlayer) GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
+                }
+                
                 return;
             }
 
             numOfBullets[input]--;
-            Attack(input+1);
+            //Attack(input+1);
+            Attack2(input);
             canShot = false;
         }
 
@@ -356,6 +393,50 @@ namespace Completed
                 case MOVE_DIR.DOWN: rotation.z = 180; break;
             }
             transform.localEulerAngles = rotation;            
+        }
+
+        public void Attack2(int type)
+        {
+            Vector3 attackPos1 = transform.position;
+            Vector3 attackPos2 = transform.position;
+
+            int startPos = 1;
+            if(type == 1)
+            {
+                startPos = 2;
+            }
+
+            switch (curDir)
+            {
+                case MOVE_DIR.RIGHT:
+                    attackPos1.x += startPos;
+                    attackPos2.x += startPos + 1;
+                    break;
+                case MOVE_DIR.LEFT:
+                    attackPos1.x -= startPos;
+                    attackPos2.x -= startPos + 1;
+                    break;
+                case MOVE_DIR.UP:
+                    attackPos1.y += startPos;
+                    attackPos2.y += startPos + 1;
+                    break;
+                case MOVE_DIR.DOWN:
+                    attackPos1.y -= startPos;
+                    attackPos2.y -= startPos + 1;
+                    break;
+            }
+
+            StartCoroutine(ChainAttack(attackPos1, attackPos2));
+        }
+
+        public System.Collections.IEnumerator ChainAttack(Vector3 attackPos1, Vector3 attackPos2)
+        {
+            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos1));
+            GameManager.instance.AttackObj(attackPos1);
+            yield return new WaitForSeconds(0.2f);
+
+            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos2));
+            GameManager.instance.AttackObj(attackPos2);
         }
 
         public void Attack(int distance)
@@ -433,21 +514,24 @@ namespace Completed
                 int index = ammoObj.type - 1;
                 if(index < numOfBullets.Length)
                 {
-                    int addAmmo = ammoObj.num;
-                    if (numOfBullets[index] + ammoObj.num > maxNumOfBullets[index])
-                    {
-                        addAmmo = maxNumOfBullets[index] - numOfBullets[index];
-                        ammoObj.UpdateNumber(ammoObj.num - addAmmo);
-                    }
-                    else
-                    {                        
-                        ammoObj.UpdateNumber(0);                        
-                    }
+                    //int addAmmo = ammoObj.num;
+                    //if (numOfBullets[index] + ammoObj.num > maxNumOfBullets[index])
+                    //{
+                    //    addAmmo = maxNumOfBullets[index] - numOfBullets[index];
+                    //    ammoObj.UpdateNumber(ammoObj.num - addAmmo);
+                    //}
+                    //else
+                    //{                        
+                    //    ammoObj.UpdateNumber(0);                        
+                    //}
 
-                    numOfBullets[index] += addAmmo;
+                    //numOfBullets[index] += addAmmo;
 
-                    if (numOfBullets[index] > maxNumOfBullets[index])
-                        numOfBullets[index] = maxNumOfBullets[index];
+                    //if (numOfBullets[index] > maxNumOfBullets[index])
+                    //    numOfBullets[index] = maxNumOfBullets[index];
+
+                    totalBullets[index] += ammoObj.num;
+                    ammoObj.UpdateNumber(0);
                 }
                 
                 if(ammoObj.num <= 0)

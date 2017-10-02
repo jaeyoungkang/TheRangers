@@ -76,7 +76,7 @@ namespace Completed
 		private List<GameObject> tiles = new List<GameObject>();
 		private List<GameObject> walls = new List<GameObject>();
 
-        public GameObject shotInstance;
+        public GameObject[] shotInstances = new GameObject[8];
         public GameObject shotTile;
 
         public GameObject explosionInstance;
@@ -90,12 +90,17 @@ namespace Completed
             explosionInstance.SetActive(false);
 		}
 
+        int shotEffectIndex = 0;
         public IEnumerator ShowShotEffect(Vector3 targetPos)
         {
+            GameObject shotInstance = shotInstances[shotEffectIndex];
+            shotEffectIndex++;
+            if (shotEffectIndex >= shotInstances.Length) shotEffectIndex = 0;
+
             shotInstance.transform.position = targetPos;
             shotInstance.SetActive(true);
             yield return new WaitForSeconds(0.5f);
-            shotInstance.SetActive(false);
+            shotInstance.SetActive(false);            
         }
 
         public void DestroyEnemy(GameObject target)
@@ -114,6 +119,8 @@ namespace Completed
 
         public void DestroyOtherPlayer(GameObject target)
         {
+            StartCoroutine(ShowExplosionEffect(target.transform.position));
+
             Player otherPlayer = target.GetComponent<Player>();
             otherPlayers.Remove(otherPlayer);
             target.SetActive(false);
@@ -360,8 +367,12 @@ namespace Completed
 		
 		void InitGame()
 		{
-            shotInstance = Instantiate(shotTile, transform.position, Quaternion.identity);
-            shotInstance.SetActive(false);
+            for(int i=0; i< shotInstances.Length; i++)
+            {
+                shotInstances[i] = Instantiate(shotTile, transform.position, Quaternion.identity);
+                shotInstances[i].SetActive(false);
+            }
+            
 
             explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
             explosionInstance.SetActive(false);
