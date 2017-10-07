@@ -88,8 +88,7 @@ namespace Completed
 
             playerInfo.foodText.text = "HP : " + HP;
             playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + totalBullets[0] + "]\n\n" +
-                            "[Ammo2 : " + numOfBullets[1] + "/" + totalBullets[1] + "]\n\n" +
-                            "[Ammo3 : " + numOfBullets[2] + "/" + totalBullets[2] + "]";
+                            "[Ammo2 : " + numOfBullets[1] + "/" + totalBullets[1] + "]";
             
             playerInfo.coolTimeText.text = Mathf.FloorToInt(playerTime * 100).ToString();
             if(startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(reloadTime * 100).ToString();
