@@ -83,8 +83,7 @@ namespace Completed
                 new int[]{ 2, 2, 2, 2, 0, 2, 1, 2, 3, 2 },
                 new int[]{ 2, 3, 3, 2, 2, 1, 1, 2, 3, 2 },
                 new int[]{ 2, 2, 2, 2, 1, 2, 1, 2, 2, 2 },
-                new int[]{ 3, 2, 1, 0, 2, 3, 2, 1, 1, 0 },
-                
+                new int[]{ 3, 2, 1, 0, 2, 3, 2, 1, 1, 0 },                
                 
             };
 
@@ -201,8 +200,8 @@ namespace Completed
 			GameManager.instance.ClearFloors ();
 			GameManager.instance.ClearWalls ();
 
-			//BoardSetup ();
-            BoardSetup2();
+			BoardSetup ();
+            //BoardSetup2();
 
             InitialiseList ();
 
