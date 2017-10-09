@@ -385,17 +385,62 @@ namespace Completed
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
 			levelText.text = "the rangers";
 			levelImage.SetActive(true);
-			Invoke("HideLevelImage", levelStartDelay);
-			
+						
 			enemies.Clear();
             otherPlayers.Clear();
 			
-			boardScript.SetupScene();			
-		}
+			boardScript.SetupScene();
+
+//            Invoke("HideLevelImage", levelStartDelay);
+
+            GameObject.Find("ButtonStart1").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(1));
+            GameObject.Find("ButtonStart2").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(2));
+            GameObject.Find("ButtonStart3").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(3));
+            GameObject.Find("ButtonStart4").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(4));
+            GameObject.Find("ButtonStart5").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(5));
+
+            GameObject.Find("ButtonStart").GetComponent<Button>().onClick.AddListener(HideLevelImage);
+        }
+
+        void SelectStartPos(int pos)
+        {
+            Player MyPlane = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            Vector3 startPos = MyPlane.gameObject.transform.position;
+
+            while(true)
+            {
+                float x = 0, y = 0;
+                switch (pos)
+                {
+                    case 1: x = 4; y = 4; break;
+                    case 2: x = 15; y = 4; break;
+                    case 3: x = 10; y = 10; break;
+                    case 4: x = 15; y = 15; break;
+                    case 5: x = 5; y = 15; break;
+                }
+
+                startPos.x = x + Random.Range(-3, 3);
+                startPos.y = y + Random.Range(-3, 3);
+
+                if(GetMapValue(startPos) == 0)
+                {
+                    break;
+                }
+            }            
+
+            MyPlane.gameObject.transform.position = startPos;            
+        }
 
 		void HideLevelImage()
 		{
-			levelImage.SetActive(false);
+            GameObject.Find("ButtonStart1").GetComponent<Button>().gameObject.SetActive(false);
+            GameObject.Find("ButtonStart2").GetComponent<Button>().gameObject.SetActive(false);
+            GameObject.Find("ButtonStart3").GetComponent<Button>().gameObject.SetActive(false);
+            GameObject.Find("ButtonStart4").GetComponent<Button>().gameObject.SetActive(false);
+            GameObject.Find("ButtonStart5").GetComponent<Button>().gameObject.SetActive(false);
+            GameObject.Find("ButtonStart").GetComponent<Button>().gameObject.SetActive(false);
+
+            levelImage.SetActive(false);
 			
 			doingSetup = false;
 		}

@@ -94,7 +94,7 @@ namespace Completed
             if(startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(reloadTime * 100).ToString();
             else playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
 
-            playerInfo.moneyText.text = "Money : " + money + " $";
+//            playerInfo.moneyText.text = "Money : " + money + " $";
         }
 
 
