@@ -107,7 +107,23 @@ namespace Completed
                 camera.transform.position = newPos;
             }
 
+            if (curViewMode == LOCAL_VIEW)
+            {
+                Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+                Vector3 MoveCamera = camera.transform.position;
+                if (playerPos.x > 5 && playerPos.x < 15)
+                {                    
+                    MoveCamera.x = LocalPos.x + playerPos.x - 5;
+                }
 
+                if (playerPos.y > 5 && playerPos.y < 15)
+                {
+                    MoveCamera.y = LocalPos.y + playerPos.y - 5;                    
+                }
+
+                camera.transform.position = MoveCamera;
+
+            }
         }
     }
 }
