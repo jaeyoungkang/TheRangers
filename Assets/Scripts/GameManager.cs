@@ -345,6 +345,7 @@ namespace Completed
             otherPlayers = new List<Player>();
             
             boardScript = GetComponent<BoardManager>();			
+
 			InitGame();
 		}
 
@@ -371,8 +372,7 @@ namespace Completed
             {
                 shotInstances[i] = Instantiate(shotTile, transform.position, Quaternion.identity);
                 shotInstances[i].SetActive(false);
-            }
-            
+            }            
 
             explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
             explosionInstance.SetActive(false);
@@ -391,8 +391,6 @@ namespace Completed
 			
 			boardScript.SetupScene();
 
-//            Invoke("HideLevelImage", levelStartDelay);
-
             GameObject.Find("ButtonStart1").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(1));
             GameObject.Find("ButtonStart2").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(2));
             GameObject.Find("ButtonStart3").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(3));
@@ -400,6 +398,8 @@ namespace Completed
             GameObject.Find("ButtonStart5").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(5));
 
             GameObject.Find("ButtonStart").GetComponent<Button>().onClick.AddListener(HideLevelImage);
+
+            InitViewMode();
         }
 
         void SelectStartPos(int pos)
@@ -443,24 +443,10 @@ namespace Completed
             levelImage.SetActive(false);
 			
 			doingSetup = false;
-		}
-		
-		void UpdateOthers()
-        {
-            if (doingSetup)
-                return;
 
-            enemyTime -= Time.deltaTime;
-
-            if (!enemiesMoving && enemyTime <= 0)
-            {                
-//                StartCoroutine(MoveEnemies());
-                enemyTime = 2.0f;
-            }
-
-//            enemyText.text = "Enemy: " + enemies.Count;
-            
+            ChangeViewMode();
         }
+		
 
 		void Update()
 		{
@@ -473,13 +459,16 @@ namespace Completed
                 }
 			}
 
-            enemyText.text = "Enemy: " + otherPlayers.Count;            
-
+            enemyText.text = "Enemy: " + otherPlayers.Count;
+            
+            if (curViewMode == LOCAL_VIEW)
+            {
+                CameraScoll(camera.transform.position);
+            }
+            UpdateViewMode();
         }
 
-        float enemyTime = 2.0f;
-		
-		public void AddEnemyToList(Enemy script)
+        public void AddEnemyToList(Enemy script)
 		{
 			enemies.Add(script);
 		}
@@ -503,17 +492,113 @@ namespace Completed
 			enabled = false;
 		}
 
-        bool enemiesMoving = false;
-        IEnumerator MoveEnemies()
+        public Camera camera;
+        public int MaxSize = 16;
+        public int MinSize = 8;
+        public Vector3 WorldPos = new Vector3(9.5f, 6f, -10f);
+        public Vector3 LocalPos = new Vector3(4.5f, 3.5f, -10f);
+        public GameObject TopFrame, BottomFrame, LeftFrame, RightFrame;
+
+        const int WORLD_VIEW = 1;
+        const int LOCAL_VIEW = 2;
+        int curViewMode = 1;
+        int preViewMode = 1;
+        
+        void ChangeViewMode()
         {
-            enemiesMoving = true;
-            for (int i = 0; i < enemies.Count; i++)
-            {
-                enemies[i].MoveEnemy();
-                yield return new WaitForSeconds(enemies[i].moveTime);
-            }
-            enemiesMoving = false;
+            if (curViewMode == WORLD_VIEW) curViewMode = LOCAL_VIEW;
+            else curViewMode = WORLD_VIEW;
         }
+
+        void UpdateViewMode()
+        {            
+            int speed = 10;
+            if (curViewMode != preViewMode)
+            {
+                if (curViewMode == WORLD_VIEW)
+                {
+                    camera.orthographicSize = camera.orthographicSize + speed * Time.deltaTime;
+
+                    if (camera.orthographicSize > MaxSize)
+                    {
+                        camera.orthographicSize = MaxSize;
+                        preViewMode = curViewMode;
+                    }
+                }
+
+                if (curViewMode == LOCAL_VIEW)
+                {
+                    CameraScoll(LocalPos);
+                    camera.orthographicSize = camera.orthographicSize - speed * Time.deltaTime;
+                    if (camera.orthographicSize < MinSize)
+                    {
+                        camera.orthographicSize = MinSize;
+                        preViewMode = curViewMode;
+                        TopFrame.SetActive(true);
+                        BottomFrame.SetActive(true);
+                        RightFrame.SetActive(true);
+                        LeftFrame.SetActive(true);
+                    }
+                }
+            }            
+        }
+
+        void InitViewMode()
+        {
+            camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+            TopFrame = GameObject.Find("FrameTop");
+            BottomFrame = GameObject.Find("FrameBottom");
+            RightFrame = GameObject.Find("FrameRight");
+            LeftFrame = GameObject.Find("FrameLeft");
+
+            camera.orthographicSize = MaxSize;
+            camera.transform.position = WorldPos;
+            TopFrame.SetActive(false);
+            BottomFrame.SetActive(false);
+            RightFrame.SetActive(false);
+            LeftFrame.SetActive(false);
+        }
+
+        void CameraScoll(Vector3 MoveCamera)
+        {
+            Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;            
+            Vector3 MoveTopFrame = TopFrame.transform.position;
+            Vector3 MoveBottomFrame = BottomFrame.transform.position;
+            Vector3 MoveRightFrame = RightFrame.transform.position;
+            Vector3 MoveLeftFrame = LeftFrame.transform.position;
+
+            if (playerPos.x > 5 && playerPos.x < 15)
+            {
+                MoveCamera.x = LocalPos.x + playerPos.x - 5;
+                MoveRightFrame.x = 14.5f + playerPos.x - 5;
+                MoveLeftFrame.x = -5.5f + playerPos.x - 5;
+            }
+            if (playerPos.x >= 15)
+            {
+                MoveCamera.x = 14.5f;
+                MoveRightFrame.x = 25.5f;
+                MoveLeftFrame.x = 4.5f;
+            }
+
+            if (playerPos.y > 5 && playerPos.y < 15)
+            {
+                MoveCamera.y = LocalPos.y + playerPos.y - 5;
+                MoveTopFrame.y = 14.5f + playerPos.y - 5;
+                MoveBottomFrame.y = -5.5f + playerPos.y - 5;
+            }
+            if (playerPos.y >= 15)
+            {
+                MoveCamera.y = 13.5f;
+                MoveTopFrame.y = 24.5f;
+                MoveBottomFrame.y = 4.5f;
+            }
+
+            camera.transform.position = MoveCamera;
+            TopFrame.transform.position = MoveTopFrame;
+            BottomFrame.transform.position = MoveBottomFrame;
+            RightFrame.transform.position = MoveRightFrame;
+            LeftFrame.transform.position = MoveLeftFrame;
+        }   
     }
 }
 
