@@ -12,6 +12,8 @@ namespace Completed
         public int MinSize = 8;
         public Vector3 WorldPos = new Vector3(9.5f, 6f, -10f);
         public Vector3 LocalPos = new Vector3(4.5f, 3.5f, -10f);
+        public GameObject TopFrame, BottomFrame, LeftFrame, RightFrame;
+
         void Awake ()
 		{
 			//Check if a GameManager has already been assigned to static variable GameManager.instance or if it's still null
@@ -31,6 +33,11 @@ namespace Completed
         {
             camera.orthographicSize = MaxSize;
             camera.transform.position = WorldPos;
+            TopFrame.SetActive(false);
+            BottomFrame.SetActive(false);
+            RightFrame.SetActive(false);
+            LeftFrame.SetActive(false);
+
         }
 
         const int WORLD_VIEW = 1;
@@ -74,6 +81,10 @@ namespace Completed
                     {
                         camera.orthographicSize = MinSize;
                         preViewMode = curViewMode;
+                        TopFrame.SetActive(true);
+                        BottomFrame.SetActive(true);
+                        RightFrame.SetActive(true);
+                        LeftFrame.SetActive(true);
                     }
                 }                    
             }
@@ -111,18 +122,30 @@ namespace Completed
             {
                 Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
                 Vector3 MoveCamera = camera.transform.position;
+                Vector3 MoveTopFrame = TopFrame.transform.position;
+                Vector3 MoveBottomFrame = BottomFrame.transform.position;
+                Vector3 MoveRightFrame = RightFrame.transform.position;
+                Vector3 MoveLeftFrame = LeftFrame.transform.position;
+
                 if (playerPos.x > 5 && playerPos.x < 15)
                 {                    
                     MoveCamera.x = LocalPos.x + playerPos.x - 5;
+                    MoveRightFrame.x = 14.5f + playerPos.x - 5;
+                    MoveLeftFrame.x = -5.5f + playerPos.x - 5;
                 }
 
                 if (playerPos.y > 5 && playerPos.y < 15)
                 {
-                    MoveCamera.y = LocalPos.y + playerPos.y - 5;                    
+                    MoveCamera.y = LocalPos.y + playerPos.y - 5;
+                    MoveTopFrame.y = 14.5f + playerPos.y - 5;
+                    MoveBottomFrame.y = -5.5f + playerPos.y - 5;
                 }
 
                 camera.transform.position = MoveCamera;
-
+                TopFrame.transform.position = MoveTopFrame;
+                BottomFrame.transform.position = MoveBottomFrame;
+                RightFrame.transform.position = MoveRightFrame;
+                LeftFrame.transform.position = MoveLeftFrame;
             }
         }
     }

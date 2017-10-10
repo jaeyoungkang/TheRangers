@@ -473,7 +473,8 @@ namespace Completed
                 }
 			}
 
-            enemyText.text = "Enemy: " + otherPlayers.Count;
+            enemyText.text = "Enemy: " + otherPlayers.Count;            
+
         }
 
         float enemyTime = 2.0f;
