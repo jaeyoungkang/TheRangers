@@ -181,7 +181,7 @@ namespace Completed
             }
         }
 
-        void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum, bool addList = false)
+        void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
 		{
 			int objectCount = Random.Range (minimum, maximum+1);
 			
@@ -189,11 +189,26 @@ namespace Completed
 			{
 				Vector3 randomPosition = RandomPosition();
 				GameObject tileChoice = tileArray[Random.Range (0, tileArray.Length)];
-				GameObject obj = Instantiate(tileChoice, randomPosition, Quaternion.identity);
-
-                if(addList) GameManager.instance.AddWall (obj);
-			}
+				Instantiate(tileChoice, randomPosition, Quaternion.identity);			}
 		}
+
+        public void DropItem(Vector3 dropPos)
+        {
+            int randomValue = Random.Range(0, 8);
+            if(randomValue < 3)
+            {
+                GameObject tileChoice = foodTiles[Random.Range(0, foodTiles.Length)];
+                Instantiate(tileChoice, dropPos, Quaternion.identity);
+            }
+            else if(randomValue == 4)
+            {
+                Instantiate(ammo1Tile, dropPos, Quaternion.identity);
+            }
+            else if (randomValue == 5)
+            {
+                Instantiate(ammo2Tile, dropPos, Quaternion.identity);
+            }
+        }
 
         public void SetupScene ()
 		{

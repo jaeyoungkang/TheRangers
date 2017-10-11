@@ -125,7 +125,9 @@ namespace Completed
             otherPlayers.Remove(otherPlayer);
             target.SetActive(false);
 
-            if(otherPlayers.Count == 0 )
+            boardScript.DropItem(target.transform.position);
+
+            if (otherPlayers.Count == 0 )
             {
                 Win();
             }

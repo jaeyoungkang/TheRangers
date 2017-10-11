@@ -72,7 +72,6 @@ namespace Completed
             }
         }
 		
-		//This function is called when the behaviour becomes disabled or inactive.
 		private void OnDisable ()
 		{
 			GameManager.instance.playerFoodPoints = HP;
@@ -246,9 +245,9 @@ namespace Completed
                 {                    
                     if(canShot)
                     {
-                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
-                        player.LoseHP(10);
                         canShot = false;
+                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
+                        player.LoseHP(10);                        
                     }                    
                 }
                 else
@@ -493,13 +492,6 @@ namespace Completed
 		
 		private void OnTriggerEnter2D (Collider2D other)
 		{
-			//if(other.tag == "Exit")
-			//{
-			//	Invoke ("Restart", restartLevelDelay);
-				
-			//	enabled = false;
-			//}
-			//else 
             if(other.tag == "Food")
 			{
                 HP += pointsPerFood;				
