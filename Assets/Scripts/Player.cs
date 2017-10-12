@@ -112,7 +112,7 @@ namespace Completed
                     startReload = false;
 
                     int relaodNum = 1;
-                    if(totalBullets[indexReload]>2) relaodNum = 2;
+                    if(totalBullets[indexReload]>= 2) relaodNum = 2;
 
                     totalBullets[indexReload] -= relaodNum;
                     numOfBullets[indexReload] += relaodNum;
@@ -492,11 +492,15 @@ namespace Completed
 		
 		private void OnTriggerEnter2D (Collider2D other)
 		{
+            if (!myPlayer) return;
             if(other.tag == "Food")
 			{
-                HP += pointsPerFood;				
-				SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);				
-				other.gameObject.SetActive (false);
+                if(HP < 30)
+                {
+                    HP += pointsPerFood;
+                    SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+                    other.gameObject.SetActive(false);
+                }                
 			}
 			else if(other.tag == "Soda")
 			{
@@ -505,24 +509,19 @@ namespace Completed
                 int index = ammoObj.type - 1;
                 if(index < numOfBullets.Length)
                 {
-                    //int addAmmo = ammoObj.num;
-                    //if (numOfBullets[index] + ammoObj.num > maxNumOfBullets[index])
-                    //{
-                    //    addAmmo = maxNumOfBullets[index] - numOfBullets[index];
-                    //    ammoObj.UpdateNumber(ammoObj.num - addAmmo);
-                    //}
-                    //else
-                    //{                        
-                    //    ammoObj.UpdateNumber(0);                        
-                    //}
+                    int maxAmmo = 4;
+                    int addAmmo = ammoObj.num;
+                    if (totalBullets[index] + ammoObj.num > maxAmmo)
+                    {
+                        addAmmo = maxAmmo - totalBullets[index];
+                        ammoObj.UpdateNumber(ammoObj.num - addAmmo);
+                    }
+                    else
+                    {
+                        ammoObj.UpdateNumber(0);
+                    }
 
-                    //numOfBullets[index] += addAmmo;
-
-                    //if (numOfBullets[index] > maxNumOfBullets[index])
-                    //    numOfBullets[index] = maxNumOfBullets[index];
-
-                    totalBullets[index] += ammoObj.num;
-                    ammoObj.UpdateNumber(0);
+                    totalBullets[index] += addAmmo;
                 }
                 
                 if(ammoObj.num <= 0)
