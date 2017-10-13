@@ -20,9 +20,8 @@ namespace Completed
         public AudioClip gameOverSound;
 
         public float restartLevelDelay = 1f;		
-		public int pointsPerFood = 10;				
 
-		private int HP;
+		public int HP;
         private int money = 0;
 
         public float playerTimeInit = 0.5f;
@@ -33,6 +32,9 @@ namespace Completed
         float reloadTime;
         bool playersTurn = true;
 
+        public int weaponDamage = 10;
+        public float weaponRangeMin = 0;
+        public float weaponRangeMax = 3;
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -46,7 +48,6 @@ namespace Completed
         
         protected override void Start ()
 		{
-            HP = GameManager.instance.playerFoodPoints;            
 			base.Start ();
 
             UpdateDirImage();
@@ -241,15 +242,22 @@ namespace Completed
             {
                 float deltaX = Mathf.Abs(transform.position.x - player.transform.position.x);
                 float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
-                if (deltaX < Mathf.Epsilon|| deltaY < Mathf.Epsilon)
-                {                    
-                    if(canShot)
+
+                bool inRange = false;
+                if(deltaX + deltaY < weaponRangeMax && deltaX + deltaY > weaponRangeMin)
+                {
+                    inRange = true;
+                }
+
+                if( inRange && (deltaX < Mathf.Epsilon || deltaY < Mathf.Epsilon) )
+                {
+                    if (canShot)
                     {
                         canShot = false;
                         StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
-                        player.LoseHP(10);                        
-                    }                    
-                }
+                        player.LoseHP(weaponDamage);
+                    }
+                }                
                 else
                 {
                     int xDir = 0;
@@ -495,9 +503,9 @@ namespace Completed
             if (!myPlayer) return;
             if(other.tag == "Food")
 			{
-                if(HP < 30)
+                if(HP < 20)
                 {
-                    HP += pointsPerFood;
+                    HP += 10;
                     SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
                     other.gameObject.SetActive(false);
                 }                
