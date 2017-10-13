@@ -146,7 +146,30 @@ namespace Completed
 
             for (int i = 0; i < objectCount; i++)
             {
-                LayoutItemAtRandom(tile);
+                Vector3 randomPosition = RandomPosition();
+                LayoutItem(tile, randomPosition);
+            }
+        }
+
+        void LayoutItemsByEnemy(GameObject tile, int minimum, int maximum, List<GameObject> enemies)
+        {
+            int objectCount = Random.Range(minimum, maximum + 1);
+
+            for (int i = 0; i < objectCount; i++)
+            {
+                Vector3 randomPosition = RandomPosition();
+                bool nearEnemy = false;
+                foreach(GameObject en in enemies)
+                {
+                    if((en.transform.position - randomPosition).magnitude < 5f)
+                    {
+                        nearEnemy = true;
+                        break;
+                    }
+                }
+                if (nearEnemy == false) continue;
+
+                LayoutItem(tile, randomPosition);
             }
         }
 
@@ -157,15 +180,16 @@ namespace Completed
             for (int i = 0; i < objectCount; i++)
             {                
                 GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
-                LayoutItemAtRandom(tileChoice);
+                Vector3 randomPosition = RandomPosition();
+                LayoutItem(tileChoice, randomPosition);
+
             }
         }
 
-        void LayoutItemAtRandom(GameObject tile)
+        void LayoutItem(GameObject tile, Vector3 pos)
         {
-            Vector3 randomPosition = RandomPosition();
-            GameObject obj = Instantiate(tile, randomPosition, Quaternion.identity);
-            GameObject objToShow = Instantiate(tile, randomPosition, Quaternion.identity);
+            GameObject obj = Instantiate(tile, pos, Quaternion.identity);
+            GameObject objToShow = Instantiate(tile, pos, Quaternion.identity);
             Renderer renderer = objToShow.GetComponent<SpriteRenderer>();
             if (renderer)
             {
@@ -180,17 +204,21 @@ namespace Completed
                 scrollItem.GenerateNumber();
             }
         }
-
-        void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
+        
+        List<GameObject> LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
 		{
+            List<GameObject> instances = new List<GameObject>();
 			int objectCount = Random.Range (minimum, maximum+1);
 			
 			for(int i = 0; i < objectCount; i++)
 			{
 				Vector3 randomPosition = RandomPosition();
 				GameObject tileChoice = tileArray[Random.Range (0, tileArray.Length)];
-				Instantiate(tileChoice, randomPosition, Quaternion.identity);			}
-		}
+                instances.Add(Instantiate(tileChoice, randomPosition, Quaternion.identity));
+            }
+
+            return instances;
+        }
 
         public void DropItem(Vector3 dropPos)
         {
@@ -202,11 +230,11 @@ namespace Completed
             }
             else if(randomValue == 4)
             {
-                Instantiate(ammo1Tile, dropPos, Quaternion.identity);
+                LayoutItem(ammo1Tile, dropPos);
             }
             else if (randomValue == 5)
             {
-                Instantiate(ammo2Tile, dropPos, Quaternion.identity);
+                LayoutItem(ammo2Tile, dropPos);
             }
         }
 
@@ -220,15 +248,21 @@ namespace Completed
 
             InitialiseList ();
 
-            LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
-            LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
-            LayoutItemsAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
-            LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
+            List<GameObject> enemies =  LayoutObjectAtRandom(enemyTiles, enemiyCount.minimum, enemiyCount.maximum);
+
+            LayoutItemsByEnemy(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum, enemies);
+            LayoutItemsByEnemy(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum, enemies);
+
+ //           LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
+//            LayoutItemsAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
+
+//            LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
+//            LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
 
             LayoutItemsAtRandom(goldTile, goldCount.minimum, goldCount.maximum);
             LayoutItemsAtRandom(gemTile, gemCount.minimum, gemCount.maximum);
 
-            LayoutObjectAtRandom(enemyTiles, enemiyCount.minimum, enemiyCount.maximum);			
+            
 		}
 	}
 }
