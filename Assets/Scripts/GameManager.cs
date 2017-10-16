@@ -259,16 +259,24 @@ namespace Completed
                     }
                 }
 
-                Renderer renderer = obj.GetComponent<SpriteRenderer>();
+                SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
 				if (renderer)
 				{
                     if (bShow) renderer.sortingLayerName = "Floor";
                     else renderer.sortingLayerName = "Fog";
-
-                    Color color = renderer.material.color;
-                    if (bShow) color = Color.white;                    
-                    else color = Color.gray;
-                    renderer.material.color = color;
+                    
+                    if(floor.type == 2)
+                    {
+                        Color color = Color.black;
+                        if (bShow) color = Color.gray;
+                        renderer.color = color;
+                    }
+                    else if(floor.type == 4)
+                    {
+                        Color color = Color.white;
+                        if (bShow) color = Color.gray;
+                        renderer.color = color;
+                    }
 
                     switch (floor.type)
                     {
