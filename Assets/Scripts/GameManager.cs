@@ -22,47 +22,85 @@ namespace Completed
 
         private BoardManager boardScript;
 
-		private List<Enemy> enemies;
         private List<Player> otherPlayers;
 
         public bool doingSetup = true;        
 		
-		public int[,] map;
+		public int[,] mapOfUnits;
+        public int[,] mapOfStructures;
 
-		public void MakeGameMap (int columns, int rows)
+        public void MakeGameMapOfStructures(int columns, int rows)
+        {
+            mapOfStructures = new int[columns, rows];
+            for (int i = 0; i < columns; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    mapOfStructures[i, j] = 0;
+                }
+            }
+        }
+
+        public void SetMapOfStructures(Vector3 pos, int value)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfStructures.GetUpperBound(0) < x)
+                return;
+            if (y < 0 || mapOfStructures.GetUpperBound(1) < y)
+                return;
+
+            mapOfStructures[x, y] = value;
+        }
+
+        public int GetMapOfStructures(Vector3 pos)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfStructures.GetUpperBound(0) < x)
+                return 1;
+            if (y < 0 || mapOfStructures.GetUpperBound(1) < y)
+                return 1;
+
+            return mapOfStructures[x, y];
+        }
+
+        public void MakeGameMapOfUnits (int columns, int rows)
 		{
-			map = new int[columns,rows];
+            mapOfUnits = new int[columns,rows];
 			for (int i = 0; i < columns; i++) {
 				for (int j = 0; j < rows; j++) {
-					map [i, j] = 0;
+                    mapOfUnits[i, j] = 0;
 				}
 			}
 		}
 
-		public void SetMap(Vector3 pos, int value)
+		public void SetMapOfUnits(Vector3 pos, int value)
 		{
 			int x = (int)pos.x;
 			int y = (int)pos.y;
 
-			if (x<0 || map.GetUpperBound (0) < x)
+			if (x<0 || mapOfUnits.GetUpperBound (0) < x)
 				return;
-			if (y<0 || map.GetUpperBound (1) < y)
+			if (y<0 || mapOfUnits.GetUpperBound (1) < y)
 				return;
 
-			map [x,y] = value;
+            mapOfUnits[x,y] = value;
 		}
 
-		public int GetMapValue(Vector3 pos)
+		public int GetMapOfUnits(Vector3 pos)
 		{
 			int x = (int)pos.x;
 			int y = (int)pos.y;
 
-			if (x<0 || map.GetUpperBound (0) < x)
+			if (x<0 || mapOfUnits.GetUpperBound (0) < x)
 				return 1;
-			if (y<0 || map.GetUpperBound (1) < y)
+			if (y<0 || mapOfUnits.GetUpperBound (1) < y)
 				return 1;
 			
-			return map [x,y];
+			return mapOfUnits[x,y];
 		}
 
 		public void UpdateGameMssage(string msg, float time)
@@ -103,20 +141,6 @@ namespace Completed
             shotInstance.SetActive(false);            
         }
 
-        public void DestroyEnemy(GameObject target)
-        {
-            StartCoroutine(ShowExplosionEffect(target.transform.position));
-
-            Enemy en = target.GetComponent<Enemy>();
-            enemies.Remove(en);
-            target.SetActive(false);
-
-            if (enemies.Count == 0)
-            {
-                Win();
-            }
-        }
-
         public void DestroyOtherPlayer(GameObject target)
         {
             StartCoroutine(ShowExplosionEffect(target.transform.position));
@@ -146,38 +170,24 @@ namespace Completed
             }
         }
 
-        public int GetFloorType(Vector3 playerPos)
+        public List<Vector3> GetShowRange(Vector3 playerPos, MOVE_DIR dir, int range)
         {
-            foreach (GameObject obj in tiles)
-            {
-                if (obj.transform.position == playerPos)
-                {
-                    return obj.GetComponent<ExFloor>().type;                    
-                }
-            }
-
-            return 0;
-        }
-
-        public List<Vector3> GetShowRange(Vector3 playerPos, MOVE_DIR dir)
-        {
-            int type = GetFloorType(playerPos);            
             Vector3 pos = playerPos;
-            switch(dir)
+            switch (dir)
             {
-                case MOVE_DIR.LEFT: pos.x -= type; break;
-                case MOVE_DIR.RIGHT: pos.x += type; break;
-                case MOVE_DIR.UP: pos.y += type; break;
-                case MOVE_DIR.DOWN: pos.y -= type; break;
+                case MOVE_DIR.LEFT: pos.x -= range; break;
+                case MOVE_DIR.RIGHT: pos.x += range; break;
+                case MOVE_DIR.UP: pos.y += range; break;
+                case MOVE_DIR.DOWN: pos.y -= range; break;
             }
 
             List<Vector3> resultRange = new List<Vector3> { pos, };
-            for(int i=0; i<type; i++)
+            for (int i = 0; i < range; i++)
             {
-                resultRange = MakeRange(resultRange, dir, playerPos);
+                resultRange = MakeRange(resultRange, dir, playerPos, range);
             }
 
-            return resultRange;            
+            return resultRange;
         }
 
         public List<Vector3> Get4way(Vector3 pos)
@@ -189,7 +199,7 @@ namespace Completed
                 new Vector3(pos.x, pos.y-1, pos.z),};
         }
 
-        public List<Vector3> MakeRange(List<Vector3> range, MOVE_DIR dir, Vector3 playerPos)
+        public List<Vector3> MakeRange(List<Vector3> range, MOVE_DIR dir, Vector3 playerPos, int viewRange)
         {
             List<Vector3> showRange = new List<Vector3>();
             showRange.AddRange(range);
@@ -209,28 +219,26 @@ namespace Completed
 
             List<Vector3> showRangeOneSideView = new List<Vector3>();
             
-            int type = GetFloorType(playerPos);
-
             foreach (Vector3 pos in showRange)
             {
                 switch (dir)
                 {
-                    case MOVE_DIR.LEFT: if ( pos.x >= playerPos.x - type) showRangeOneSideView.Add(pos); break;
-                    case MOVE_DIR.RIGHT: if ( pos.x <= playerPos.x + type) showRangeOneSideView.Add(pos); break;
-                    case MOVE_DIR.UP: if (pos.y <= playerPos.y + type) showRangeOneSideView.Add(pos); break;
-                    case MOVE_DIR.DOWN: if ( pos.y >= playerPos.y - type) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.LEFT: if ( pos.x >= playerPos.x - viewRange) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.RIGHT: if ( pos.x <= playerPos.x + viewRange) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.UP: if (pos.y <= playerPos.y + viewRange) showRangeOneSideView.Add(pos); break;
+                    case MOVE_DIR.DOWN: if ( pos.y >= playerPos.y - viewRange) showRangeOneSideView.Add(pos); break;
                 }
             }
 
             return showRangeOneSideView;
 //            return showRange;
-        }        
-
-        public void ShowObjs(Vector3 playerPos, MOVE_DIR dir)
+        }
+        
+        public void ShowObjs(Vector3 playerPos, MOVE_DIR dir, int range)
 		{
-            List<Vector3> showRange = GetShowRange(playerPos, dir);
+            List<Vector3> showRange = GetShowRange(playerPos, dir, range);
 
-            if(GetFloorType(playerPos) == 0)
+            if(GetMapOfStructures(playerPos) == 1)
             {
                 Vector3 viewPos = playerPos;
                 switch (dir)
@@ -247,11 +255,10 @@ namespace Completed
 			{
 				if (obj == null) continue;
 				bool bShow = false;                
-                ExFloor floor = obj.GetComponent<ExFloor>();
                                 
                 foreach (Vector3 showPos in showRange)
                 {
-                    if (floor && floor.type == 0) continue;
+                    if (GetMapOfStructures(showPos) == 1) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -264,59 +271,12 @@ namespace Completed
 				{
                     if (bShow) renderer.sortingLayerName = "Floor";
                     else renderer.sortingLayerName = "Fog";
-                    
-                    if(floor.type == 2)
-                    {
-                        Color color = Color.black;
-                        if (bShow) color = Color.gray;
-                        renderer.color = color;
-                    }
-                    else if(floor.type == 4)
-                    {
-                        Color color = Color.white;
-                        if (bShow) color = Color.gray;
-                        renderer.color = color;
-                    }
 
-                    switch (floor.type)
-                    {
-                        case 0:
-                            if (playerPos == obj.transform.position) renderer.sortingLayerName = "Floor";
-                            else renderer.sortingLayerName = "Fog";
-                            break;
-                    }                    
+                    Color color = Color.black;
+                    if (bShow) color = Color.gray;
+                    renderer.color = color;                    
 				}
 			}
-
-            foreach (Enemy en in enemies)
-            {
-                bool bShow = false;
-                foreach (Vector3 showPos in showRange)
-                {
-                    if (showPos == en.transform.position)
-                    {
-                        bShow = true;
-                        break;
-                    }
-                }
-
-                foreach (GameObject obj in tiles)
-                {
-                    if (obj == null) continue;
-                    if(obj.transform.position == en.transform.position)
-                    {
-                        ExFloor floor = obj.GetComponent<ExFloor>();
-                        if (floor && floor.type == 0) bShow = false;
-                    }                    
-                }
-
-                 Renderer renderer = en.GetComponent<SpriteRenderer>();
-                if (renderer)
-                {
-                    if (bShow) renderer.sortingLayerName = "Player";
-                    else renderer.sortingLayerName = "Enemy";                    
-                }
-            }
         }
 
 		public void ClearFloors()
@@ -351,7 +311,6 @@ namespace Completed
 			
 			DontDestroyOnLoad(gameObject);
 			
-			enemies = new List<Enemy>();
             otherPlayers = new List<Player>();
             
             boardScript = GetComponent<BoardManager>();			
@@ -396,7 +355,6 @@ namespace Completed
 			levelText.text = "the rangers";
 			levelImage.SetActive(true);
 						
-			enemies.Clear();
             otherPlayers.Clear();
 			
 			boardScript.SetupScene();
@@ -432,7 +390,7 @@ namespace Completed
                 startPos.x = x + Random.Range(-3, 3);
                 startPos.y = y + Random.Range(-3, 3);
 
-                if(GetMapValue(startPos) == 0)
+                if(GetMapOfUnits(startPos) < 1)
                 {
                     break;
                 }
@@ -477,11 +435,6 @@ namespace Completed
             }
             UpdateViewMode();
         }
-
-        public void AddEnemyToList(Enemy script)
-		{
-			enemies.Add(script);
-		}
 
         public void AddOtherPlayerToList(Player script)
         {

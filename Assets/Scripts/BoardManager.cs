@@ -35,6 +35,9 @@ namespace Completed
         public Count goldCount = new Count(1, 5);
         public Count gemCount = new Count(1, 5);
 
+        public Count shelterCount = new Count(1, 5);
+        public Count radarCount = new Count(1, 5);
+
         public Count enemiyCount = new Count(1, 5);
         public GameObject exit;											
 		public GameObject[] floorTiles;									
@@ -45,6 +48,9 @@ namespace Completed
         public GameObject ammo3Tile;
         public GameObject goldTile;
         public GameObject gemTile;
+
+        public GameObject shelterTile;
+        public GameObject radarTile;
 
         public GameObject[] enemyTiles;
 		public GameObject[] outerWallTiles;								
@@ -70,7 +76,7 @@ namespace Completed
         {
             boardHolder = new GameObject("Board").transform;
 
-            GameManager.instance.MakeGameMap(columns, rows);
+            GameManager.instance.MakeGameMapOfUnits(columns, rows);
 
             int[][] mapInfo = new int[][] {
                 new int[]{ 1, 2, 2, 2, 3, 2, 0, 0, 1, 1 },
@@ -112,9 +118,10 @@ namespace Completed
 		{
 			boardHolder = new GameObject ("Board").transform;
 
-			GameManager.instance.MakeGameMap (columns, rows);
+			GameManager.instance.MakeGameMapOfUnits(columns, rows);
+            GameManager.instance.MakeGameMapOfStructures(columns, rows);
 
-			for(int x = -1; x < columns + 1; x++)
+            for (int x = -1; x < columns + 1; x++)
 			{
 				for(int y = -1; y < rows + 1; y++)
 				{
@@ -140,13 +147,14 @@ namespace Completed
 			return randomPosition;
 		}
 
-        void LayoutItemsAtRandom(GameObject tile, int minimum, int maximum)
+        void LayoutItemsAtRandom(GameObject tile, int minimum, int maximum, bool writeToMapTable = false, int mapValue = 0)
         {
             int objectCount = Random.Range(minimum, maximum + 1);
 
             for (int i = 0; i < objectCount; i++)
             {
                 Vector3 randomPosition = RandomPosition();
+                if (writeToMapTable) GameManager.instance.SetMapOfStructures(randomPosition, mapValue);
                 LayoutItem(tile, randomPosition);
             }
         }
@@ -256,11 +264,11 @@ namespace Completed
  //           LayoutItemsAtRandom(ammo1Tile, ammo1Count.minimum, ammo1Count.maximum);
 //            LayoutItemsAtRandom(ammo2Tile, ammo2Count.minimum, ammo2Count.maximum);
 
-//            LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
+            LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
 //            LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
 
-            LayoutItemsAtRandom(goldTile, goldCount.minimum, goldCount.maximum);
-            LayoutItemsAtRandom(gemTile, gemCount.minimum, gemCount.maximum);
+            LayoutItemsAtRandom(radarTile, radarCount.minimum, radarCount.maximum, true, 4);            
+            LayoutItemsAtRandom(shelterTile, shelterCount.minimum, shelterCount.maximum, true, 1);
 
             
 		}

@@ -55,6 +55,7 @@ namespace Completed
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
             reloadTime = reloadTimeInit;
+            scopeRange = scopeRangeInit;
 
             if (!myPlayer)
             {
@@ -97,12 +98,17 @@ namespace Completed
 //            playerInfo.moneyText.text = "Money : " + money + " $";
         }
 
+        int scopeRangeInit = 3;
+        int scopeRange = 3;
 
         private void Update ()
 		{
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
-            if(myPlayer) GameManager.instance.ShowObjs(transform.position, curDir);
+            int value = GameManager.instance.GetMapOfStructures(transform.position);
+            if (value != 0) scopeRange = value;
+            else scopeRange = scopeRangeInit;
+            if (myPlayer) GameManager.instance.ShowObjs(transform.position, curDir, scopeRange);
 
             if(startReload)
             {
@@ -224,7 +230,7 @@ namespace Completed
         private Vector3 targetPos = Vector3.zero; 
         public void AutoMove()
         {
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir);
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
@@ -461,6 +467,7 @@ namespace Completed
             GameManager.instance.AttackObj (attackPos);
         }        
 
+
        
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
@@ -477,7 +484,7 @@ namespace Completed
 			nextPos.x += xDir;
 			nextPos.y += yDir;
 
-			if (GameManager.instance.GetMapValue (nextPos) == 1)
+			if (GameManager.instance.GetMapOfUnits (nextPos) == 1)
 				return;
 					
 			base.AttemptMove <T> (xDir, yDir);
@@ -485,8 +492,8 @@ namespace Completed
 			if (Move (xDir, yDir, out hit)) {
 				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
 
-				GameManager.instance.SetMap (transform.position, 0);
-				GameManager.instance.SetMap (nextPos, 1);
+				GameManager.instance.SetMapOfUnits(transform.position, 0);
+				GameManager.instance.SetMapOfUnits(nextPos, 1);
 			}		
 			
 			CheckIfGameOver ();			
@@ -537,8 +544,8 @@ namespace Completed
 			}
             else if (other.tag == "Money")
             {
-                money += 100;
-                other.gameObject.SetActive(false);
+                //money += 100;
+                //other.gameObject.SetActive(false);
             }
 
         }
@@ -564,7 +571,7 @@ namespace Completed
                 if(HP<=0)
                 {
                     GameManager.instance.DestroyOtherPlayer(gameObject);
-                    GameManager.instance.SetMap(gameObject.transform.position, 0);
+                    GameManager.instance.SetMapOfUnits(gameObject.transform.position, 0);
                 }
             }
 		}
