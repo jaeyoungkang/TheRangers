@@ -267,10 +267,51 @@ namespace Completed
             LayoutItemsAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
 //            LayoutItemsAtRandom(ammo3Tile, ammo3Count.minimum, ammo3Count.maximum);
 
-            LayoutItemsAtRandom(radarTile, radarCount.minimum, radarCount.maximum, true, 4);            
-            LayoutItemsAtRandom(shelterTile, shelterCount.minimum, shelterCount.maximum, true, 1);
-
+//            LayoutItemsAtRandom(radarTile, radarCount.minimum, radarCount.maximum, true, 4);
+//            LayoutItemsAtRandom(shelterTile, shelterCount.minimum, shelterCount.maximum, true, 1);
+            LayoutStructuresByFile();
             
 		}
-	}
+
+        void LayoutStructure(Vector3 pos, int range)
+        {
+            GameObject tileChoice = radarTile;
+            if (range == 1) tileChoice = shelterTile;
+            GameObject obj = Instantiate(tileChoice, pos, Quaternion.identity);
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+            if (renderer)
+            {
+                renderer.sortingLayerName = "Map";
+                if(range == 5)
+                {
+                    renderer.color = Color.yellow;
+                }
+            }
+
+            GameManager.instance.SetMapOfStructures(pos, range);
+        }
+
+        void LayoutStructuresByFile()
+        {
+            string[] lines = System.IO.File.ReadAllLines(@"E:\TheRangers\map01.txt");
+            
+            int x = 0;
+            int y = 0;
+            foreach(string str in lines)
+            {
+                x = 0;
+                string[] symbols = str.Split(',');
+                foreach(string s in symbols)
+                {
+                    Vector3 pos = new Vector3(x, y, 0);
+                    int value = Int32.Parse(s);
+                    if (value != 0)
+                        LayoutStructure(pos, value);
+                    x++;                               
+                }
+                y++;                
+            }
+        }
+
+    }
 }
