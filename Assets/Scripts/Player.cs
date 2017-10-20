@@ -9,6 +9,7 @@ namespace Completed
     public class Player : MovingObject
 	{
         public bool autoMode = true;
+        public int unitId = 1;
         public bool myPlayer = false;
         public GameObject display;
         public AudioClip moveSound1;
@@ -35,6 +36,9 @@ namespace Completed
         public int weaponDamage = 10;
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;
+
+        public int scopeRangeInit = 2;
+        public int scopeRange = 2;
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -96,10 +100,7 @@ namespace Completed
             else playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
 
 //            playerInfo.moneyText.text = "Money : " + money + " $";
-        }
-
-        int scopeRangeInit = 3;
-        int scopeRange = 3;
+        }       
 
         private void Update ()
 		{
@@ -109,8 +110,9 @@ namespace Completed
             if (value != 0) scopeRange = value;
             else scopeRange = scopeRangeInit;
             if (myPlayer) GameManager.instance.ShowObjs(transform.position, curDir, scopeRange);
+            
 
-            if(startReload)
+            if (startReload)
             {
                 reloadTime -= Time.deltaTime;
                 if (reloadTime <= 0)
@@ -227,9 +229,59 @@ namespace Completed
             return -1;
         }
 
+        public void AutoMoveUnit01()
+        {
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+
+            bool found = false;
+            foreach (Vector3 pos in showRange)
+            {
+                if (GameManager.instance.GetMapOfStructures(pos) == 1) continue;
+                if (player.transform.position == pos)
+                {
+                    found = true;
+                    targetPos = pos;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                if (canShot)
+                {
+                    canShot = false;
+                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
+                    player.LoseHP(weaponDamage);
+                }
+            }
+            else
+            {
+                
+                int xDir = 0;
+                int yDir = 0;
+                switch (curDir)
+                {
+                    case MOVE_DIR.LEFT: yDir = 1; break;
+                    case MOVE_DIR.RIGHT: yDir = -1; break;
+                    case MOVE_DIR.UP: xDir = 1; break;
+                    case MOVE_DIR.DOWN: xDir = -1; break;
+                }
+
+                AttemptMove<Player>(xDir, yDir);
+            }
+
+            
+        }
+
         private Vector3 targetPos = Vector3.zero; 
         public void AutoMove()
         {
+            if (unitId == 1)
+            {
+                AutoMoveUnit01();
+                return;
+            }
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 

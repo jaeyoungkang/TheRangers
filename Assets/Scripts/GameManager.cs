@@ -279,7 +279,58 @@ namespace Completed
 			}
         }
 
-		public void ClearFloors()
+        public void ShowEnemyScope(List<Vector3> unitPositions, List<MOVE_DIR> dirs, List<int> ranges)
+        {
+            List<Vector3> showRange = new List<Vector3>();
+            for (int i = 0; i < unitPositions.Count; i++)
+            {
+                Vector3 unitPos = unitPositions[i];
+                MOVE_DIR dir = dirs[i];
+                int range = ranges[i];
+
+                showRange.AddRange(GetShowRange(unitPos, dir, range));
+
+                if (GetMapOfStructures(unitPos) == 1)
+                {
+                    Vector3 viewPos = unitPos;
+                    switch (dir)
+                    {
+                        case MOVE_DIR.RIGHT: viewPos.x += 1; break;
+                        case MOVE_DIR.LEFT: viewPos.x -= 1; break;
+                        case MOVE_DIR.UP: viewPos.y += 1; break;
+                        case MOVE_DIR.DOWN: viewPos.y -= 1; break;
+                    }
+                    showRange.Add(viewPos);
+                }
+            }
+
+            foreach (GameObject obj in tiles)
+            {
+                if (obj == null) continue;
+                bool bShow = false;
+
+                foreach (Vector3 showPos in showRange)
+                {
+                    if (GetMapOfStructures(showPos) == 1) continue;
+                    if (showPos == obj.transform.position)
+                    {
+                        bShow = true;
+                        break;
+                    }
+                }
+
+                SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+                if (renderer)
+                {
+                    Color color = renderer.color;
+                    if (bShow) color = Color.red;
+                    renderer.color = color;
+                }
+            }
+
+        }
+
+        public void ClearFloors()
 		{
 			tiles.Clear ();
 		}
@@ -430,10 +481,28 @@ namespace Completed
             enemyText.text = "Enemy: " + otherPlayers.Count;
             
             if (curViewMode == LOCAL_VIEW)
-            {
+            {                
                 CameraScoll(camera.transform.position);
             }
             UpdateViewMode();
+
+            UpdateOtherPlayersScope();
+        }
+
+        void UpdateOtherPlayersScope()
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<MOVE_DIR> dirs = new List<MOVE_DIR>();
+            List<int> ranges = new List<int>();
+
+            foreach(Player other in otherPlayers)
+            {
+                positions.Add(other.transform.position);
+                dirs.Add(other.curDir);
+                ranges.Add(other.scopeRange);
+            }            
+
+            ShowEnemyScope(positions, dirs, ranges);
         }
 
         public void AddOtherPlayerToList(Player script)
@@ -530,30 +599,36 @@ namespace Completed
             Vector3 MoveRightFrame = RightFrame.transform.position;
             Vector3 MoveLeftFrame = LeftFrame.transform.position;
 
-            if (playerPos.x > 5 && playerPos.x < 15)
+            if (boardScript.rows > 10)
             {
-                MoveCamera.x = LocalPos.x + playerPos.x - 5;
-                MoveRightFrame.x = 14.5f + playerPos.x - 5;
-                MoveLeftFrame.x = -5.5f + playerPos.x - 5;
-            }
-            if (playerPos.x >= 15)
-            {
-                MoveCamera.x = 14.5f;
-                MoveRightFrame.x = 25.5f;
-                MoveLeftFrame.x = 4.5f;
+                if (playerPos.x > 5 && playerPos.x < 15)
+                {
+                    MoveCamera.x = LocalPos.x + playerPos.x - 5;
+                    MoveRightFrame.x = 14.5f + playerPos.x - 5;
+                    MoveLeftFrame.x = -5.5f + playerPos.x - 5;
+                }
+                if (playerPos.x >= 15)
+                {
+                    MoveCamera.x = 14.5f;
+                    MoveRightFrame.x = 25.5f;
+                    MoveLeftFrame.x = 4.5f;
+                }
             }
 
-            if (playerPos.y > 5 && playerPos.y < 15)
+            if (boardScript.columns > 10)
             {
-                MoveCamera.y = LocalPos.y + playerPos.y - 5;
-                MoveTopFrame.y = 14.5f + playerPos.y - 5;
-                MoveBottomFrame.y = -5.5f + playerPos.y - 5;
-            }
-            if (playerPos.y >= 15)
-            {
-                MoveCamera.y = 13.5f;
-                MoveTopFrame.y = 24.5f;
-                MoveBottomFrame.y = 4.5f;
+                if (playerPos.y > 5 && playerPos.y < 15)
+                {
+                    MoveCamera.y = LocalPos.y + playerPos.y - 5;
+                    MoveTopFrame.y = 14.5f + playerPos.y - 5;
+                    MoveBottomFrame.y = -5.5f + playerPos.y - 5;
+                }
+                if (playerPos.y >= 15)
+                {
+                    MoveCamera.y = 13.5f;
+                    MoveTopFrame.y = 24.5f;
+                    MoveBottomFrame.y = 4.5f;
+                }
             }
 
             camera.transform.position = MoveCamera;
