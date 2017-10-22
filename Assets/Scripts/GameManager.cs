@@ -4,9 +4,9 @@ using System.Collections;
 
 namespace Completed
 {
-	using System.Collections.Generic;		//Allows us to use Lists. 
-	using UnityEngine.UI;					//Allows us to use UI.
-    public enum PAGE { FRONT, MAIN, MISSION, SPACE };
+	using System.Collections.Generic;
+    using UnityEngine.UI;
+    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };
 
     public class GameManager : MonoBehaviour
 	{
@@ -414,9 +414,14 @@ namespace Completed
             HideLevelImage();
         }
 
-        public void GotoMissionPage()
+        public void GotoMission()
         {
             ChangePage(PAGE.MISSION);
+        }
+
+        public void GotoMissionListPage()
+        {
+            ChangePage(PAGE.MISSION_LIST);
         }
 
         void HideLevelImage()
@@ -484,9 +489,9 @@ namespace Completed
 
         public Camera camera;
         public int MaxSize = 16;
-        public int MinSize = 8;
+        public int MinSize = 6;
         public Vector3 WorldPos = new Vector3(9.5f, 6f, -10f);
-        public Vector3 LocalPos = new Vector3(4.5f, 3.5f, -10f);
+        public Vector3 LocalPos = new Vector3(4.5f, 4.5f, -10f);
         public GameObject TopFrame, BottomFrame, LeftFrame, RightFrame;
 
         const int WORLD_VIEW = 1;
@@ -599,6 +604,7 @@ namespace Completed
         GameObject frontPage;
         GameObject mainPage;
         GameObject missionPage;
+        GameObject missionListPage;
         GameObject spacePage;
 
         public void InitPages()
@@ -606,6 +612,7 @@ namespace Completed
             frontPage = GameObject.Find("FrontPage");
             mainPage = GameObject.Find("MainPage");
             missionPage = GameObject.Find("MissionPage");
+            missionListPage = GameObject.Find("MissionListPage");
             spacePage = GameObject.Find("SpacePage");
 
             ChangePage(PAGE.FRONT);
@@ -622,6 +629,7 @@ namespace Completed
             bool activeFront = false;
             bool activeMain = false;
             bool activeMission = false;
+            bool activeMissionList = false;
             bool activeSpace = false;
 
             switch (nextPage)
@@ -629,12 +637,14 @@ namespace Completed
                 case PAGE.FRONT: activeFront = true; break;
                 case PAGE.MAIN: activeMain = true; break;
                 case PAGE.MISSION: activeMission = true; break;
+                case PAGE.MISSION_LIST: activeMissionList = true; break;
                 case PAGE.SPACE: activeSpace = true; break;
             }
 
             frontPage.SetActive(activeFront);
             mainPage.SetActive(activeMain);
             missionPage.SetActive(activeMission);
+            missionListPage.SetActive(activeMissionList);
             spacePage.SetActive(activeSpace);
         }
     }

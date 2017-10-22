@@ -5,14 +5,14 @@ using UnityEngine.UI;
 
 namespace Completed
 {
-    public class MainPage : MonoBehaviour
+    public class MissionListPage : MonoBehaviour
     {
-        public Button missionBtn;
+        public Button mission1;
 
         // Use this for initialization
         void Start()
         {
-            missionBtn.onClick.AddListener(GameManager.instance.GotoMissionListPage);
+            mission1.onClick.AddListener(GameManager.instance.GotoMission);
         }
 
         // Update is called once per frame
