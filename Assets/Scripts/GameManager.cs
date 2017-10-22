@@ -6,8 +6,9 @@ namespace Completed
 {
 	using System.Collections.Generic;		//Allows us to use Lists. 
 	using UnityEngine.UI;					//Allows us to use UI.
-	
-	public class GameManager : MonoBehaviour
+    public enum PAGE { FRONT, MAIN, MISSION, SPACE };
+
+    public class GameManager : MonoBehaviour
 	{
 		public float levelStartDelay = 2f;						
 		public float turnDelay = 0.1f;							
@@ -399,70 +400,31 @@ namespace Completed
 
             doingSetup = true;
 			
-			levelImage = GameObject.Find("LevelImage");			
-			levelText = GameObject.Find("LevelText").GetComponent<Text>();
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
-			levelText.text = "the rangers";
-			levelImage.SetActive(true);
 						
             otherPlayers.Clear();
 			
 			boardScript.SetupScene();
-
-            GameObject.Find("ButtonStart1").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(1));
-            GameObject.Find("ButtonStart2").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(2));
-            GameObject.Find("ButtonStart3").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(3));
-            GameObject.Find("ButtonStart4").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(4));
-            GameObject.Find("ButtonStart5").GetComponent<Button>().onClick.AddListener(() => SelectStartPos(5));
-
-            GameObject.Find("ButtonStart").GetComponent<Button>().onClick.AddListener(HideLevelImage);
-
+            
             InitViewMode();
+            InitPages();
         }
 
-        void SelectStartPos(int pos)
+        public void StartMission()
         {
-            Player MyPlane = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            Vector3 startPos = MyPlane.gameObject.transform.position;
-
-            while(true)
-            {
-                float x = 0, y = 0;
-                switch (pos)
-                {
-                    case 1: x = 4; y = 4; break;
-                    case 2: x = 15; y = 4; break;
-                    case 3: x = 10; y = 10; break;
-                    case 4: x = 15; y = 15; break;
-                    case 5: x = 5; y = 15; break;
-                }
-
-                startPos.x = x + Random.Range(-3, 3);
-                startPos.y = y + Random.Range(-3, 3);
-
-                if(GetMapOfUnits(startPos) < 1)
-                {
-                    break;
-                }
-            }            
-
-            MyPlane.gameObject.transform.position = startPos;            
+            HideLevelImage();
         }
 
-		void HideLevelImage()
+        public void GotoMissionPage()
+        {
+            ChangePage(PAGE.MISSION);
+        }
+
+        void HideLevelImage()
 		{
-            GameObject.Find("ButtonStart1").GetComponent<Button>().gameObject.SetActive(false);
-            GameObject.Find("ButtonStart2").GetComponent<Button>().gameObject.SetActive(false);
-            GameObject.Find("ButtonStart3").GetComponent<Button>().gameObject.SetActive(false);
-            GameObject.Find("ButtonStart4").GetComponent<Button>().gameObject.SetActive(false);
-            GameObject.Find("ButtonStart5").GetComponent<Button>().gameObject.SetActive(false);
-            GameObject.Find("ButtonStart").GetComponent<Button>().gameObject.SetActive(false);
-
-            levelImage.SetActive(false);
-			
+            ChangePage(PAGE.SPACE);
 			doingSetup = false;
-
             ChangeViewMode();
         }
 		
@@ -636,7 +598,49 @@ namespace Completed
             BottomFrame.transform.position = MoveBottomFrame;
             RightFrame.transform.position = MoveRightFrame;
             LeftFrame.transform.position = MoveLeftFrame;
-        }   
+        }
+        
+        GameObject frontPage;
+        GameObject mainPage;
+        GameObject missionPage;
+        GameObject spacePage;
+
+        public void InitPages()
+        {
+            frontPage = GameObject.Find("FrontPage");
+            mainPage = GameObject.Find("MainPage");
+            missionPage = GameObject.Find("MissionPage");
+            spacePage = GameObject.Find("SpacePage");
+
+            ChangePage(PAGE.FRONT);
+        }
+        
+        public void GotoMain()
+        {
+            ChangePage(PAGE.MAIN);
+        }
+
+
+        public void ChangePage(PAGE nextPage)
+        {
+            bool activeFront = false;
+            bool activeMain = false;
+            bool activeMission = false;
+            bool activeSpace = false;
+
+            switch (nextPage)
+            {
+                case PAGE.FRONT: activeFront = true; break;
+                case PAGE.MAIN: activeMain = true; break;
+                case PAGE.MISSION: activeMission = true; break;
+                case PAGE.SPACE: activeSpace = true; break;
+            }
+
+            frontPage.SetActive(activeFront);
+            mainPage.SetActive(activeMain);
+            missionPage.SetActive(activeMission);
+            spacePage.SetActive(activeSpace);
+        }
     }
 }
 
