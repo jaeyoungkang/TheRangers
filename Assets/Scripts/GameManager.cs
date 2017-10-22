@@ -15,8 +15,6 @@ namespace Completed
 		public int playerFoodPoints = 100;						
 		public static GameManager instance = null;				
                 
-        private Text levelText;									
-		private GameObject levelImage;
         private Text enemyText;
         public Text gameMessage;
         public float msgTimer = 0;
@@ -474,16 +472,14 @@ namespace Completed
 
         public void Win()
         {
-            levelText.text = "You win!";
-            levelImage.SetActive(true);
+            spacePage.GetComponent<SpacePage>().ShowResult("Winner Winner Chicken Dinner!");            
             enabled = false;
         }
 
         public void GameOver()
 		{
-			levelText.text = "You died.";
-			levelImage.SetActive(true);
-			enabled = false;
+            spacePage.GetComponent<SpacePage>().ShowResult("You died.");
+            enabled = false;
 		}
 
         public Camera camera;
