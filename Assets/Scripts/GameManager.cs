@@ -8,25 +8,95 @@ namespace Completed
     using UnityEngine.UI;
     public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };
 
-    public class GameManager : MonoBehaviour
-	{
-		public float levelStartDelay = 2f;						
-		public float turnDelay = 0.1f;							
-		public int playerFoodPoints = 100;						
-		public static GameManager instance = null;				
-                
-        private Text enemyText;
-        public Text gameMessage;
-        public float msgTimer = 0;
-
-        private BoardManager boardScript;
-
-        private List<Player> otherPlayers;
-
-        public bool doingSetup = true;        
-		
-		public int[,] mapOfUnits;
+    public class Level
+    {
+        public string filePath;
+        public int[,] mapOfUnits;
         public int[,] mapOfStructures;
+        public List<GameObject> tiles = new List<GameObject>();
+        public List<Player> otherPlayers = new List<Player>();
+
+        public void AddOtherPlayerToList(Player script)
+        {
+            otherPlayers.Add(script);
+        }
+
+        public void AttackOtherPlayer(Vector3 targetPos)
+        {
+            foreach (Player other in otherPlayers)
+            {
+                if (targetPos == other.transform.position)
+                {
+                    other.LoseHP(10);
+                    return;
+                }
+            }
+        }
+
+        public void RemoveOtherPlayer(GameObject target)
+        {
+            Player otherPlayer = target.GetComponent<Player>();
+            otherPlayers.Remove(otherPlayer);
+            target.SetActive(false);
+        }        
+
+        public void AddFloor(GameObject obj)
+        {
+            tiles.Add(obj);
+        }
+
+        public void Init()
+        {
+            foreach(Player other in otherPlayers)
+            {
+                UnityEngine.GameObject.Destroy(other.gameObject);
+            }
+            otherPlayers.Clear();
+
+            foreach(GameObject tile in tiles)
+            {
+                UnityEngine.GameObject.Destroy(tile.gameObject);
+            }
+            tiles.Clear();
+        }
+
+        public void MakeGameMapOfUnits(int columns, int rows)
+        {
+            mapOfUnits = new int[columns, rows];
+            for (int i = 0; i < columns; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    mapOfUnits[i, j] = 0;
+                }
+            }
+        }
+
+        public void SetMapOfUnits(Vector3 pos, int value)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfUnits.GetUpperBound(0) < x)
+                return;
+            if (y < 0 || mapOfUnits.GetUpperBound(1) < y)
+                return;
+
+            mapOfUnits[x, y] = value;
+        }
+
+        public int GetMapOfUnits(Vector3 pos)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfUnits.GetUpperBound(0) < x)
+                return 1;
+            if (y < 0 || mapOfUnits.GetUpperBound(1) < y)
+                return 1;
+
+            return mapOfUnits[x, y];
+        }
 
         public void MakeGameMapOfStructures(int columns, int rows)
         {
@@ -65,43 +135,25 @@ namespace Completed
 
             return mapOfStructures[x, y];
         }
+    }
 
-        public void MakeGameMapOfUnits (int columns, int rows)
-		{
-            mapOfUnits = new int[columns,rows];
-			for (int i = 0; i < columns; i++) {
-				for (int j = 0; j < rows; j++) {
-                    mapOfUnits[i, j] = 0;
-				}
-			}
-		}
 
-		public void SetMapOfUnits(Vector3 pos, int value)
-		{
-			int x = (int)pos.x;
-			int y = (int)pos.y;
+    public class GameManager : MonoBehaviour
+	{
+        public Level curLevel = new Level();
+		public float levelStartDelay = 2f;						
+		public float turnDelay = 0.1f;							
+		public int playerFoodPoints = 100;						
+		public static GameManager instance = null;				
+                
+        private Text enemyText;
+        public Text gameMessage;
+        public float msgTimer = 0;
 
-			if (x<0 || mapOfUnits.GetUpperBound (0) < x)
-				return;
-			if (y<0 || mapOfUnits.GetUpperBound (1) < y)
-				return;
+        private BoardManager boardScript;       
 
-            mapOfUnits[x,y] = value;
-		}
-
-		public int GetMapOfUnits(Vector3 pos)
-		{
-			int x = (int)pos.x;
-			int y = (int)pos.y;
-
-			if (x<0 || mapOfUnits.GetUpperBound (0) < x)
-				return 1;
-			if (y<0 || mapOfUnits.GetUpperBound (1) < y)
-				return 1;
-			
-			return mapOfUnits[x,y];
-		}
-
+        public bool doingSetup = true;        
+		
 		public void UpdateGameMssage(string msg, float time)
 		{
             gameMessage.gameObject.SetActive(true);
@@ -109,10 +161,7 @@ namespace Completed
             gameMessage.text = msg;
 			msgTimer = time;
 		}
-
-		private List<GameObject> tiles = new List<GameObject>();
-		private List<GameObject> walls = new List<GameObject>();
-
+        
         public GameObject[] shotInstances = new GameObject[8];
         public GameObject shotTile;
 
@@ -144,30 +193,16 @@ namespace Completed
         {
             StartCoroutine(ShowExplosionEffect(target.transform.position));
 
-            Player otherPlayer = target.GetComponent<Player>();
-            otherPlayers.Remove(otherPlayer);
-            target.SetActive(false);
+            curLevel.RemoveOtherPlayer(target);
 
             boardScript.DropItem(target.transform.position);
 
-            if (otherPlayers.Count == 0 )
+            if (curLevel.otherPlayers.Count == 0)
             {
                 Win();
             }
         }
-
-
-        public void AttackObj(Vector3 targetPos)
-		{
-            foreach (Player other in otherPlayers)
-            {
-                if (targetPos == other.transform.position)
-                {
-                    other.LoseHP(10);
-                    return;
-                }
-            }
-        }
+                
 
         public List<Vector3> GetShowRange(Vector3 playerPos, MOVE_DIR dir, int range)
         {
@@ -237,7 +272,7 @@ namespace Completed
 		{
             List<Vector3> showRange = GetShowRange(playerPos, dir, range);
 
-            if(GetMapOfStructures(playerPos) == 1)
+            if(curLevel.GetMapOfStructures(playerPos) == 1)
             {
                 Vector3 viewPos = playerPos;
                 switch (dir)
@@ -250,14 +285,14 @@ namespace Completed
                 showRange.Add(viewPos);
             }
 
-            foreach (GameObject obj in tiles)
+            foreach (GameObject obj in curLevel.tiles)
 			{
 				if (obj == null) continue;
 				bool bShow = false;                
                                 
                 foreach (Vector3 showPos in showRange)
                 {
-                    if (GetMapOfStructures(showPos) == 1) continue;
+                    if (curLevel.GetMapOfStructures(showPos) == 1) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -289,7 +324,7 @@ namespace Completed
 
                 showRange.AddRange(GetShowRange(unitPos, dir, range));
 
-                if (GetMapOfStructures(unitPos) == 1)
+                if (curLevel.GetMapOfStructures(unitPos) == 1)
                 {
                     Vector3 viewPos = unitPos;
                     switch (dir)
@@ -303,14 +338,14 @@ namespace Completed
                 }
             }
 
-            foreach (GameObject obj in tiles)
+            foreach (GameObject obj in curLevel.tiles)
             {
                 if (obj == null) continue;
                 bool bShow = false;
 
                 foreach (Vector3 showPos in showRange)
                 {
-                    if (GetMapOfStructures(showPos) == 1) continue;
+                    if (curLevel.GetMapOfStructures(showPos) == 1) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -329,27 +364,6 @@ namespace Completed
 
         }
 
-        public void ClearFloors()
-		{
-			tiles.Clear ();
-		}
-
-		public void AddFloor(GameObject obj)
-		{
-			tiles.Add (obj);
-		}
-
-
-		public void ClearWalls()
-		{
-			walls.Clear ();
-		}
-
-		public void AddWall(GameObject obj)
-		{
-			walls.Add (obj);
-		}
-
 		//Awake is always called before any Start functions
 		void Awake()
 		{
@@ -361,7 +375,7 @@ namespace Completed
 			
 			DontDestroyOnLoad(gameObject);
 			
-            otherPlayers = new List<Player>();
+            
             
             boardScript = GetComponent<BoardManager>();			
 
@@ -395,18 +409,24 @@ namespace Completed
 
             explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
             explosionInstance.SetActive(false);
-
-            doingSetup = true;
-			
+            			
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
 						
-            otherPlayers.Clear();
-			
-			boardScript.SetupScene();
             
             InitViewMode();
             InitPages();
+        }
+
+        void InitLevel(int levelId)
+        {
+            doingSetup = true;
+            
+            string filePath = @"E:\TheRangers\map01.txt";
+            if(levelId == 2) filePath = @"E:\TheRangers\map02.txt";
+            curLevel.filePath = filePath;
+            boardScript.SetupScene(curLevel);
+            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
 
         public void StartMission()
@@ -414,8 +434,9 @@ namespace Completed
             HideLevelImage();
         }
 
-        public void GotoMission()
+        public void GotoMission(int id)
         {
+            InitLevel(id);
             ChangePage(PAGE.MISSION);
         }
 
@@ -428,7 +449,7 @@ namespace Completed
 		{
             ChangePage(PAGE.SPACE);
 			doingSetup = false;
-            ChangeViewMode();
+            SetLocalViewMode();
         }
 		
 
@@ -443,7 +464,7 @@ namespace Completed
                 }
 			}
 
-            enemyText.text = "Enemy: " + otherPlayers.Count;
+            enemyText.text = "Enemy: " + curLevel.otherPlayers.Count;
             
             if (curViewMode == LOCAL_VIEW)
             {                
@@ -460,31 +481,27 @@ namespace Completed
             List<MOVE_DIR> dirs = new List<MOVE_DIR>();
             List<int> ranges = new List<int>();
 
-            foreach(Player other in otherPlayers)
+            foreach(Player other in curLevel.otherPlayers)
             {
-                positions.Add(other.transform.position);
-                dirs.Add(other.curDir);
-                ranges.Add(other.scopeRange);
+                if(other.unitId == 1)
+                {
+                    positions.Add(other.transform.position);
+                    dirs.Add(other.curDir);
+                    ranges.Add(other.scopeRange);
+                }                
             }            
 
             ShowEnemyScope(positions, dirs, ranges);
-        }
-
-        public void AddOtherPlayerToList(Player script)
-        {
-            otherPlayers.Add(script);
-        }
+        }        
 
         public void Win()
         {
             spacePage.GetComponent<SpacePage>().ShowResult("Winner Winner Chicken Dinner!");            
-            enabled = false;
         }
 
         public void GameOver()
 		{
             spacePage.GetComponent<SpacePage>().ShowResult("You died.");
-            enabled = false;
 		}
 
         public Camera camera;
@@ -496,13 +513,18 @@ namespace Completed
 
         const int WORLD_VIEW = 1;
         const int LOCAL_VIEW = 2;
-        int curViewMode = 1;
-        int preViewMode = 1;
+        int curViewMode = LOCAL_VIEW;
+        int preViewMode = LOCAL_VIEW;
         
-        void ChangeViewMode()
+        void SetLocalViewMode()
         {
-            if (curViewMode == WORLD_VIEW) curViewMode = LOCAL_VIEW;
-            else curViewMode = WORLD_VIEW;
+            camera.orthographicSize = MinSize;
+            preViewMode = curViewMode;
+            TopFrame.SetActive(true);
+            BottomFrame.SetActive(true);
+            RightFrame.SetActive(true);
+            LeftFrame.SetActive(true);
+
         }
 
         void UpdateViewMode()
@@ -546,8 +568,8 @@ namespace Completed
             RightFrame = GameObject.Find("FrameRight");
             LeftFrame = GameObject.Find("FrameLeft");
 
-            camera.orthographicSize = MaxSize;
-            camera.transform.position = WorldPos;
+            camera.orthographicSize = MinSize;
+            camera.transform.position = LocalPos;
             TopFrame.SetActive(false);
             BottomFrame.SetActive(false);
             RightFrame.SetActive(false);

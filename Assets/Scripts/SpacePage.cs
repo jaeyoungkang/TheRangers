@@ -13,10 +13,14 @@ namespace Completed
 
         // Use this for initialization
         void Start()
-        {
-            result.SetActive(false);
+        {            
             backBtn.onClick.AddListener(GameManager.instance.GotoMain);
         }
+        
+        void OnEnable()
+        {
+            result.SetActive(false);
+        }        
 
         public void ShowResult(string msg)
         {

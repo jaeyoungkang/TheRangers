@@ -8,6 +8,7 @@ namespace Completed
 
     public class Player : MovingObject
 	{
+        bool canShot = true;
         public bool autoMode = true;
         public int unitId = 1;
         public bool myPlayer = false;
@@ -23,6 +24,8 @@ namespace Completed
         public float restartLevelDelay = 1f;		
 
 		public int HP;
+        public int HP_MAX = 20;
+        public int HP_INIT = 10;
         private int money = 0;
 
         public float playerTimeInit = 0.5f;
@@ -49,21 +52,26 @@ namespace Completed
 
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
-        
-        protected override void Start ()
-		{
-			base.Start ();
 
+        public void Init()
+        {
             UpdateDirImage();
-                        
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
             reloadTime = reloadTimeInit;
             scopeRange = scopeRangeInit;
+            HP = HP_INIT;
+            if (myPlayer)  transform.position = Vector3.zero;
+        }
+        
+        protected override void Start ()
+		{
+			base.Start ();
+            Init();
 
             if (!myPlayer)
             {
-                GameManager.instance.AddOtherPlayerToList(this);
+                GameManager.instance.curLevel.AddOtherPlayerToList(this);
 
                 Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
                 renderer.sortingLayerName = "Enemy";
@@ -77,15 +85,7 @@ namespace Completed
                 }                
             }
         }
-		
-		private void OnDisable ()
-		{
-			GameManager.instance.playerFoodPoints = HP;
-		}
-               
 
-        bool canShot = true;
-        
         private void UpdateDisplay()
         {
             if (display == null) return;
@@ -106,7 +106,7 @@ namespace Completed
 		{
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
-            int value = GameManager.instance.GetMapOfStructures(transform.position);
+            int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
             if (value != 0) scopeRange = value;
             else scopeRange = scopeRangeInit;
             if (myPlayer) GameManager.instance.ShowObjs(transform.position, curDir, scopeRange);
@@ -237,11 +237,10 @@ namespace Completed
             bool found = false;
             foreach (Vector3 pos in showRange)
             {
-                if (GameManager.instance.GetMapOfStructures(pos) == 1) continue;
+                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
                 if (player.transform.position == pos)
                 {
                     found = true;
-                    targetPos = pos;
                     break;
                 }
             }
@@ -256,8 +255,7 @@ namespace Completed
                 }
             }
             else
-            {
-                
+            {                
                 int xDir = 0;
                 int yDir = 0;
                 switch (curDir)
@@ -302,7 +300,7 @@ namespace Completed
                 float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
 
                 bool inRange = false;
-                if(deltaX + deltaY < weaponRangeMax && deltaX + deltaY > weaponRangeMin)
+                if(deltaX + deltaY <= weaponRangeMax && deltaX + deltaY >= weaponRangeMin)
                 {
                     inRange = true;
                 }
@@ -496,11 +494,11 @@ namespace Completed
         public System.Collections.IEnumerator ChainAttack(Vector3 attackPos1, Vector3 attackPos2)
         {
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos1));
-            GameManager.instance.AttackObj(attackPos1);
+            GameManager.instance.curLevel.AttackOtherPlayer(attackPos1);
             yield return new WaitForSeconds(0.2f);
 
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos2));
-            GameManager.instance.AttackObj(attackPos2);
+            GameManager.instance.curLevel.AttackOtherPlayer(attackPos2);
         }
 
         public void Attack(int distance)
@@ -516,7 +514,7 @@ namespace Completed
 
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos));
 
-            GameManager.instance.AttackObj (attackPos);
+            GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
         }        
 
 
@@ -536,7 +534,7 @@ namespace Completed
 			nextPos.x += xDir;
 			nextPos.y += yDir;
 
-			if (GameManager.instance.GetMapOfUnits (nextPos) == 1)
+			if (GameManager.instance.curLevel.GetMapOfUnits (nextPos) == 1)
 				return;
 					
 			base.AttemptMove <T> (xDir, yDir);
@@ -544,8 +542,8 @@ namespace Completed
 			if (Move (xDir, yDir, out hit)) {
 				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
 
-				GameManager.instance.SetMapOfUnits(transform.position, 0);
-				GameManager.instance.SetMapOfUnits(nextPos, 1);
+				GameManager.instance.curLevel.SetMapOfUnits(transform.position, 0);
+				GameManager.instance.curLevel.SetMapOfUnits(nextPos, 1);
 			}		
 			
 			CheckIfGameOver ();			
@@ -562,7 +560,7 @@ namespace Completed
             if (!myPlayer) return;
             if(other.tag == "Food")
 			{
-                if(HP < 20)
+                if(HP < HP_MAX)
                 {
                     HP += 10;
                     SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
@@ -623,7 +621,7 @@ namespace Completed
                 if(HP<=0)
                 {
                     GameManager.instance.DestroyOtherPlayer(gameObject);
-                    GameManager.instance.SetMapOfUnits(gameObject.transform.position, 0);
+                    GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
                 }
             }
 		}

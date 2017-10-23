@@ -72,12 +72,12 @@ namespace Completed
 			}
 		}
 
-        void BoardSetup ()
+        void BoardSetup (Level curLevel)
 		{
 			boardHolder = new GameObject ("Board").transform;
 
-			GameManager.instance.MakeGameMapOfUnits(columns, rows);
-            GameManager.instance.MakeGameMapOfStructures(columns, rows);
+            curLevel.MakeGameMapOfUnits(columns, rows);
+            curLevel.MakeGameMapOfStructures(columns, rows);
 
             for (int x = -1; x < columns + 1; x++)
 			{
@@ -92,7 +92,7 @@ namespace Completed
 					instance.transform.SetParent (boardHolder);
 
                     if (x == -1 || x == columns || y == -1 || y == rows) continue;                        
-                    GameManager.instance.AddFloor (instance);
+                    GameManager.instance.curLevel.AddFloor (instance);
 				}
 			}
 		}
@@ -142,16 +142,14 @@ namespace Completed
             }
         }
 
-        public void SetupScene ()
+        public void SetupScene (Level curLevel)
 		{
-			GameManager.instance.ClearFloors ();
-			GameManager.instance.ClearWalls ();
-
-			BoardSetup ();
+            curLevel.Init();
+			BoardSetup (curLevel);
 
             InitialiseList ();
 
-            LayoutStructuresByFile();            
+            LayoutStructuresByFile(curLevel.filePath);            
 		}
 
         void LayoutStructure(Vector3 pos, int range)
@@ -169,7 +167,7 @@ namespace Completed
                 }
             }
 
-            GameManager.instance.SetMapOfStructures(pos, range);
+            GameManager.instance.curLevel.SetMapOfStructures(pos, range);
         }
 
         void LayoutItemById(Vector3 pos, int itemId)
@@ -181,12 +179,12 @@ namespace Completed
         void LayoutUnitById(Vector3 pos, int unitId)
         {
             Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
-            GameManager.instance.SetMapOfUnits(pos, unitId);
+            GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);
         }
 
-        void LayoutStructuresByFile()
+        void LayoutStructuresByFile(string filePath)
         {
-            string[] lines = System.IO.File.ReadAllLines(@"E:\TheRangers\map01.txt");
+            string[] lines = System.IO.File.ReadAllLines(filePath);
             
             int x = 0;
             int y = lines.Length;
