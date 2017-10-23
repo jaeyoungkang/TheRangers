@@ -10,6 +10,7 @@ namespace Completed
 
     public class Level
     {
+        public int columns, rows;
         public string filePath;
         public int[,] mapOfUnits;
         public int[,] mapOfStructures;
@@ -58,6 +59,11 @@ namespace Completed
                 UnityEngine.GameObject.Destroy(tile.gameObject);
             }
             tiles.Clear();
+
+            string[] lines = System.IO.File.ReadAllLines(filePath);
+            string[] symbols = lines[0].Split(',');
+            columns = symbols.Length;
+            rows = lines.Length;
         }
 
         public void MakeGameMapOfUnits(int columns, int rows)
@@ -424,6 +430,7 @@ namespace Completed
             
             string filePath = @"E:\TheRangers\map01.txt";
             if(levelId == 2) filePath = @"E:\TheRangers\map02.txt";
+            else if (levelId == 3) filePath = @"E:\TheRangers\map03.txt";
             curLevel.filePath = filePath;
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
@@ -584,7 +591,7 @@ namespace Completed
             Vector3 MoveRightFrame = RightFrame.transform.position;
             Vector3 MoveLeftFrame = LeftFrame.transform.position;
 
-            if (boardScript.rows > 10)
+            if (boardScript.columns > 10)
             {
                 if (playerPos.x > 5 && playerPos.x < 15)
                 {
@@ -600,7 +607,7 @@ namespace Completed
                 }
             }
 
-            if (boardScript.columns > 10)
+            if (boardScript.rows > 10)
             {
                 if (playerPos.y > 5 && playerPos.y < 15)
                 {

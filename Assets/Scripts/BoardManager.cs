@@ -75,6 +75,8 @@ namespace Completed
         void BoardSetup (Level curLevel)
 		{
 			boardHolder = new GameObject ("Board").transform;
+            rows = curLevel.rows;
+            columns = curLevel.columns;
 
             curLevel.MakeGameMapOfUnits(columns, rows);
             curLevel.MakeGameMapOfStructures(columns, rows);
@@ -208,7 +210,7 @@ namespace Completed
                         LayoutUnitById(pos, unitId);
                     x++;                               
                 }                
-            }
+            }                        
         }
 
     }

@@ -229,6 +229,50 @@ namespace Completed
             return -1;
         }
 
+        public void AutoMoveUnit03()
+        {
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+
+            bool found = false;
+            foreach (Vector3 pos in showRange)
+            {
+                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
+                if (player.transform.position == pos)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                if (canShot)
+                {
+                    canShot = false;
+                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
+                    player.LoseHP(weaponDamage);
+                }
+            }
+            else
+            {
+                if(transform.position.x > 0)
+                {
+                    int xDir = Random.Range(-1, 1);
+                    int yDir = 0;
+
+                    AttemptMove<Player>(xDir, yDir);
+                }
+                else
+                {
+                    Vector3 pos = transform.position;
+                    pos.x = 19;
+                    transform.position = pos;
+                }
+                
+            }
+        }
+
         public void AutoMoveUnit01()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
@@ -267,9 +311,7 @@ namespace Completed
                 }
 
                 AttemptMove<Player>(xDir, yDir);
-            }
-
-            
+            }            
         }
 
         private Vector3 targetPos = Vector3.zero; 
@@ -280,6 +322,12 @@ namespace Completed
                 AutoMoveUnit01();
                 return;
             }
+            else if(unitId == 3)
+            {
+                AutoMoveUnit03();
+                return;
+            }
+
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
