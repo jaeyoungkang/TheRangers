@@ -231,7 +231,12 @@ namespace Completed
 
         public void AutoMoveUnit03()
         {
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
+            List<Vector3> showRange = new List<Vector3>();
+            Vector3 range = transform.position;
+            range.x -= 1;
+            showRange.Add(range);
+            range.x -= 1;
+            showRange.Add(range);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
