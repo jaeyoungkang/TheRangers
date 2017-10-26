@@ -27,18 +27,6 @@ namespace Completed
 		
 		public int columns = 5; 										
 		public int rows = 5;											
-		public Count wallCount = new Count (5, 9);						
-		public Count foodCount = new Count (1, 5);
-        public Count ammo1Count = new Count(1, 5);
-        public Count ammo2Count = new Count(1, 5);
-        public Count ammo3Count = new Count(1, 5);
-        public Count goldCount = new Count(1, 5);
-        public Count gemCount = new Count(1, 5);
-
-        public Count shelterCount = new Count(1, 5);
-        public Count radarCount = new Count(1, 5);
-
-        public Count enemiyCount = new Count(1, 5);
         public GameObject exit;											
 		public GameObject[] floorTiles;									
 		public GameObject[] wallTiles;									
@@ -124,6 +112,8 @@ namespace Completed
             {
                 scrollItem.GenerateNumber();
             }
+
+            GameManager.instance.curLevel.AddItem(obj);
         }
  
         public void DropItem(Vector3 dropPos)
@@ -132,7 +122,8 @@ namespace Completed
             if(randomValue < 3)
             {
                 GameObject tileChoice = foodTiles[Random.Range(0, foodTiles.Length)];
-                Instantiate(tileChoice, dropPos, Quaternion.identity);
+                GameObject item = Instantiate(tileChoice, dropPos, Quaternion.identity);
+                GameManager.instance.curLevel.AddItem(item);
             }
             else if(randomValue == 4)
             {
@@ -180,8 +171,15 @@ namespace Completed
 
         void LayoutUnitById(Vector3 pos, int unitId)
         {
-            Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
-            GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);
+            if(unitId == 3)
+            {
+                Instantiate(gemTile, pos, Quaternion.identity);                
+            }
+            else
+            {
+                Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
+                GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);
+            }            
         }
 
         void LayoutStructuresByFile(string filePath)

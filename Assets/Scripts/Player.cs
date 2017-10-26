@@ -55,6 +55,16 @@ namespace Completed
 
         public void Init()
         {
+            for(int i=0; i< numOfBullets.Length; i++)
+            {
+                numOfBullets[i] = 0;
+            }
+
+            for (int i = 0; i < totalBullets.Length; i++)
+            {
+                totalBullets[i] = 0;
+            }
+
             UpdateDirImage();
             playerTime = playerTimeInit;
             shotTime = shotTimeInit;
@@ -74,7 +84,9 @@ namespace Completed
                 GameManager.instance.curLevel.AddOtherPlayerToList(this);
 
                 Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
-                renderer.sortingLayerName = "Enemy";
+
+                if(unitId == 1) renderer.sortingLayerName = "Player";
+                else renderer.sortingLayerName = "Enemy";
 
                 if(autoMode)
                 {
@@ -315,13 +327,15 @@ namespace Completed
                     case MOVE_DIR.DOWN: xDir = -1; break;
                 }
 
-                AttemptMove<Player>(xDir, yDir);
+                ChangeDir(xDir, yDir);
+                UpdateDirImage();
+                playersTurn = false;
             }            
         }
 
         private Vector3 targetPos = Vector3.zero; 
         public void AutoMove()
-        {
+        {            
             if (unitId == 1)
             {
                 AutoMoveUnit01();
@@ -611,7 +625,13 @@ namespace Completed
 		private void OnTriggerEnter2D (Collider2D other)
 		{
             if (!myPlayer) return;
-            if(other.tag == "Food")
+
+            if (other.tag == "Enemy")
+            {
+                LoseHP(10);
+                other.gameObject.SetActive(false);
+            }
+            else if (other.tag == "Food")
 			{
                 if(HP < HP_MAX)
                 {

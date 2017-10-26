@@ -14,6 +14,8 @@ namespace Completed
         public string filePath;
         public int[,] mapOfUnits;
         public int[,] mapOfStructures;
+
+        public List<GameObject> items = new List<GameObject>();
         public List<GameObject> tiles = new List<GameObject>();
         public List<Player> otherPlayers = new List<Player>();
 
@@ -39,7 +41,12 @@ namespace Completed
             Player otherPlayer = target.GetComponent<Player>();
             otherPlayers.Remove(otherPlayer);
             target.SetActive(false);
-        }        
+        }
+
+        public void AddItem(GameObject obj)
+        {
+            items.Add(obj);
+        }
 
         public void AddFloor(GameObject obj)
         {
@@ -56,9 +63,14 @@ namespace Completed
 
             foreach(GameObject tile in tiles)
             {
-                UnityEngine.GameObject.Destroy(tile.gameObject);
+                UnityEngine.GameObject.Destroy(tile);
             }
             tiles.Clear();
+
+            foreach(GameObject item in items)
+            {
+                UnityEngine.GameObject.Destroy(item);
+            }
 
             string[] lines = System.IO.File.ReadAllLines(filePath);
             string[] symbols = lines[0].Split(',');
@@ -649,6 +661,7 @@ namespace Completed
         
         public void GotoMain()
         {
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
             ChangePage(PAGE.MAIN);
         }
 
