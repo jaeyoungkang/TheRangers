@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic; 		//Allows us to use Lists.
 using Random = UnityEngine.Random; 		//Tells Random to use the Unity Engine random number generator.
 
-namespace Completed
-	
+namespace Completed	
 {
-	
-	public class BoardManager : MonoBehaviour
+    public class BoardManager : MonoBehaviour
 	{
 		// Using Serializable allows us to embed a class with sub properties in the inspector.
 		[Serializable]
@@ -29,14 +27,8 @@ namespace Completed
 		public int rows = 5;											
         public GameObject exit;											
 		public GameObject[] floorTiles;									
-		public GameObject[] wallTiles;									
-		public GameObject[] foodTiles;
-        public GameObject ammo1Tile;
-        public GameObject ammo2Tile;
-        public GameObject ammo3Tile;
-        public GameObject goldTile;
-        public GameObject gemTile;
-
+		public GameObject[] itemTiles;
+ 
         public GameObject shelterTile;
         public GameObject radarTile;
 
@@ -121,17 +113,16 @@ namespace Completed
             int randomValue = Random.Range(0, 8);
             if(randomValue < 3)
             {
-                GameObject tileChoice = foodTiles[Random.Range(0, foodTiles.Length)];
-                GameObject item = Instantiate(tileChoice, dropPos, Quaternion.identity);
+                GameObject item = Instantiate(itemTiles[0], dropPos, Quaternion.identity);
                 GameManager.instance.curLevel.AddItem(item);
             }
             else if(randomValue == 4)
             {
-                LayoutItem(ammo1Tile, dropPos);
+                LayoutItem(itemTiles[1], dropPos);
             }
             else if (randomValue == 5)
             {
-                LayoutItem(ammo2Tile, dropPos);
+                LayoutItem(itemTiles[2], dropPos);
             }
         }
 
@@ -165,21 +156,13 @@ namespace Completed
 
         void LayoutItemById(Vector3 pos, int itemId)
         {
-            if (itemId == 1) LayoutItem(ammo1Tile, pos);
-            if (itemId == 2) LayoutItem(ammo2Tile, pos);
+            LayoutItem(itemTiles[itemId], pos);
         }
 
         void LayoutUnitById(Vector3 pos, int unitId)
         {
-            if(unitId == 3)
-            {
-                Instantiate(gemTile, pos, Quaternion.identity);                
-            }
-            else
-            {
-                Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
-                GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);
-            }            
+            Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
+            GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);         
         }
 
         void LayoutStructuresByFile(string filePath)

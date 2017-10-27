@@ -52,6 +52,7 @@ namespace Completed
 
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
+        public int[] maxBullets = new int[3];
 
         public void Init()
         {
@@ -63,6 +64,11 @@ namespace Completed
             for (int i = 0; i < totalBullets.Length; i++)
             {
                 totalBullets[i] = 0;
+            }
+
+            for (int i = 0; i < maxBullets.Length; i++)
+            {
+                maxBullets[i] = 4;
             }
 
             UpdateDirImage();
@@ -98,6 +104,11 @@ namespace Completed
             }
         }
 
+        bool playerTimeChanged = false;
+        bool playerHpChanged = false;
+        bool maxBullet1Changed = false;
+        bool maxBullet2Changed = false;
+
         private void UpdateDisplay()
         {
             if (display == null) return;
@@ -111,7 +122,38 @@ namespace Completed
             if(startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(reloadTime * 100).ToString();
             else playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
 
-//            playerInfo.moneyText.text = "Money : " + money + " $";
+            
+            string greenTag = "<color=#00ff00>";
+            string redTag = "<color=#ff0000>";
+            string colorTag = greenTag;
+            if (playerHpChanged) colorTag = redTag;
+            else colorTag = greenTag;
+            string HpText = colorTag + string.Format("최대 HP {0} </color>\n\n", HP_MAX);
+
+            if (playerTimeChanged) colorTag = redTag;
+            else colorTag = greenTag;
+            string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", playerTimeInit);
+
+            string colorTag1 = greenTag;
+            string colorTag2 = greenTag;
+            if (maxBullet1Changed) colorTag1 = redTag;
+            if (maxBullet2Changed) colorTag2 = redTag;
+            playerInfo.infoText.text = HpText + SpeedText + string.Format(
+                        @"공격 대기 시간 {0:N2}초
+
+장전 대기 시간 {1:N2}초
+
+시야 {2}칸
+
+1번무기
+범위 : 1,2 블럭 공격
+{3}최대 탄수 : {4}개</color>
+장전 탄수: 2개
+
+2번무기
+범위 : 2,3 블럭 공격
+{5}최대 탄수 : {6}개</color>
+장전 탄수: 2개", shotTime, reloadTime, scopeRange, colorTag1, maxBullets[0], colorTag2, maxBullets[1]);
         }       
 
         private void Update ()
@@ -179,7 +221,7 @@ namespace Completed
 			{
 				vertical = 0;
 			}
-			
+
 #elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 			
 			//Check if Input has registered more than zero touches
@@ -220,16 +262,16 @@ namespace Completed
 				}
 			}
 			
-#endif 
-			if(horizontal != 0 || vertical != 0)
+#endif
+            if (!myPlayer && autoMode)
+            {
+                AutoMove();
+            }else if (horizontal != 0 || vertical != 0)
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
 
-            if(!myPlayer && autoMode)
-            {
-                AutoMove();
-            }
+            
 		}
 
         public int GetAttackInput()
@@ -353,7 +395,8 @@ namespace Completed
             bool found = false;
             foreach(Vector3 pos in showRange)
             {
-                if(player.transform.position == pos)
+                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
+                if (player.transform.position == pos)
                 {
                     found = true;
                     targetPos = pos;
@@ -632,26 +675,26 @@ namespace Completed
                 other.gameObject.SetActive(false);
             }
             else if (other.tag == "Food")
-			{
-                if(HP < HP_MAX)
+            {
+                if (HP < HP_MAX)
                 {
                     HP += 10;
                     SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
                     other.gameObject.SetActive(false);
-                }                
-			}
-			else if(other.tag == "Soda")
-			{
+                }
+            }
+            else if (other.tag == "Soda")
+            {
                 Scroll ammoObj = other.GetComponent<Scroll>();
 
                 int index = ammoObj.type - 1;
-                if(index < numOfBullets.Length)
+                if (index < numOfBullets.Length)
                 {
-                    int maxAmmo = 4;
+                    
                     int addAmmo = ammoObj.num;
-                    if (totalBullets[index] + ammoObj.num > maxAmmo)
+                    if (totalBullets[index] + ammoObj.num > maxBullets[index])
                     {
-                        addAmmo = maxAmmo - totalBullets[index];
+                        addAmmo = maxBullets[index] - totalBullets[index];
                         ammoObj.UpdateNumber(ammoObj.num - addAmmo);
                     }
                     else
@@ -661,14 +704,33 @@ namespace Completed
 
                     totalBullets[index] += addAmmo;
                 }
-                
-                if(ammoObj.num <= 0)
+
+                if (ammoObj.num <= 0)
                     other.gameObject.SetActive(false);
-			}
+            }
             else if (other.tag == "Money")
             {
-                //money += 100;
-                //other.gameObject.SetActive(false);
+                if (other.name.Contains("ExAmmo1"))
+                {
+                    maxBullet1Changed = true;
+                    maxBullets[0] += 2;
+                }
+                else if (other.name.Contains("ExAmmo2"))
+                {
+                    maxBullet2Changed = true;
+                    maxBullets[1] += 2;
+                }
+                else if (other.name.Contains("ExFood"))
+                {
+                    playerHpChanged = true;
+                    HP_MAX += 10;
+                }
+                else if (other.name.Contains("ExSpeed"))
+                {
+                    playerTimeChanged = true;
+                    playerTimeInit -= 0.05f;
+                }
+                other.gameObject.SetActive(false);
             }
 
         }

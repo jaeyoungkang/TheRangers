@@ -7,9 +7,10 @@ public class PlayerInfo : MonoBehaviour {
 
     public Text foodText;
     public Text ammoText;
-    public Text moneyText;
     public Text coolTimeText;
     public Text shotTimeText;
+
+    public Text infoText;
 
     // Use this for initialization
     void Start () {
