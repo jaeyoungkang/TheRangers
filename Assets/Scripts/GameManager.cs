@@ -440,9 +440,9 @@ namespace Completed
         {
             doingSetup = true;
             
-            string filePath = @"E:\TheRangers\map01.txt";
-            if(levelId == 2) filePath = @"E:\TheRangers\map02.txt";
-            else if (levelId == 3) filePath = @"E:\TheRangers\map03.txt";
+            string filePath = "map01.txt";
+            if(levelId == 2) filePath = "map02.txt";
+            else if (levelId == 3) filePath = "map03.txt";
             curLevel.filePath = filePath;
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
