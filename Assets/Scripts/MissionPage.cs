@@ -8,15 +8,16 @@ namespace Completed
     public class MissionPage : MonoBehaviour
     {
         public Button startBtn;
+        public Text subText;
+
         void Start()
         {
             startBtn.onClick.AddListener(GameManager.instance.StartMission);
-        }
+        }        
 
-        // Update is called once per frame
         void Update()
-        {
-
+        {            
+            subText.text = GameManager.instance.storageText;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Completed
 {
 	using System.Collections.Generic;
     using UnityEngine.UI;
-    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };
+    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };  
 
     public class Level
     {
@@ -168,11 +168,61 @@ namespace Completed
         public Text gameMessage;
         public float msgTimer = 0;
 
-        private BoardManager boardScript;       
+        private BoardManager boardScript;
 
-        public bool doingSetup = true;        
-		
-		public void UpdateGameMssage(string msg, float time)
+        public int storageAmmo1 = 0;
+        public int storageAmmo2 = 0;
+        public int powerSupply = 0;
+        public int storageSize = 5;
+        public int money = 100;
+        public string storageText ="";
+
+        public bool doingSetup = true;
+
+        void BuyItem(int itemId)
+        {
+            switch (itemId)
+            {
+                case 1: storageAmmo1++; money -= 10; break;
+                case 2: storageAmmo2++; money -= 10; break;
+                case 3: powerSupply++; money -= 10; break;
+            }
+        }
+
+        void SellItem(int itemId)
+        {
+            switch (itemId)
+            {
+                case 1: storageAmmo1--; money += 10; break;
+                case 2: storageAmmo2--; money += 10; break;
+                case 3: powerSupply--; money += 10; break;
+            }
+        }
+
+        void UpdateStorage()
+        {
+            if (storageAmmo1 + storageAmmo2 + powerSupply < storageSize)
+            {
+                if (Input.GetKeyDown("1")) BuyItem(1);
+                else if (Input.GetKeyDown("2")) BuyItem(2);
+                else if (Input.GetKeyDown("3")) BuyItem(3);
+            }
+
+
+            if (Input.GetKeyDown("4") && storageAmmo1 > 0) SellItem(1);
+            else if (Input.GetKeyDown("5") && storageAmmo2 > 0) SellItem(2);
+            else if (Input.GetKeyDown("6") && powerSupply > 0) SellItem(3);
+
+            storageText = string.Format(@"
+Money : {0}
+Storage : {1} / {2}
+Ammo1 : {3}
+Ammo2 : {4}
+powerSupply : {5}
+                ", money, storageAmmo1 + storageAmmo2 + powerSupply, storageSize, storageAmmo1, storageAmmo2, powerSupply);            
+        }
+
+        public void UpdateGameMssage(string msg, float time)
 		{
             gameMessage.gameObject.SetActive(true);
 
@@ -469,6 +519,7 @@ namespace Completed
             ChangePage(PAGE.SPACE);
 			doingSetup = false;
             SetLocalViewMode();
+            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().SetupStorage();
         }
 		
 
@@ -492,6 +543,8 @@ namespace Completed
             UpdateViewMode();
 
             UpdateOtherPlayersScope();
+
+            if(curPage == PAGE.MISSION) UpdateStorage();
         }
 
         void UpdateOtherPlayersScope()
@@ -641,7 +694,8 @@ namespace Completed
             RightFrame.transform.position = MoveRightFrame;
             LeftFrame.transform.position = MoveLeftFrame;
         }
-        
+
+        PAGE curPage = PAGE.FRONT;
         GameObject frontPage;
         GameObject mainPage;
         GameObject missionPage;
@@ -665,7 +719,7 @@ namespace Completed
             ChangePage(PAGE.MAIN);
         }
 
-
+        
         public void ChangePage(PAGE nextPage)
         {
             bool activeFront = false;
@@ -688,6 +742,8 @@ namespace Completed
             missionPage.SetActive(activeMission);
             missionListPage.SetActive(activeMissionList);
             spacePage.SetActive(activeSpace);
+
+            curPage = nextPage;
         }
     }
 }

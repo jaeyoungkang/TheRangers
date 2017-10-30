@@ -59,10 +59,12 @@ namespace Completed
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
         public int[] maxBullets = new int[3];
+        public int powerSupply = 0;
 
         public void Init()
         {
-            for(int i=0; i< numOfBullets.Length; i++)
+            powerSupply = 0;
+            for (int i=0; i< numOfBullets.Length; i++)
             {
                 numOfBullets[i] = 0;
             }
@@ -86,10 +88,17 @@ namespace Completed
             if (myPlayer)
             {
                 transform.position = Vector3.zero;
-                controlPower = controlPowerInit;
+                controlPower = controlPowerInit;                
             }
         }
-        
+
+        public void SetupStorage()
+        {
+            totalBullets[0] = GameManager.instance.storageAmmo1 * 2;
+            totalBullets[1] = GameManager.instance.storageAmmo2 * 2;
+            powerSupply = GameManager.instance.powerSupply;
+        }
+                
         protected override void Start ()
 		{
 			base.Start ();
@@ -200,9 +209,20 @@ namespace Completed
             else if (canShot)
             {
                 if(myPlayer)
-                {
-                    int input = GetAttackInput();
-                    if (input != -1) AttempAttack(input);
+                {                    
+                    if (Input.GetKeyDown("3"))
+                    {
+                        if(powerSupply>0)
+                        {
+                            controlPower += 10;
+                            powerSupply--;
+                        }                        
+                    }
+                    else
+                    {
+                        int input = GetAttackInput();
+                        if (input != -1) AttempAttack(input);
+                    }
                 }
             }
             else
@@ -658,7 +678,7 @@ namespace Completed
         {
             controlPower -= consume;
 
-            if (controlPower < 50) GameManager.instance.UpdateGameMssage("위험 : 출력 낮음", 1);
+            if (controlPower < controlPowerInit / 5) GameManager.instance.UpdateGameMssage("위험 : 출력 낮음", 1);
 
             CheckControlPowerDown();
         }
