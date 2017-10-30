@@ -8,6 +8,10 @@ namespace Completed
 
     public class Player : MovingObject
 	{
+        public int storageSize = 10;
+        public int controlPower = 50;
+        public int controlPowerInit = 200;
+
         bool canShot = true;
         public bool autoMode = true;
         public int unitId = 1;
@@ -21,9 +25,11 @@ namespace Completed
         public AudioClip drinkSound2;
         public AudioClip gameOverSound;
 
-        public float restartLevelDelay = 1f;		
+        public float restartLevelDelay = 1f;
 
-		public int HP;
+        public int copper = 0;
+
+        public int HP;
         public int HP_MAX = 20;
         public int HP_INIT = 10;
         private int money = 0;
@@ -77,7 +83,11 @@ namespace Completed
             reloadTime = reloadTimeInit;
             scopeRange = scopeRangeInit;
             HP = HP_INIT;
-            if (myPlayer)  transform.position = Vector3.zero;
+            if (myPlayer)
+            {
+                transform.position = Vector3.zero;
+                controlPower = controlPowerInit;
+            }
         }
         
         protected override void Start ()
@@ -154,6 +164,11 @@ namespace Completed
 범위 : 2,3 블럭 공격
 {5}최대 탄수 : {6}개</color>
 장전 탄수: 2개", shotTime, reloadTime, scopeRange, colorTag1, maxBullets[0], colorTag2, maxBullets[1]);
+
+            playerInfo.infoText.text += "\nCopper " + copper + "개";
+            playerInfo.infoText.text += "\n출력 " + controlPower + "%";
+
+            
         }       
 
         private void Update ()
@@ -179,6 +194,7 @@ namespace Completed
 
                     totalBullets[indexReload] -= relaodNum;
                     numOfBullets[indexReload] += relaodNum;
+                    DecreaseControlPower(reloadPower);
                 }
             }
             else if (canShot)
@@ -266,7 +282,8 @@ namespace Completed
             if (!myPlayer && autoMode)
             {
                 AutoMove();
-            }else if (horizontal != 0 || vertical != 0)
+            }
+            else if (horizontal != 0 || vertical != 0)
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
@@ -505,6 +522,8 @@ namespace Completed
             //Attack(input+1);
             Attack2(input);
             canShot = false;
+
+            if (myPlayer) DecreaseControlPower(shotPower + input);
         }
 
         public bool CheckDir(int xDir, int yDir)
@@ -627,11 +646,32 @@ namespace Completed
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
         }        
 
+        public void CheckControlPowerDown()
+        {
+            if(controlPower <= 0)
+            {
+                GameManager.instance.GameOver();
+            }
+        }
 
-       
+        public void DecreaseControlPower(int consume)
+        {
+            controlPower -= consume;
+
+            if (controlPower < 50) GameManager.instance.UpdateGameMssage("위험 : 출력 낮음", 1);
+
+            CheckControlPowerDown();
+        }
+
+        public int reloadPower = 1;
+        public int scopePower = 1;
+        public int shotPower = 1;
+        public int movePower = 1;
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
             playersTurn = false;
+
+            if(myPlayer) DecreaseControlPower(movePower + scopePower);
 
             if (CheckDir(xDir, yDir))
             {
@@ -730,6 +770,11 @@ namespace Completed
                     playerTimeChanged = true;
                     playerTimeInit -= 0.05f;
                 }
+                other.gameObject.SetActive(false);
+            }
+            else if (other.tag == "Resource")
+            {
+                copper++;
                 other.gameObject.SetActive(false);
             }
 
