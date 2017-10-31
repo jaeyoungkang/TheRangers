@@ -10,6 +10,8 @@ namespace Completed
 
     public class Level
     {
+        public int collectMission;        
+        public int id;
         public int columns, rows;
         public string filePath;
         public int[,] mapOfUnits;
@@ -53,9 +55,16 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Init()
+        public void Init(int levelId)
         {
-            foreach(Player other in otherPlayers)
+            id = levelId;
+            filePath = "map01.txt";
+            if (levelId == 2) filePath = "map02.txt";
+            else if (levelId == 3) filePath = "map03.txt";
+
+            if (levelId == 3) collectMission = 3;
+
+            foreach (Player other in otherPlayers)
             {
                 UnityEngine.GameObject.Destroy(other.gameObject);
             }
@@ -158,6 +167,7 @@ namespace Completed
 
     public class GameManager : MonoBehaviour
 	{
+        public int collectionCount = 0;
         public Level curLevel = new Level();
 		public float levelStartDelay = 2f;						
 		public float turnDelay = 0.1f;							
@@ -263,12 +273,7 @@ powerSupply : {5}
 
             curLevel.RemoveOtherPlayer(target);
 
-            boardScript.DropItem(target.transform.position);
-
-            if (curLevel.otherPlayers.Count == 0)
-            {
-                Win();
-            }
+            boardScript.DropItem(target.transform.position);            
         }
                 
 
@@ -489,11 +494,9 @@ powerSupply : {5}
         void InitLevel(int levelId)
         {
             doingSetup = true;
-            
-            string filePath = "map01.txt";
-            if(levelId == 2) filePath = "map02.txt";
-            else if (levelId == 3) filePath = "map03.txt";
-            curLevel.filePath = filePath;
+
+            collectionCount = 0;
+            curLevel.Init(levelId);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
@@ -521,8 +524,8 @@ powerSupply : {5}
             SetLocalViewMode();
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().SetupStorage();
         }
-		
 
+        
 		void Update()
 		{
 			if (msgTimer >= 0) {
@@ -545,6 +548,28 @@ powerSupply : {5}
             UpdateOtherPlayersScope();
 
             if(curPage == PAGE.MISSION) UpdateStorage();
+
+            if(curPage == PAGE.SPACE)
+            {
+                switch(curLevel.id)
+                {
+                    case 1:
+                    case 2:
+                        if (curLevel.otherPlayers.Count == 0)
+                        {
+                            Win();
+                        }
+                        break;
+
+                    case 3:
+                        if(curLevel.collectMission == collectionCount)
+                        {
+                            Win();
+                        }
+                        break;
+                }
+                
+            }
         }
 
         void UpdateOtherPlayersScope()

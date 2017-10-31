@@ -792,9 +792,9 @@ namespace Completed
                 }
                 other.gameObject.SetActive(false);
             }
-            else if (other.tag == "Resource")
+            else if (other.tag == "MissionItem")
             {
-                copper++;
+                GameManager.instance.collectionCount++;                
                 other.gameObject.SetActive(false);
             }
 

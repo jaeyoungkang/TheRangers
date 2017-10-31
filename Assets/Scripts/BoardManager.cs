@@ -128,12 +128,26 @@ namespace Completed
 
         public void SetupScene (Level curLevel)
 		{
-            curLevel.Init();
 			BoardSetup (curLevel);
 
             InitialiseList ();
 
-            LayoutStructuresByFile(curLevel.filePath);            
+            LayoutStructuresByFile(curLevel.filePath);
+
+            if(curLevel.id == 3)
+            {
+                int missionItemCount = 0;
+                while(missionItemCount < curLevel.collectMission)
+                {
+                    Vector3 rPos = RandomPosition();
+                    if(curLevel.GetMapOfStructures(rPos) == 0 && curLevel.GetMapOfUnits(rPos) == 0)
+                    {
+                        LayoutItemById(rPos, 7);
+                        missionItemCount++;
+                    }                    
+                }                
+            }
+            
 		}
 
         void LayoutStructure(Vector3 pos, int range)
