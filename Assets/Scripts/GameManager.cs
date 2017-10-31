@@ -522,7 +522,7 @@ powerSupply : {5}
             ChangePage(PAGE.SPACE);
 			doingSetup = false;
             SetLocalViewMode();
-            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().SetupStorage();
+            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.SetupStorage(storageAmmo1 * 2, storageAmmo2 * 2, powerSupply);
         }
 
         
@@ -584,7 +584,7 @@ powerSupply : {5}
                 {
                     positions.Add(other.transform.position);
                     dirs.Add(other.curDir);
-                    ranges.Add(other.scopeRange);
+                    ranges.Add(other.myShip.scopeRange);
                 }                
             }            
 

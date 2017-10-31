@@ -5,14 +5,12 @@ using System.Collections.Generic;
 namespace Completed
 {
     public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
+    public enum WEAPON_TYPE { FRONT_1, FRONT_2 };    
 
     public class Player : MovingObject
 	{
-        public int storageSize = 10;
-        public int controlPower = 50;
-        public int controlPowerInit = 200;
-
-        bool canShot = true;
+        public SpaceShip myShip;
+        
         public bool autoMode = true;
         public int unitId = 1;
         public bool myPlayer = false;
@@ -23,31 +21,11 @@ namespace Completed
         public AudioClip eatSound2;
         public AudioClip drinkSound1;
         public AudioClip drinkSound2;
-        public AudioClip gameOverSound;
-
-        public float restartLevelDelay = 1f;
-
-        public int copper = 0;
-
-        public int HP;
-        public int HP_MAX = 20;
-        public int HP_INIT = 10;
-        private int money = 0;
-
-        public float playerTimeInit = 0.5f;
-        public float shotTimeInit = 0.5f;
-        public float reloadTimeInit = 3.0f;
-        float playerTime;
-        float shotTime;
-        float reloadTime;
-        bool playersTurn = true;
+        public AudioClip gameOverSound;        
 
         public int weaponDamage = 10;
         public float weaponRangeMin = 0;
-        public float weaponRangeMax = 3;
-
-        public int scopeRangeInit = 2;
-        public int scopeRange = 2;
+        public float weaponRangeMax = 3;        
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -56,48 +34,22 @@ namespace Completed
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject[] dirSprits;
 
-        public int[] numOfBullets = new int[3];
-        public int[] totalBullets = new int[3];
-        public int[] maxBullets = new int[3];
-        public int powerSupply = 0;
-
         public void Init()
-        {
-            powerSupply = 0;
-            for (int i=0; i< numOfBullets.Length; i++)
-            {
-                numOfBullets[i] = 0;
-            }
-
-            for (int i = 0; i < totalBullets.Length; i++)
-            {
-                totalBullets[i] = 0;
-            }
-
-            for (int i = 0; i < maxBullets.Length; i++)
-            {
-                maxBullets[i] = 4;
-            }
-
+        {            
             UpdateDirImage();
-            playerTime = playerTimeInit;
-            shotTime = shotTimeInit;
-            reloadTime = reloadTimeInit;
-            scopeRange = scopeRangeInit;
-            HP = HP_INIT;
+
+            myShip = new SpaceShip();
+            myShip.ReadyToDeparture(); 
+            
             if (myPlayer)
             {
-                transform.position = Vector3.zero;
-                controlPower = controlPowerInit;                
+                transform.position = Vector3.zero;                
             }
-        }
-
-        public void SetupStorage()
-        {
-            totalBullets[0] = GameManager.instance.storageAmmo1 * 2;
-            totalBullets[1] = GameManager.instance.storageAmmo2 * 2;
-            powerSupply = GameManager.instance.powerSupply;
-        }
+            else
+            {
+                myShip.SetupStorage(10, 10, 10);
+            }
+        }        
                 
         protected override void Start ()
 		{
@@ -112,51 +64,32 @@ namespace Completed
 
                 if(unitId == 1) renderer.sortingLayerName = "Player";
                 else renderer.sortingLayerName = "Enemy";
-
-                if(autoMode)
-                {
-                    for (int i = 0; i < numOfBullets.Length; i++)
-                    {
-                        numOfBullets[i] = 2;
-                    }
-                }                
             }
         }
-
-        bool playerTimeChanged = false;
-        bool playerHpChanged = false;
-        bool maxBullet1Changed = false;
-        bool maxBullet2Changed = false;
 
         private void UpdateDisplay()
         {
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
-            playerInfo.foodText.text = "HP : " + HP;
-            playerInfo.ammoText.text = "[Ammo1 : " + numOfBullets[0] + "/" + totalBullets[0] + "]\n\n" +
-                            "[Ammo2 : " + numOfBullets[1] + "/" + totalBullets[1] + "]";
+            playerInfo.foodText.text = "SHIELD : " + myShip.shield;
+            playerInfo.ammoText.text = "[Ammo1 : " + myShip.numOfBullets[0] + "/" + myShip.totalBullets[0] + "]\n\n" +
+                            "[Ammo2 : " + myShip.numOfBullets[1] + "/" + myShip.totalBullets[1] + "]";
             
-            playerInfo.coolTimeText.text = Mathf.FloorToInt(playerTime * 100).ToString();
-            if(startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(reloadTime * 100).ToString();
-            else playerInfo.shotTimeText.text = Mathf.FloorToInt(shotTime * 100).ToString();
+            playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
+            if(myShip.startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.reloadTime * 100).ToString();
+            else playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.shotTime * 100).ToString();
 
             
             string greenTag = "<color=#00ff00>";
-            string redTag = "<color=#ff0000>";
-            string colorTag = greenTag;
-            if (playerHpChanged) colorTag = redTag;
-            else colorTag = greenTag;
-            string HpText = colorTag + string.Format("최대 HP {0} </color>\n\n", HP_MAX);
 
-            if (playerTimeChanged) colorTag = redTag;
-            else colorTag = greenTag;
-            string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", playerTimeInit);
+            string colorTag = greenTag;
+            string HpText = colorTag + string.Format("최대 실드 {0} </color>\n\n", myShip.shieldInit);
+            string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", myShip.moveTimeInit);
 
             string colorTag1 = greenTag;
             string colorTag2 = greenTag;
-            if (maxBullet1Changed) colorTag1 = redTag;
-            if (maxBullet2Changed) colorTag2 = redTag;
+
             playerInfo.infoText.text = HpText + SpeedText + string.Format(
                         @"공격 대기 시간 {0:N2}초
 
@@ -166,16 +99,13 @@ namespace Completed
 
 1번무기
 범위 : 1,2 블럭 공격
-{3}최대 탄수 : {4}개</color>
 장전 탄수: 2개
 
 2번무기
 범위 : 2,3 블럭 공격
-{5}최대 탄수 : {6}개</color>
-장전 탄수: 2개", shotTime, reloadTime, scopeRange, colorTag1, maxBullets[0], colorTag2, maxBullets[1]);
+장전 탄수: 2개", myShip.shotTime, myShip.reloadTime, myShip.scopeRange);
 
-            playerInfo.infoText.text += "\nCopper " + copper + "개";
-            playerInfo.infoText.text += "\n출력 " + controlPower + "%";
+            playerInfo.infoText.text += "\n출력 " + myShip.controlPower + "%";
 
             
         }       
@@ -185,38 +115,26 @@ namespace Completed
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
-            if (value != 0) scopeRange = value;
-            else scopeRange = scopeRangeInit;
-            if (myPlayer) GameManager.instance.ShowObjs(transform.position, curDir, scopeRange);
-            
+            myShip.UpdateScope(value);
 
-            if (startReload)
+            if (myPlayer)
             {
-                reloadTime -= Time.deltaTime;
-                if (reloadTime <= 0)
-                {
-                    reloadTime = reloadTimeInit;
-                    startReload = false;
+                GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
+                myShip.UpdatePowerState();
+                if (myShip.IsPowerDown()) Destoryed();
+            }            
 
-                    int relaodNum = 1;
-                    if(totalBullets[indexReload]>= 2) relaodNum = 2;
-
-                    totalBullets[indexReload] -= relaodNum;
-                    numOfBullets[indexReload] += relaodNum;
-                    DecreaseControlPower(reloadPower);
-                }
+            if (myShip.startReload)
+            {
+                myShip.UpdateReload();                
             }
-            else if (canShot)
+            else if (myShip.canShot)
             {
                 if(myPlayer)
                 {                    
                     if (Input.GetKeyDown("3"))
                     {
-                        if(powerSupply>0)
-                        {
-                            controlPower += 10;
-                            powerSupply--;
-                        }                        
+                        myShip.ChargePower();       
                     }
                     else
                     {
@@ -227,25 +145,14 @@ namespace Completed
             }
             else
             {
-                shotTime -= Time.deltaTime;
-                if(shotTime <=0)
-                {
-                    shotTime = shotTimeInit;
-                    canShot = true;
-                }                
+                myShip.UpdateWeaponCooling();
             }            
 
-            if (!playersTurn)
+            if (myShip.canMove == false)
             {
-                playerTime -= Time.deltaTime;
-                if(playerTime <= 0)
-                {
-                    playersTurn = true;
-                    playerTime = playerTimeInit;
-                }
+                myShip.UpdateMoveCoolTime();
                 return;
             }
-
             int horizontal = 0;
 			int vertical = 0;
 			
@@ -343,9 +250,8 @@ namespace Completed
 
             if (found)
             {
-                if (canShot)
+                if (myShip.Shot(0))
                 {
-                    canShot = false;
                     StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
                     player.LoseHP(weaponDamage);
                 }
@@ -371,7 +277,7 @@ namespace Completed
 
         public void AutoMoveUnit01()
         {
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
@@ -387,9 +293,8 @@ namespace Completed
 
             if (found)
             {
-                if (canShot)
+                if (myShip.Shot(0))
                 {
-                    canShot = false;
                     StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
                     player.LoseHP(weaponDamage);
                 }
@@ -408,7 +313,7 @@ namespace Completed
 
                 ChangeDir(xDir, yDir);
                 UpdateDirImage();
-                playersTurn = false;
+                myShip.Move();
             }            
         }
 
@@ -426,7 +331,7 @@ namespace Completed
                 return;
             }
 
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, scopeRange);
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
@@ -454,9 +359,8 @@ namespace Completed
 
                 if( inRange && (deltaX < Mathf.Epsilon || deltaY < Mathf.Epsilon) )
                 {
-                    if (canShot)
+                    if (myShip.Shot(0))
                     {
-                        canShot = false;
                         StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
                         player.LoseHP(weaponDamage);
                     }
@@ -512,38 +416,13 @@ namespace Completed
                 }
                 AttemptMove<Player>(xDir, yDir);
             }
-        }
-
-        bool startReload = false;
-        int indexReload = 0;
-        void StartReload(int index)
-        {
-            startReload = true;
-            indexReload = index;
-        }
+        }        
 
         public void  AttempAttack(int input)
-        {
-            if (numOfBullets[input] <= 0)
-            {
-                if(totalBullets[input] > 0)
-                {
-                    StartReload(input);
-                }
-                else
-                {
-                    if (myPlayer) GameManager.instance.UpdateGameMssage("No Ammo !!!", 1f);
-                }
-                
-                return;
-            }
-
-            numOfBullets[input]--;
+        {            
             //Attack(input+1);
-            Attack2(input);
-            canShot = false;
-
-            if (myPlayer) DecreaseControlPower(shotPower + input);
+            if(myShip.Shot(input)) Attack2(input);
+            
         }
 
         public bool CheckDir(int xDir, int yDir)
@@ -664,34 +543,11 @@ namespace Completed
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos));
 
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
-        }        
-
-        public void CheckControlPowerDown()
-        {
-            if(controlPower <= 0)
-            {
-                GameManager.instance.GameOver();
-            }
         }
-
-        public void DecreaseControlPower(int consume)
-        {
-            controlPower -= consume;
-
-            if (controlPower < controlPowerInit / 5) GameManager.instance.UpdateGameMssage("위험 : 출력 낮음", 1);
-
-            CheckControlPowerDown();
-        }
-
-        public int reloadPower = 1;
-        public int scopePower = 1;
-        public int shotPower = 1;
-        public int movePower = 1;
+        
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
-            playersTurn = false;
-
-            if(myPlayer) DecreaseControlPower(movePower + scopePower);
+            myShip.Move();
 
             if (CheckDir(xDir, yDir))
             {
@@ -714,9 +570,7 @@ namespace Completed
 
 				GameManager.instance.curLevel.SetMapOfUnits(transform.position, 0);
 				GameManager.instance.curLevel.SetMapOfUnits(nextPos, 1);
-			}		
-			
-			CheckIfGameOver ();			
+			}			
 		}
 		
 		protected override void OnCantMove <T> (T component)
@@ -729,112 +583,38 @@ namespace Completed
 		{
             if (!myPlayer) return;
 
-            if (other.tag == "Enemy")
-            {
-                LoseHP(10);
-                other.gameObject.SetActive(false);
-            }
-            else if (other.tag == "Food")
-            {
-                if (HP < HP_MAX)
-                {
-                    HP += 10;
-                    SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
-                    other.gameObject.SetActive(false);
-                }
-            }
-            else if (other.tag == "Soda")
-            {
-                Scroll ammoObj = other.GetComponent<Scroll>();
-
-                int index = ammoObj.type - 1;
-                if (index < numOfBullets.Length)
-                {
-                    
-                    int addAmmo = ammoObj.num;
-                    if (totalBullets[index] + ammoObj.num > maxBullets[index])
-                    {
-                        addAmmo = maxBullets[index] - totalBullets[index];
-                        ammoObj.UpdateNumber(ammoObj.num - addAmmo);
-                    }
-                    else
-                    {
-                        ammoObj.UpdateNumber(0);
-                    }
-
-                    totalBullets[index] += addAmmo;
-                }
-
-                if (ammoObj.num <= 0)
-                    other.gameObject.SetActive(false);
-            }
-            else if (other.tag == "Money")
-            {
-                if (other.name.Contains("ExAmmo1"))
-                {
-                    maxBullet1Changed = true;
-                    maxBullets[0] += 2;
-                }
-                else if (other.name.Contains("ExAmmo2"))
-                {
-                    maxBullet2Changed = true;
-                    maxBullets[1] += 2;
-                }
-                else if (other.name.Contains("ExFood"))
-                {
-                    playerHpChanged = true;
-                    HP_MAX += 10;
-                }
-                else if (other.name.Contains("ExSpeed"))
-                {
-                    playerTimeChanged = true;
-                    playerTimeInit -= 0.05f;
-                }
-                other.gameObject.SetActive(false);
-            }
-            else if (other.tag == "MissionItem")
+            if (other.tag == "MissionItem")
             {
                 GameManager.instance.collectionCount++;                
                 other.gameObject.SetActive(false);
             }
-
         }
-
-
+        
 		private void Restart ()
 		{
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
-		}
-		
+		}		
 		
     	public void LoseHP (int loss)
 		{
-            HP -= loss;
-
-            if(myPlayer)
+            if (myShip.Shield()) myShip.Damaged(loss);
+            else Destoryed();
+		}
+		
+		private void Destoryed()
+		{
+            if (myPlayer)
             {
-                GameManager.instance.UpdateGameMssage("공격 받았다!!!!", 0.5f);
-                CheckIfGameOver();
+                SoundManager.instance.PlaySingle(gameOverSound);
+                SoundManager.instance.musicSource.Stop();
+                GameManager.instance.GameOver();
             }
             else
             {
-                if(HP<=0)
-                {
-                    GameManager.instance.DestroyOtherPlayer(gameObject);
-                    GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
-                }
-            }
-		}
-		
-		private void CheckIfGameOver ()
-		{
-			if (HP <= 0) 
-			{
-				SoundManager.instance.PlaySingle (gameOverSound);
-				SoundManager.instance.musicSource.Stop();
-				GameManager.instance.GameOver ();
-			}
-		}
+                GameManager.instance.DestroyOtherPlayer(gameObject);
+                GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
+            }                       
+        }
 	}
 }
 
