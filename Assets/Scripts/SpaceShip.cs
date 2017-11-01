@@ -6,6 +6,8 @@ namespace Completed
 {
     public class SpaceShip : MonoBehaviour
     {
+        public int storageSize = 5;
+
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
         public int powerSupply = 0;
@@ -24,7 +26,6 @@ namespace Completed
         WEAPON_TYPE weaponInit;
 
         List<int> storage = new List<int>();
-        int storageSize;
 
         public int controlPower;
         public int controlPowerInit = 50;

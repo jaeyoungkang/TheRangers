@@ -10,6 +10,10 @@ namespace Completed
 
     public class Level
     {
+        public bool missionFinish;
+        public List<int> rewardItems = new List<int>();
+        public int rewardMoney;
+
         public int collectMission;        
         public int id;
         public int columns, rows;
@@ -57,13 +61,35 @@ namespace Completed
 
         public void Init(int levelId)
         {
+            missionFinish = false;
+            filePath = "";
+            rewardItems.Clear();
+            rewardMoney = 0;
+            collectMission = 0;
+
             id = levelId;
-            filePath = "map01.txt";
-            if (levelId == 2) filePath = "map02.txt";
-            else if (levelId == 3) filePath = "map03.txt";
+            switch(id)
+            {
+                case 1:
+                    filePath = "map01.txt";
+                    rewardItems.Add(10);
+                    rewardMoney = 10;
+                    break;
 
-            if (levelId == 3) collectMission = 3;
+                case 2:
+                    filePath = "map02.txt";
+                    rewardItems.Add(20);
+                    rewardMoney = 10;
+                    break;
 
+                case 3:
+                    filePath = "map03.txt";
+                    collectMission = 3;
+                    rewardItems.Add(30);
+                    rewardMoney = 10;
+                    break;
+            }            
+            
             foreach (Player other in otherPlayers)
             {
                 UnityEngine.GameObject.Destroy(other.gameObject);
@@ -85,6 +111,9 @@ namespace Completed
             string[] symbols = lines[0].Split(',');
             columns = symbols.Length;
             rows = lines.Length;
+
+            MakeGameMapOfUnits(columns, rows);
+            MakeGameMapOfStructures(columns, rows);
         }
 
         public void MakeGameMapOfUnits(int columns, int rows)
@@ -183,8 +212,9 @@ namespace Completed
         public int storageAmmo1 = 0;
         public int storageAmmo2 = 0;
         public int powerSupply = 0;
-        public int storageSize = 5;
-        public int money = 100;
+
+        public List<int> inven = new List<int>();
+        public int money = 10;
         public string storageText ="";
 
         public bool doingSetup = true;
@@ -193,9 +223,9 @@ namespace Completed
         {
             switch (itemId)
             {
-                case 1: storageAmmo1++; money -= 10; break;
-                case 2: storageAmmo2++; money -= 10; break;
-                case 3: powerSupply++; money -= 10; break;
+                case 1: storageAmmo1++; money -= 1; break;
+                case 2: storageAmmo2++; money -= 1; break;
+                case 3: powerSupply++; money -= 1; break;
             }
         }
 
@@ -209,19 +239,40 @@ namespace Completed
             }
         }
 
+        public int gold = 0;
+        public int silver = 0;
+        public int copper = 0;
+
+        void ExtendStorage()
+        {
+            if (money < 10) return;           
+
+            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().ExtendStorage();
+            money -= 10;            
+        }
+
+        // 미션 설명 및 보상 표시 - 보상을 보고 미션을 선택한다.
+        // 미션 완료시 보상 획득
+        // 미션수행과 끝난후 보상으로 업그레이드 미션에서 확실하고 큰 보상은 하나 있어야한다.
+
         void UpdateStorage()
         {
-            if (storageAmmo1 + storageAmmo2 + powerSupply < storageSize)
+            Player myPlayer = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            if (storageAmmo1 + storageAmmo2 + powerSupply < myPlayer.myShip.storageSize)
             {
                 if (Input.GetKeyDown("1")) BuyItem(1);
                 else if (Input.GetKeyDown("2")) BuyItem(2);
                 else if (Input.GetKeyDown("3")) BuyItem(3);
             }
 
-
             if (Input.GetKeyDown("4") && storageAmmo1 > 0) SellItem(1);
             else if (Input.GetKeyDown("5") && storageAmmo2 > 0) SellItem(2);
             else if (Input.GetKeyDown("6") && powerSupply > 0) SellItem(3);
+
+            if (Input.GetKeyDown("0"))
+            {
+                ExtendStorage();
+            }
 
             storageText = string.Format(@"
 Money : {0}
@@ -229,7 +280,22 @@ Storage : {1} / {2}
 Ammo1 : {3}
 Ammo2 : {4}
 powerSupply : {5}
-                ", money, storageAmmo1 + storageAmmo2 + powerSupply, storageSize, storageAmmo1, storageAmmo2, powerSupply);            
+                ", money, storageAmmo1 + storageAmmo2 + powerSupply, myPlayer.myShip.storageSize, storageAmmo1, storageAmmo2, powerSupply);
+
+            string itemName = GetItemName(curLevel.rewardItems[0]);
+            storageText += string.Format("\n\n 미션 보상 \n {0} $\n {1}", curLevel.rewardMoney, itemName);
+        }
+
+        public string GetItemName(int itemId)
+        {
+            string itemName = "";
+            switch (itemId)
+            {
+                case 10: itemName = "쿠퍼 광석"; break;
+                case 20: itemName = "실버 광석"; break;
+                case 30: itemName = "골드 광석"; break;
+            }
+            return itemName;
         }
 
         public void UpdateGameMssage(string msg, float time)
@@ -549,7 +615,7 @@ powerSupply : {5}
 
             if(curPage == PAGE.MISSION) UpdateStorage();
 
-            if(curPage == PAGE.SPACE)
+            if(curPage == PAGE.SPACE && curLevel.missionFinish == false)
             {
                 switch(curLevel.id)
                 {
@@ -593,7 +659,14 @@ powerSupply : {5}
 
         public void Win()
         {
-            spacePage.GetComponent<SpacePage>().ShowResult("Winner Winner Chicken Dinner!");            
+            curLevel.missionFinish = true;
+            string resultMsg = "Winner Winner Chicken Dinner!";
+            string itemName = GetItemName(curLevel.rewardItems[0]);
+            resultMsg += string.Format("\n\n 미션 보상 \n {0} $\n {1}", curLevel.rewardMoney, itemName);
+            spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);
+
+            money += curLevel.rewardMoney;
+            inven.AddRange(curLevel.rewardItems);
         }
 
         public void GameOver()

@@ -87,9 +87,6 @@ namespace Completed
             string HpText = colorTag + string.Format("최대 실드 {0} </color>\n\n", myShip.shieldInit);
             string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", myShip.moveTimeInit);
 
-            string colorTag1 = greenTag;
-            string colorTag2 = greenTag;
-
             playerInfo.infoText.text = HpText + SpeedText + string.Format(
                         @"공격 대기 시간 {0:N2}초
 
@@ -105,10 +102,13 @@ namespace Completed
 범위 : 2,3 블럭 공격
 장전 탄수: 2개", myShip.shotTime, myShip.reloadTime, myShip.scopeRange);
 
-            playerInfo.infoText.text += "\n출력 " + myShip.controlPower + "%";
-
-            
+            playerInfo.infoText.text += "\n출력 " + myShip.controlPower + "%";            
         }       
+
+        public void ExtendStorage()
+        {
+            myShip.storageSize++;
+        }
 
         private void Update ()
 		{

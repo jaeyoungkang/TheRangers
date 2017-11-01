@@ -58,9 +58,6 @@ namespace Completed
             rows = curLevel.rows;
             columns = curLevel.columns;
 
-            curLevel.MakeGameMapOfUnits(columns, rows);
-            curLevel.MakeGameMapOfStructures(columns, rows);
-
             for (int x = -1; x < columns + 1; x++)
 			{
 				for(int y = -1; y < rows + 1; y++)
