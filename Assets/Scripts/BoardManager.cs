@@ -103,7 +103,7 @@ namespace Completed
             }
 
             GameManager.instance.curLevel.AddItem(obj);
-        }
+        }       
  
         public void DropItem(Vector3 dropPos)
         {
