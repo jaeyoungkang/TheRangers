@@ -20,6 +20,7 @@ namespace Completed
         public string filePath;
         public int[,] mapOfUnits;
         public int[,] mapOfStructures;
+        public int[,] mapOfItems;
 
         public List<GameObject> items = new List<GameObject>();
         public List<GameObject> tiles = new List<GameObject>();
@@ -114,6 +115,7 @@ namespace Completed
 
             MakeGameMapOfUnits(columns, rows);
             MakeGameMapOfStructures(columns, rows);
+            MakeGameMapOfItems(columns, rows);
         }
 
         public void MakeGameMapOfUnits(int columns, int rows)
@@ -153,6 +155,17 @@ namespace Completed
 
             return mapOfUnits[x, y];
         }
+        public void MakeGameMapOfItems(int columns, int rows)
+        {
+            mapOfItems= new int[columns, rows];
+            for (int i = 0; i < columns; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    mapOfItems[i, j] = 0;
+                }
+            }
+        }
 
         public void MakeGameMapOfStructures(int columns, int rows)
         {
@@ -190,6 +203,32 @@ namespace Completed
                 return 1;
 
             return mapOfStructures[x, y];
+        }
+
+        public void SetMapOfItems(Vector3 pos, int value)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfItems.GetUpperBound(0) < x)
+                return;
+            if (y < 0 || mapOfItems.GetUpperBound(1) < y)
+                return;
+
+            mapOfItems[x, y] = value;
+        }
+
+        public int GetMapOfItems(Vector3 pos)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfItems.GetUpperBound(0) < x)
+                return 1;
+            if (y < 0 || mapOfItems.GetUpperBound(1) < y)
+                return 1;
+
+            return mapOfItems[x, y];
         }
     }
 
@@ -844,9 +883,9 @@ powerSupply : {5}
             curPage = nextPage;
         }
 
-        public void ActivateRootBtn()
+        public void ActivateRootBtn(bool bActive)
         {
-            spacePage.GetComponent<SpacePage>().ActivateRootBtn();
+            spacePage.GetComponent<SpacePage>().ActivateRootBtn(bActive);
         }
     }
 }

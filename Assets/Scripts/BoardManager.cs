@@ -109,7 +109,7 @@ namespace Completed
         public void DropItem(Vector3 dropPos)
         {
             GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
-            GameManager.instance.curLevel.AddItem(item);
+            GameManager.instance.curLevel.SetMapOfItems(dropPos, 1);            
 
             //int randomValue = Random.Range(0, 8);
             //if(randomValue < 3)

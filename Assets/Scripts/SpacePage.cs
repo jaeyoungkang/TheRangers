@@ -24,9 +24,9 @@ namespace Completed
             closeRootPanelBtn.onClick.AddListener(HideRootPanel);
         }
 
-        public void ActivateRootBtn()
+        public void ActivateRootBtn(bool bActive)
         {
-            openRootPanelBtn.enabled = true;
+            openRootPanelBtn.enabled = bActive;
         }
 
         void OnEnable()

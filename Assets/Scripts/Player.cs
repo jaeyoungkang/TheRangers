@@ -117,6 +117,13 @@ namespace Completed
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
             myShip.UpdateScope(value);
 
+            if(myPlayer)
+            {
+                value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
+                GameManager.instance.ActivateRootBtn(value == 1);
+            }
+            
+
             if (myPlayer)
             {
                 GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
@@ -587,10 +594,6 @@ namespace Completed
             {
                 GameManager.instance.collectionCount++;                
                 other.gameObject.SetActive(false);
-            }
-            else if (other.tag == "RootBox")
-            {
-                GameManager.instance.ActivateRootBtn();
             }
         }
         
