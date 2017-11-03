@@ -588,6 +588,10 @@ namespace Completed
                 GameManager.instance.collectionCount++;                
                 other.gameObject.SetActive(false);
             }
+            else if (other.tag == "RootBox")
+            {
+                GameManager.instance.ActivateRootBtn();
+            }
         }
         
 		private void Restart ()

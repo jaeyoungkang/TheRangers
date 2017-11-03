@@ -17,16 +17,21 @@ namespace Completed
         public Button backBtn;
         public Text resultMsg;
 
-        // Use this for initialization
         void Start()
         {            
             backBtn.onClick.AddListener(GameManager.instance.GotoMain);
             openRootPanelBtn.onClick.AddListener(ShowRootPanel);
             closeRootPanelBtn.onClick.AddListener(HideRootPanel);
         }
-        
+
+        public void ActivateRootBtn()
+        {
+            openRootPanelBtn.enabled = true;
+        }
+
         void OnEnable()
-        {               
+        {
+            openRootPanelBtn.enabled = false;
             result.SetActive(false);
             HideRootPanel();
         }

@@ -23,9 +23,10 @@ namespace Completed
 			}
 		}		
 		
-		public int columns = 5; 										
-		public int rows = 5;											
-        public GameObject exit;											
+		public int columns = 5;
+		public int rows = 5;
+        public GameObject rootBox;
+        public GameObject exit;
 		public GameObject[] floorTiles;									
 		public GameObject[] itemTiles;
  
@@ -107,20 +108,23 @@ namespace Completed
  
         public void DropItem(Vector3 dropPos)
         {
-            int randomValue = Random.Range(0, 8);
-            if(randomValue < 3)
-            {
-                GameObject item = Instantiate(itemTiles[0], dropPos, Quaternion.identity);
-                GameManager.instance.curLevel.AddItem(item);
-            }
-            else if(randomValue == 4)
-            {
-                LayoutItem(itemTiles[1], dropPos);
-            }
-            else if (randomValue == 5)
-            {
-                LayoutItem(itemTiles[2], dropPos);
-            }
+            GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
+            GameManager.instance.curLevel.AddItem(item);
+
+            //int randomValue = Random.Range(0, 8);
+            //if(randomValue < 3)
+            //{
+            //    GameObject item = Instantiate(itemTiles[0], dropPos, Quaternion.identity);
+            //    GameManager.instance.curLevel.AddItem(item);
+            //}
+            //else if(randomValue == 4)
+            //{
+            //    LayoutItem(itemTiles[1], dropPos);
+            //}
+            //else if (randomValue == 5)
+            //{
+            //    LayoutItem(itemTiles[2], dropPos);
+            //}
         }
 
         public void SetupScene (Level curLevel)

@@ -339,7 +339,7 @@ powerSupply : {5}
 
             curLevel.RemoveOtherPlayer(target);
 
-            boardScript.DropItem(target.transform.position);            
+            boardScript.DropItem(target.transform.position);
         }
                 
 
@@ -842,6 +842,11 @@ powerSupply : {5}
             spacePage.SetActive(activeSpace);
 
             curPage = nextPage;
+        }
+
+        public void ActivateRootBtn()
+        {
+            spacePage.GetComponent<SpacePage>().ActivateRootBtn();
         }
     }
 }

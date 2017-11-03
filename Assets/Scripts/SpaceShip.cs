@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Completed
 {
-    public class SpaceShip : MonoBehaviour
+    public class SpaceShip
     {
         public int storageSize = 5;
 
