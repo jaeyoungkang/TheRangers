@@ -10,7 +10,8 @@ namespace Completed
     public class Player : MovingObject
 	{
         public SpaceShip myShip;
-        
+        public GameObject sight;
+
         public bool autoMode = true;
         public int unitId = 1;
         public bool myPlayer = false;
@@ -43,7 +44,7 @@ namespace Completed
             
             if (myPlayer)
             {
-                transform.position = Vector3.zero;                
+                transform.position = Vector3.zero;
             }
             else
             {
@@ -63,7 +64,7 @@ namespace Completed
                 Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
 
                 if(unitId == 1) renderer.sortingLayerName = "Player";
-                else renderer.sortingLayerName = "Enemy";
+                else renderer.sortingLayerName = "Enemy";                
             }
         }
 
@@ -110,6 +111,21 @@ namespace Completed
             myShip.storageSize++;
         }
 
+        public void UpdateSightPos(Vector3 localPos)
+        {
+            Vector3 pos = transform.position;            
+            switch (curDir)
+            {
+                case MOVE_DIR.UP: pos.y += 1; break;
+                case MOVE_DIR.DOWN: pos.y -= 1; break;
+                case MOVE_DIR.LEFT: pos.x -= 1; break;
+                case MOVE_DIR.RIGHT: pos.x += 1; break;
+            }
+
+            sight.transform.position = pos + localPos;
+        }
+
+        Vector3 localSightPos = new Vector3(1, 0, 0);
         private void Update ()
 		{
             if (GameManager.instance.doingSetup) return;
@@ -121,6 +137,25 @@ namespace Completed
             {
                 value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
                 GameManager.instance.ActivateRootBtn(value == 1);
+
+                if (Input.GetKeyDown(KeyCode.T))
+                {
+                    localSightPos.y += 1;                    
+                }
+                else if (Input.GetKeyDown(KeyCode.G))
+                {
+                    localSightPos.y -= 1;
+                }
+                else if (Input.GetKeyDown(KeyCode.F))
+                {
+                    localSightPos.x -= 1;
+                }
+                else if (Input.GetKeyDown(KeyCode.H))
+                {
+                    localSightPos.x += 1;
+                }
+                sight.transform.position = transform.position + localSightPos;
+                //UpdateSightPos(localSightPos);
             }
             
 
@@ -460,9 +495,11 @@ namespace Completed
 
         public void ChangeDir(int xDir, int yDir)
         {
-            if(xDir == 1)
+            MOVE_DIR prevDir = curDir;
+            if (xDir == 1)
             {
                 curDir = MOVE_DIR.RIGHT;
+
             }
             else if(xDir == -1)
             {
@@ -472,11 +509,79 @@ namespace Completed
             if (yDir == 1)
             {
                 curDir = MOVE_DIR.UP;
+
             }
             else if (yDir == -1)
             {
-                curDir = MOVE_DIR.DOWN;
+                curDir = MOVE_DIR.DOWN;                
             }
+            
+            if(myPlayer)
+            {
+                if(prevDir == MOVE_DIR.RIGHT)
+                {
+                    if ( curDir == MOVE_DIR.UP)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.DOWN)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.LEFT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                    }
+                }
+                if (prevDir == MOVE_DIR.UP)
+                {
+                    if (curDir == MOVE_DIR.RIGHT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.DOWN)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.LEFT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                    }
+                }
+
+                if (prevDir == MOVE_DIR.DOWN)
+                {
+                    if (curDir == MOVE_DIR.UP)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.RIGHT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.LEFT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                    }
+                }
+
+                if (prevDir == MOVE_DIR.LEFT)
+                {
+                    if (curDir == MOVE_DIR.UP)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.DOWN)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                    }
+                    else if (curDir == MOVE_DIR.RIGHT)
+                    {
+                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                    }
+                }
+
+            }            
         }
         
         public void UpdateDirImage()

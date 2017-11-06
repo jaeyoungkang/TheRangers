@@ -346,7 +346,7 @@ powerSupply : {5}
 		}
         
         public GameObject[] shotInstances = new GameObject[8];
-        public GameObject shotTile;
+        public GameObject shotTile;        
 
         public GameObject explosionInstance;
 		public GameObject explosionTile;
@@ -583,8 +583,8 @@ powerSupply : {5}
             {
                 shotInstances[i] = Instantiate(shotTile, transform.position, Quaternion.identity);
                 shotInstances[i].SetActive(false);
-            }            
-
+            }
+                        
             explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
             explosionInstance.SetActive(false);
             			
