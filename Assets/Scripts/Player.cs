@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
@@ -11,6 +12,12 @@ namespace Completed
 	{
         public SpaceShip myShip;
         public GameObject sight;
+
+        public Button shotBtn;
+        public Button sightUpBtn;
+        public Button sightDownBtn;
+        public Button sightLeftBtn;
+        public Button sightRightBtn;
 
         public bool autoMode = true;
         public int unitId = 1;
@@ -45,6 +52,12 @@ namespace Completed
             if (myPlayer)
             {
                 transform.position = Vector3.zero;
+
+                shotBtn.onClick.AddListener(AttempAttackAtSight);
+                sightUpBtn.onClick.AddListener(SightMoveUp);
+                sightDownBtn.onClick.AddListener(SightMoveDown);
+                sightRightBtn.onClick.AddListener(SightMoveRight);
+                sightLeftBtn.onClick.AddListener(SightMoveLeft);
             }
             else
             {
@@ -66,6 +79,43 @@ namespace Completed
                 if(unitId == 1) renderer.sortingLayerName = "Player";
                 else renderer.sortingLayerName = "Enemy";                
             }
+        }
+
+        void UpdateSightPos()
+        {
+            sight.transform.position = transform.position + localSightPos;
+        }
+
+        void SightMoveUp()
+        {
+            if (!myShip.canMove) return;
+            myShip.canMove = false;
+            localSightPos.y += 1;
+            UpdateSightPos();
+        }
+
+        void SightMoveRight()
+        {
+            if (!myShip.canMove) return;
+            myShip.canMove = false;
+            localSightPos.x += 1;
+            UpdateSightPos();
+        }
+
+        void SightMoveLeft()
+        {
+            if (!myShip.canMove) return;
+            myShip.canMove = false;
+            localSightPos.x -= 1;
+            UpdateSightPos();
+        }
+
+        void SightMoveDown()
+        {
+            if (!myShip.canMove) return;
+            myShip.canMove = false;
+            localSightPos.y -= 1;            
+            UpdateSightPos();
         }
 
         private void UpdateDisplay()
@@ -140,7 +190,7 @@ namespace Completed
 
                 if (Input.GetKeyDown(KeyCode.T))
                 {
-                    localSightPos.y += 1;                    
+                    localSightPos.y += 1;
                 }
                 else if (Input.GetKeyDown(KeyCode.G))
                 {
@@ -154,8 +204,7 @@ namespace Completed
                 {
                     localSightPos.x += 1;
                 }
-                sight.transform.position = transform.position + localSightPos;
-                //UpdateSightPos(localSightPos);
+                UpdateSightPos();
             }
             
 
@@ -458,12 +507,18 @@ namespace Completed
                 }
                 AttemptMove<Player>(xDir, yDir);
             }
-        }        
+        }
+
+        public void AttempAttackAtSight()
+        {
+            if (myShip.Shot(0)) Attack(sight.transform.position);
+        }
+
 
         public void  AttempAttack(int input)
-        {            
-            //Attack(input+1);
-            if(myShip.Shot(input)) Attack2(input);
+        {
+            if (myShip.Shot(input)) Attack(sight.transform.position);
+//            if(myShip.Shot(input)) Attack2(input);
             
         }
 
@@ -641,17 +696,8 @@ namespace Completed
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos2);
         }
 
-        public void Attack(int distance)
+        public void Attack(Vector3 attackPos)
         {
-            Vector3 attackPos = transform.position;
-            switch (curDir)
-            {
-                case MOVE_DIR.RIGHT: attackPos.x += distance; break;
-                case MOVE_DIR.LEFT: attackPos.x -= distance; break;
-                case MOVE_DIR.UP: attackPos.y += distance; break;
-                case MOVE_DIR.DOWN: attackPos.y -= distance; break;
-            }
-
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos));
 
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
