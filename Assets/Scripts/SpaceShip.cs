@@ -181,7 +181,7 @@ namespace Completed
 
         public void ConsumePower(int consume)
         {
-            controlPower -= consume;
+//            controlPower -= consume;
         }
 
         public bool LowerPower()

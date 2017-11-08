@@ -484,9 +484,12 @@ powerSupply : {5}
                     if (bShow) renderer.sortingLayerName = "Floor";
                     else renderer.sortingLayerName = "Fog";
 
-                    Color color = Color.black;
-                    if (bShow) color = Color.gray;
-                    renderer.color = color;                    
+                    if(obj.transform.position != playerPos)
+                    {
+                        Color color = Color.black;
+                        if (bShow) color = Color.gray;
+                        renderer.color = color;
+                    }                                        
 				}
 			}
         }

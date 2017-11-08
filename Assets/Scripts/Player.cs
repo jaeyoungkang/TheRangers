@@ -19,6 +19,12 @@ namespace Completed
         public Button sightLeftBtn;
         public Button sightRightBtn;
 
+        public Button lockDirBtn;
+        public Button moveUpBtn;
+        public Button moveDownBtn;
+        public Button moveLeftBtn;
+        public Button moveRightBtn;
+
         public bool autoMode = true;
         public int unitId = 1;
         public bool myPlayer = false;
@@ -42,6 +48,12 @@ namespace Completed
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject[] dirSprits;
 
+        bool bLockDir = false;
+        void LockDir()
+        {
+            bLockDir = !bLockDir;
+        }
+
         public void Init()
         {            
             UpdateDirImage();
@@ -58,6 +70,14 @@ namespace Completed
                 sightDownBtn.onClick.AddListener(SightMoveDown);
                 sightRightBtn.onClick.AddListener(SightMoveRight);
                 sightLeftBtn.onClick.AddListener(SightMoveLeft);
+
+                lockDirBtn.onClick.RemoveAllListeners();
+                lockDirBtn.onClick.AddListener(LockDir);
+                moveUpBtn.onClick.AddListener(MoveUp);
+                moveDownBtn.onClick.AddListener(MoveDown);
+                moveRightBtn.onClick.AddListener(MoveRight);
+                moveLeftBtn.onClick.AddListener(MoveLeft);
+                
             }
             else
             {
@@ -80,6 +100,11 @@ namespace Completed
                 else renderer.sortingLayerName = "Enemy";                
             }
         }
+
+        void MoveUp() { AttemptMove<Wall>(0, 1); }
+        void MoveDown() { AttemptMove<Wall>(0, -1); }
+        void MoveRight() { AttemptMove<Wall>(1, 0); }
+        void MoveLeft() { AttemptMove<Wall>(-1, 1); }
 
         void UpdateSightPos()
         {
@@ -137,23 +162,6 @@ namespace Completed
             string colorTag = greenTag;
             string HpText = colorTag + string.Format("최대 실드 {0} </color>\n\n", myShip.shieldInit);
             string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", myShip.moveTimeInit);
-
-            playerInfo.infoText.text = HpText + SpeedText + string.Format(
-                        @"공격 대기 시간 {0:N2}초
-
-장전 대기 시간 {1:N2}초
-
-시야 {2}칸
-
-1번무기
-범위 : 1,2 블럭 공격
-장전 탄수: 2개
-
-2번무기
-범위 : 2,3 블럭 공격
-장전 탄수: 2개", myShip.shotTime, myShip.reloadTime, myShip.scopeRange);
-
-            playerInfo.infoText.text += "\n출력 " + myShip.controlPower + "%";            
         }       
 
         public void ExtendStorage()
@@ -242,7 +250,6 @@ namespace Completed
             if (myShip.canMove == false)
             {
                 myShip.UpdateMoveCoolTime();
-                return;
             }
             int horizontal = 0;
 			int vertical = 0;
@@ -522,8 +529,10 @@ namespace Completed
             
         }
 
-        public bool CheckDir(int xDir, int yDir)
+        public bool CheckDirChanged(int xDir, int yDir)
         {
+            if (bLockDir) return false;
+
             bool change = true;
             switch(curDir)
             {
@@ -705,9 +714,11 @@ namespace Completed
         
         protected override void AttemptMove <T> (int xDir, int yDir)
 		{
+            if (myShip.canMove == false) return;
+
             myShip.Move();
 
-            if (CheckDir(xDir, yDir))
+            if (CheckDirChanged(xDir, yDir))
             {
                 ChangeDir(xDir, yDir);
                 UpdateDirImage();
