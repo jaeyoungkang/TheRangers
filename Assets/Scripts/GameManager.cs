@@ -33,11 +33,12 @@ namespace Completed
 
         public void AttackOtherPlayer(Vector3 targetPos)
         {
+            int damage = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().weaponDamage;
             foreach (Player other in otherPlayers)
             {
                 if (targetPos == other.transform.position)
                 {
-                    other.LoseHP(10);
+                    other.LoseHP(damage);
                     return;
                 }
             }
@@ -368,7 +369,7 @@ powerSupply : {5}
 
             shotInstance.transform.position = targetPos;
             shotInstance.SetActive(true);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
             shotInstance.SetActive(false);            
         }
 
@@ -630,7 +631,7 @@ powerSupply : {5}
             ChangePage(PAGE.SPACE);
 			doingSetup = false;
             SetLocalViewMode();
-            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.SetupStorage(storageAmmo1 * 2, storageAmmo2 * 2, powerSupply);
+//            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.SetupStorage(storageAmmo1 * 2, storageAmmo2 * 2, powerSupply);
         }
 
         

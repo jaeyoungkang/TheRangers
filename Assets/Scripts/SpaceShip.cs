@@ -34,7 +34,7 @@ namespace Completed
         public int shieldInit = 10;
 
         public float shotTime;
-        public float shotTimeInit = 0.5f;
+        public float shotTimeInit = 1f;
 
         public float moveTime;
         public float moveTimeInit = 0.45f;
@@ -85,10 +85,6 @@ namespace Completed
 
             if (numOfBullets[input] <= 0)
             {
-                if (totalBullets[input] > 0)
-                {
-                    Reload(input);
-                }
                 return false;
             }
 
@@ -129,12 +125,15 @@ namespace Completed
             {
                 reloadTime = reloadTimeInit;
                 startReload = false;
+                
+                int relaodNum = numOfBullets[indexReload];
+                int maxReloadAmmo = 4 - numOfBullets[indexReload];
 
-                int relaodNum = 1;
-                if (totalBullets[indexReload] >= 2) relaodNum = 2;
+                if (totalBullets[indexReload] >= maxReloadAmmo) relaodNum = maxReloadAmmo;
 
                 totalBullets[indexReload] -= relaodNum;
                 numOfBullets[indexReload] += relaodNum;
+                                
                 ConsumePower(reloadPower);
             }
             return false;

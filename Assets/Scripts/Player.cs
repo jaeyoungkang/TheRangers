@@ -37,7 +37,7 @@ namespace Completed
         public AudioClip drinkSound2;
         public AudioClip gameOverSound;        
 
-        public int weaponDamage = 10;
+        public int weaponDamage = 4;
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;        
 
@@ -76,13 +76,14 @@ namespace Completed
                 moveUpBtn.onClick.AddListener(MoveUp);
                 moveDownBtn.onClick.AddListener(MoveDown);
                 moveRightBtn.onClick.AddListener(MoveRight);
-                moveLeftBtn.onClick.AddListener(MoveLeft);
-                
+                moveLeftBtn.onClick.AddListener(MoveLeft);                
             }
             else
             {
                 myShip.SetupStorage(10, 10, 10);
             }
+
+            myShip.SetupStorage(16, 30, 10);
         }        
                 
         protected override void Start ()
@@ -108,7 +109,39 @@ namespace Completed
 
         void UpdateSightPos()
         {
-            sight.transform.position = transform.position + localSightPos;
+            Vector3 worldSightPos = transform.position + localSightPos;
+            if (worldSightPos.x < 0)
+            {
+                localSightPos.x -= worldSightPos.x;
+                worldSightPos.x = 0;
+            }
+
+            if (worldSightPos.x >= GameManager.instance.curLevel.columns)
+            {
+                localSightPos.x -= worldSightPos.x - (GameManager.instance.curLevel.columns - 1);
+                worldSightPos.x = GameManager.instance.curLevel.columns - 1;
+                
+            }
+
+            if (worldSightPos.y < 0)
+            {
+                localSightPos.y -= worldSightPos.y;
+                worldSightPos.y = 0;
+            }
+
+            if (worldSightPos.y >= GameManager.instance.curLevel.rows)
+            {
+                localSightPos.y -= worldSightPos.y - (GameManager.instance.curLevel.rows - 1);
+                worldSightPos.y = GameManager.instance.curLevel.rows - 1;
+            }
+
+            localSightPos.y = Mathf.Round(localSightPos.y);
+            localSightPos.x = Mathf.Round(localSightPos.x);
+
+            worldSightPos.y = Mathf.Round(worldSightPos.y);
+            worldSightPos.x = Mathf.Round(worldSightPos.x);
+
+            sight.transform.position = worldSightPos;
         }
 
         void SightMoveUp()
@@ -169,20 +202,6 @@ namespace Completed
             myShip.storageSize++;
         }
 
-        public void UpdateSightPos(Vector3 localPos)
-        {
-            Vector3 pos = transform.position;            
-            switch (curDir)
-            {
-                case MOVE_DIR.UP: pos.y += 1; break;
-                case MOVE_DIR.DOWN: pos.y -= 1; break;
-                case MOVE_DIR.LEFT: pos.x -= 1; break;
-                case MOVE_DIR.RIGHT: pos.x += 1; break;
-            }
-
-            sight.transform.position = pos + localPos;
-        }
-
         Vector3 localSightPos = new Vector3(1, 0, 0);
         private void Update ()
 		{
@@ -196,19 +215,19 @@ namespace Completed
                 value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
                 GameManager.instance.ActivateRootBtn(value == 1);
 
-                if (Input.GetKeyDown(KeyCode.T))
+                if (Input.GetKeyDown(KeyCode.UpArrow))
                 {
                     localSightPos.y += 1;
                 }
-                else if (Input.GetKeyDown(KeyCode.G))
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
                 {
                     localSightPos.y -= 1;
                 }
-                else if (Input.GetKeyDown(KeyCode.F))
+                else if (Input.GetKeyDown(KeyCode.LeftArrow))
                 {
                     localSightPos.x -= 1;
                 }
-                else if (Input.GetKeyDown(KeyCode.H))
+                else if (Input.GetKeyDown(KeyCode.RightArrow))
                 {
                     localSightPos.x += 1;
                 }
@@ -230,16 +249,25 @@ namespace Completed
             else if (myShip.canShot)
             {
                 if(myPlayer)
-                {                    
-                    if (Input.GetKeyDown("3"))
+                {
+                    if (Input.GetKeyDown(KeyCode.Space))
                     {
-                        myShip.ChargePower();       
+                        AttempAttack(0);
                     }
-                    else
+                    else if (Input.GetKeyDown(KeyCode.R))
                     {
-                        int input = GetAttackInput();
-                        if (input != -1) AttempAttack(input);
+                        myShip.Reload(0);
                     }
+
+                    //if (Input.GetKeyDown(KeyCode.Space))
+                    //{
+                    //    myShip.ChargePower();
+                    //}
+                    //else
+                    //{
+                    //    int input = GetAttackInput();
+                    //    if (input != -1) AttempAttack(input);                        
+                    //}
                 }
             }
             else
@@ -302,8 +330,30 @@ namespace Completed
 						vertical = y > 0 ? 1 : -1;
 				}
 			}
-			
+
 #endif
+
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                vertical = 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                vertical = -1;
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                horizontal = -1;
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                horizontal = 1;
+            }
+            else if(Input.GetKeyUp(KeyCode.Tab))
+            {
+                LockDir();
+            }
+
             if (!myPlayer && autoMode)
             {
                 AutoMove();
@@ -644,6 +694,7 @@ namespace Completed
                         localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
                     }
                 }
+                UpdateSightPos();
 
             }            
         }
