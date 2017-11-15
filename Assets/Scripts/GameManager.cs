@@ -33,7 +33,7 @@ namespace Completed
 
         public void AttackOtherPlayer(Vector3 targetPos)
         {
-            int damage = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().weaponDamage;
+            int damage = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.curWeapon.weaponDamage;
             foreach (Player other in otherPlayers)
             {
                 if (targetPos == other.transform.position)
@@ -359,17 +359,23 @@ powerSupply : {5}
 			yield return new WaitForSeconds(0.5f);
             explosionInstance.SetActive(false);
 		}
-
+        
         int shotEffectIndex = 0;
-        public IEnumerator ShowShotEffect(Vector3 targetPos)
+        public IEnumerator ShowShotEffect(Vector3 targetPos, Weapon weapon)
         {
             GameObject shotInstance = shotInstances[shotEffectIndex];
+            Animator anim = shotInstance.GetComponent<Animator>();
+            if(anim)
+            {
+                anim.speed = weapon.shotAniSpeed;
+            }
+
             shotEffectIndex++;
             if (shotEffectIndex >= shotInstances.Length) shotEffectIndex = 0;
 
             shotInstance.transform.position = targetPos;
             shotInstance.SetActive(true);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(weapon.aniDelay);
             shotInstance.SetActive(false);            
         }
 

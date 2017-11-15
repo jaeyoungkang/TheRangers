@@ -18,12 +18,9 @@ namespace Completed
         public int movePower = 1;
 
         public bool canMove = true;
-        public bool canShot = true;
+        
         public bool startReload = false;
         public int indexReload = 0;
-
-        WEAPON_TYPE weapon;
-        WEAPON_TYPE weaponInit;
 
         List<int> storage = new List<int>();
 
@@ -32,21 +29,18 @@ namespace Completed
 
         public int shield;
         public int shieldInit = 10;
-
-        public float shotTime;
-        public float shotTimeInit = 1f;
-
+        
         public float moveTime;
         public float moveTimeInit = 0.45f;
 
-        public float reloadTime;
-        public float reloadTimeInit = 1.5f;
+        public Weapon curWeapon;        
 
         public int scopeRange;
         public int scopeRangeInit = 2;
 
-        public void ReadyToDeparture()
+        public void ReadyToDeparture(Weapon weapon)
         {
+            curWeapon = weapon;
             powerSupply = 0;
             for (int i = 0; i < numOfBullets.Length; i++)
             {
@@ -61,8 +55,7 @@ namespace Completed
             shield = shieldInit;
             moveTime = moveTimeInit;
             controlPower = controlPowerInit;
-            shotTime = shotTimeInit;
-            reloadTime = reloadTimeInit;
+            curWeapon.Init();            
             scopeRange = scopeRangeInit;
         }
 
@@ -81,7 +74,7 @@ namespace Completed
 
         public bool Shot(int input)
         {
-            if (canShot == false) return false;
+            if (curWeapon.canShot == false) return false;
 
             if (numOfBullets[input] <= 0)
             {
@@ -90,7 +83,7 @@ namespace Completed
 
             numOfBullets[input]--;
             ConsumePower(shotPower);
-            canShot = false;
+            curWeapon.canShot = false;
             return true;
 
         }
@@ -118,16 +111,17 @@ namespace Completed
             indexReload = index;
         }
 
-        public bool UpdateReload()
+        public void UpdateReload()
         {
-            reloadTime -= Time.deltaTime;
-            if (reloadTime <= 0)
+            curWeapon.UpdateReload();
+            
+            if (curWeapon.reloadTime <= 0)
             {
-                reloadTime = reloadTimeInit;
+                curWeapon.reloadTime = curWeapon.reloadTimeInit;
                 startReload = false;
                 
                 int relaodNum = numOfBullets[indexReload];
-                int maxReloadAmmo = 4 - numOfBullets[indexReload];
+                int maxReloadAmmo = curWeapon.capability - numOfBullets[indexReload];
 
                 if (totalBullets[indexReload] >= maxReloadAmmo) relaodNum = maxReloadAmmo;
 
@@ -136,17 +130,11 @@ namespace Completed
                                 
                 ConsumePower(reloadPower);
             }
-            return false;
         }
 
         public void UpdateWeaponCooling()
         {
-            shotTime -= Time.deltaTime;
-            if (shotTime <= 0)
-            {
-                shotTime = shotTimeInit;
-                canShot = true;
-            }
+            curWeapon.UpdateWeaponCooling();            
         }
 
         public void UpdateMoveCoolTime()
@@ -186,18 +174,6 @@ namespace Completed
         public bool LowerPower()
         {
             return controlPower < controlPowerInit / 5;
-        }
-
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        }        
     }
 }

@@ -8,6 +8,55 @@ namespace Completed
     public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
     public enum WEAPON_TYPE { FRONT_1, FRONT_2 };    
 
+    public class Weapon
+    {
+        public int capability = 10;
+        public int weaponDamage = 4;
+
+        public bool canShot = true;
+
+        public float shotTime;
+        public float shotTimeInit = 1f;
+
+        public float reloadTime;
+        public float reloadTimeInit = 1.5f;
+
+        public int shotAniSpeed = 1;
+        public float aniDelay = 0.3f;
+
+        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability)
+        {
+            weaponDamage = _damage;
+            shotTimeInit = _shotTime;
+            reloadTimeInit = _reloadTime;
+            shotAniSpeed = _shotAniSpeed;
+            aniDelay = _aniDelay;
+            capability = _capability;
+        }
+
+        public void Init()
+        {
+            shotTime = shotTimeInit;
+            reloadTime = reloadTimeInit;
+        }
+
+        public void UpdateReload()
+        {
+            reloadTime -= Time.deltaTime;            
+        }
+
+        public void UpdateWeaponCooling()
+        {
+            shotTime -= Time.deltaTime;
+            if (shotTime <= 0)
+            {
+                shotTime = shotTimeInit;
+                canShot = true;
+            }
+        }
+
+    }
+
     public class Player : MovingObject
 	{
         public SpaceShip myShip;
@@ -35,9 +84,12 @@ namespace Completed
         public AudioClip eatSound2;
         public AudioClip drinkSound1;
         public AudioClip drinkSound2;
-        public AudioClip gameOverSound;        
+        public AudioClip gameOverSound;
 
-        public int weaponDamage = 4;
+        public Weapon weaponP = new Weapon(15, 1.5f, 3, 1, 0.5f, 2);
+        public Weapon weaponM = new Weapon(4, 0.6f, 2.0f, 2, 0.3f, 5);
+        public Weapon weaponS = new Weapon(2, 0.2f, 1.5f, 3, 0.2f, 10);
+
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;        
 
@@ -59,7 +111,7 @@ namespace Completed
             UpdateDirImage();
 
             myShip = new SpaceShip();
-            myShip.ReadyToDeparture(); 
+            myShip.ReadyToDeparture(weaponS); 
             
             if (myPlayer)
             {
@@ -83,7 +135,7 @@ namespace Completed
                 myShip.SetupStorage(10, 10, 10);
             }
 
-            myShip.SetupStorage(16, 30, 10);
+            myShip.SetupStorage(50, 30, 10);
         }        
                 
         protected override void Start ()
@@ -186,8 +238,8 @@ namespace Completed
                             "[Ammo2 : " + myShip.numOfBullets[1] + "/" + myShip.totalBullets[1] + "]";
             
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
-            if(myShip.startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.reloadTime * 100).ToString();
-            else playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.shotTime * 100).ToString();
+            if(myShip.startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString();
+            else playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
 
             
             string greenTag = "<color=#00ff00>";
@@ -246,7 +298,7 @@ namespace Completed
             {
                 myShip.UpdateReload();                
             }
-            else if (myShip.canShot)
+            else if (myShip.curWeapon.canShot)
             {
                 if(myPlayer)
                 {
@@ -400,8 +452,8 @@ namespace Completed
             {
                 if (myShip.Shot(0))
                 {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
-                    player.LoseHP(weaponDamage);
+                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
+                    player.LoseHP(myShip.curWeapon.weaponDamage);
                 }
             }
             else
@@ -443,8 +495,8 @@ namespace Completed
             {
                 if (myShip.Shot(0))
                 {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
-                    player.LoseHP(weaponDamage);
+                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
+                    player.LoseHP(myShip.curWeapon.weaponDamage);
                 }
             }
             else
@@ -509,8 +561,8 @@ namespace Completed
                 {
                     if (myShip.Shot(0))
                     {
-                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position));
-                        player.LoseHP(weaponDamage);
+                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
+                        player.LoseHP(myShip.curWeapon.weaponDamage);
                     }
                 }                
                 else
@@ -711,54 +763,10 @@ namespace Completed
             }
             transform.localEulerAngles = rotation;            
         }
-
-        public void Attack2(int type)
-        {
-            Vector3 attackPos1 = transform.position;
-            Vector3 attackPos2 = transform.position;
-
-            int startPos = 1;
-            if(type == 1)
-            {
-                startPos = 2;
-            }
-
-            switch (curDir)
-            {
-                case MOVE_DIR.RIGHT:
-                    attackPos1.x += startPos;
-                    attackPos2.x += startPos + 1;
-                    break;
-                case MOVE_DIR.LEFT:
-                    attackPos1.x -= startPos;
-                    attackPos2.x -= startPos + 1;
-                    break;
-                case MOVE_DIR.UP:
-                    attackPos1.y += startPos;
-                    attackPos2.y += startPos + 1;
-                    break;
-                case MOVE_DIR.DOWN:
-                    attackPos1.y -= startPos;
-                    attackPos2.y -= startPos + 1;
-                    break;
-            }
-
-            StartCoroutine(ChainAttack(attackPos1, attackPos2));
-        }
-
-        public System.Collections.IEnumerator ChainAttack(Vector3 attackPos1, Vector3 attackPos2)
-        {
-            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos1));
-            GameManager.instance.curLevel.AttackOtherPlayer(attackPos1);
-            yield return new WaitForSeconds(0.2f);
-
-            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos2));
-            GameManager.instance.curLevel.AttackOtherPlayer(attackPos2);
-        }
-
+        
         public void Attack(Vector3 attackPos)
         {
-            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos));
+            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos, myShip.curWeapon));
 
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
         }
@@ -819,6 +827,8 @@ namespace Completed
 		{
             if (myShip.Shield()) myShip.Damaged(loss);
             else Destoryed();
+
+            if (myShip.shield < 0) Destoryed();
 		}
 		
 		private void Destoryed()
