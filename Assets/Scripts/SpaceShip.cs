@@ -10,12 +10,6 @@ namespace Completed
 
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
-        public int powerSupply = 0;
-
-        public int reloadPower = 1;
-        public int scopePower = 1;
-        public int shotPower = 1;
-        public int movePower = 1;
 
         public bool canMove = true;
         
@@ -24,16 +18,13 @@ namespace Completed
 
         List<int> storage = new List<int>();
 
-        public int controlPower;
-        public int controlPowerInit = 50;
-
         public int shield;
         public int shieldInit = 10;
         
         public float moveTime;
-        public float moveTimeInit = 0.45f;
+        public float moveTimeInit = 0.4f;
 
-        public Weapon curWeapon;        
+        public Weapon curWeapon;
 
         public int scopeRange;
         public int scopeRangeInit = 2;
@@ -41,7 +32,6 @@ namespace Completed
         public void ReadyToDeparture(Weapon weapon)
         {
             curWeapon = weapon;
-            powerSupply = 0;
             for (int i = 0; i < numOfBullets.Length; i++)
             {
                 numOfBullets[i] = 0;
@@ -54,7 +44,6 @@ namespace Completed
 
             shield = shieldInit;
             moveTime = moveTimeInit;
-            controlPower = controlPowerInit;
             curWeapon.Init();            
             scopeRange = scopeRangeInit;
         }
@@ -63,13 +52,11 @@ namespace Completed
         {
             totalBullets[0] = Ammo1;
             totalBullets[1] = Ammo2;
-            powerSupply = supply;
         }
 
         public void Move()
         {
             canMove = false;
-            ConsumePower(movePower + scopePower);
         }
 
         public bool Shot(int input)
@@ -82,24 +69,11 @@ namespace Completed
             }
 
             numOfBullets[input]--;
-            ConsumePower(shotPower);
             curWeapon.canShot = false;
             return true;
-
         }
 
-        public bool IsPowerDown()
-        {
-            return controlPower < 0;
-        }
-
-        public void UpdatePowerState()
-        {
-            if (controlPower < 0)
-                ConsumePower(controlPower);
-        }
-
-        public void UpdateScope(int value)
+		public void UpdateScope(int value)
         {
             if (value != 0) scopeRange = value;
             else scopeRange = scopeRangeInit;
@@ -127,8 +101,6 @@ namespace Completed
 
                 totalBullets[indexReload] -= relaodNum;
                 numOfBullets[indexReload] += relaodNum;
-                                
-                ConsumePower(reloadPower);
             }
         }
 
@@ -147,15 +119,6 @@ namespace Completed
             }
         }
 
-        public void ChargePower()
-        {
-            if (powerSupply > 0)
-            {
-                powerSupply--;
-                controlPower += 10;
-            }
-        }
-
         public bool Shield()
         {
             return shield > 0;
@@ -165,15 +128,5 @@ namespace Completed
         {
             shield -= damage;
         }
-
-        public void ConsumePower(int consume)
-        {
-//            controlPower -= consume;
-        }
-
-        public bool LowerPower()
-        {
-            return controlPower < controlPowerInit / 5;
-        }        
     }
 }

@@ -78,14 +78,7 @@ namespace Completed
         public int unitId = 1;
         public bool myPlayer = false;
         public GameObject display;
-        public AudioClip moveSound1;
-        public AudioClip moveSound2;
-        public AudioClip eatSound1;
-        public AudioClip eatSound2;
-        public AudioClip drinkSound1;
-        public AudioClip drinkSound2;
-        public AudioClip gameOverSound;
-
+        
         public Weapon weaponP = new Weapon(15, 1.5f, 3, 1, 0.5f, 2);
         public Weapon weaponM = new Weapon(4, 0.6f, 2.0f, 2, 0.3f, 5);
         public Weapon weaponS = new Weapon(2, 0.2f, 1.5f, 3, 0.2f, 10);
@@ -105,13 +98,14 @@ namespace Completed
         {
             bLockDir = !bLockDir;
         }
+			
 
         public void Init()
         {            
             UpdateDirImage();
 
             myShip = new SpaceShip();
-            myShip.ReadyToDeparture(weaponS); 
+			myShip.ReadyToDeparture(weaponM); 
             
             if (myPlayer)
             {
@@ -290,8 +284,6 @@ namespace Completed
             if (myPlayer)
             {
                 GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
-                myShip.UpdatePowerState();
-                if (myShip.IsPowerDown()) Destoryed();
             }            
 
             if (myShip.startReload)
@@ -794,7 +786,7 @@ namespace Completed
 			base.AttemptMove <T> (xDir, yDir);
 			RaycastHit2D hit;
 			if (Move (xDir, yDir, out hit)) {
-				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
+//				SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
 
 				GameManager.instance.curLevel.SetMapOfUnits(transform.position, 0);
 				GameManager.instance.curLevel.SetMapOfUnits(nextPos, 1);
@@ -835,7 +827,7 @@ namespace Completed
 		{
             if (myPlayer)
             {
-                SoundManager.instance.PlaySingle(gameOverSound);
+//                SoundManager.instance.PlaySingle(gameOverSound);
                 SoundManager.instance.musicSource.Stop();
                 GameManager.instance.GameOver();
             }
