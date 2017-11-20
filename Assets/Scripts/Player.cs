@@ -6,10 +6,11 @@ using System.Collections.Generic;
 namespace Completed
 {
     public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
-    public enum WEAPON_TYPE { FRONT_1, FRONT_2 };    
 
     public class Weapon
     {
+        public int bulletSpeed = 30;
+
         public int capability = 10;
         public int weaponDamage = 4;
 
@@ -25,7 +26,7 @@ namespace Completed
         public float aniDelay = 0.3f;
 
 
-        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability)
+        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability, int _bulletSpeed)
         {
             weaponDamage = _damage;
             shotTimeInit = _shotTime;
@@ -33,6 +34,7 @@ namespace Completed
             shotAniSpeed = _shotAniSpeed;
             aniDelay = _aniDelay;
             capability = _capability;
+            bulletSpeed = _bulletSpeed;
         }
 
         public void Init()
@@ -55,7 +57,6 @@ namespace Completed
                 canShot = true;
             }
         }
-
     }
 
     public class Player : MovingObject
@@ -63,9 +64,6 @@ namespace Completed
         public SpaceShip myShip;
         public GameObject sight;
 
-        public GameObject bulletM;
-        public GameObject bulletS;
-        public GameObject bulletP;
         private GameObject curBullet;
 
         public Button shotBtn;
@@ -80,11 +78,7 @@ namespace Completed
         public Button moveLeftBtn;
         public Button moveRightBtn;
 
-        public GameObject display;
-        
-        public Weapon weaponP = new Weapon(15, 1.5f, 3, 1, 0.5f, 2);
-        public Weapon weaponM = new Weapon(4, 0.6f, 2.0f, 2, 0.3f, 5);
-        public Weapon weaponS = new Weapon(2, 0.2f, 1.5f, 3, 0.2f, 10);
+        public GameObject display;       
 
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;
@@ -92,7 +86,6 @@ namespace Completed
         Vector3 localSightPos = new Vector3(1, 0, 0);
         bool shoting = false;
         Vector3 enemyPos = new Vector3();
-        float bulletSpeed = 30f;
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -111,9 +104,8 @@ namespace Completed
         {            
             UpdateDirImage();
 
-            myShip = new SpaceShip();
-			myShip.ReadyToDeparture(weaponM);
-            curBullet = bulletM;
+            myShip = new SpaceShip(10, 0.4f, 2);
+            myShip.ReadyToDeparture(GameManager.instance.weaponM);            
             
             transform.position = Vector3.zero;
 
@@ -253,13 +245,15 @@ namespace Completed
                 Vector3 moveDir = enemyPos - bulletPos;
                 float length = moveDir.sqrMagnitude;
                 moveDir.Normalize();
-                bulletPos += (moveDir*Time.deltaTime* bulletSpeed);
+                bulletPos += (moveDir*Time.deltaTime* myShip.curWeapon.bulletSpeed);
                 curBullet.transform.position = bulletPos;
 
                 if (length < 0.1f)
                 {
                     shoting = false;
                     curBullet.SetActive(false);
+                    StartCoroutine(GameManager.instance.ShowShotEffect(enemyPos, myShip.curWeapon));
+                    GameManager.instance.curLevel.AttackOtherPlayer(enemyPos);
                 }
             }
 
@@ -389,21 +383,28 @@ namespace Completed
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
-
-            
 		}
 
-       
-        
         public void AttempAttackAtSight()
         {
             if (myShip.Shot(0)) Attack(sight.transform.position);
         }
 
-
         public void  AttempAttack(int input)
         {
-            if (myShip.Shot(input)) Attack(sight.transform.position);            
+            bool enableShot = false;
+            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
+            foreach (Vector3 pos in showRange)
+            {
+                if (pos == sight.transform.position)
+                {
+                    enableShot = true;
+                    break;
+                }
+            }
+            if (enableShot == false) return;
+
+            if (myShip.Shot(input)) Attack(sight.transform.position);
         }
 
         public bool CheckDirChanged(int xDir, int yDir)
@@ -538,16 +539,13 @@ namespace Completed
         
         public void Attack(Vector3 attackPos)
         {
-            StartCoroutine(GameManager.instance.ShowShotEffect(attackPos, myShip.curWeapon));
-
-            GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
             if(shoting == false)
             {
+                curBullet = GameManager.instance.GetBullet(1);
                 shoting = true;
                 curBullet.transform.position = transform.position;
                 enemyPos = attackPos;
-                bulletSpeed = 30f;
-                curBullet.SetActive(true);
+                curBullet.SetActive(true);                
             }            
         }
         

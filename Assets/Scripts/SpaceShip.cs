@@ -29,6 +29,13 @@ namespace Completed
         public int scopeRange;
         public int scopeRangeInit = 2;
 
+        public SpaceShip(int _shieldInit, float _moveTimeInit, int _scopeRangeInit)
+        {
+            shieldInit = _shieldInit;
+            moveTimeInit = _moveTimeInit;
+            scopeRangeInit = _scopeRangeInit;
+        }
+
         public void ReadyToDeparture(Weapon weapon)
         {
             curWeapon = weapon;
@@ -75,7 +82,7 @@ namespace Completed
 
 		public void UpdateScope(int value)
         {
-            if (value != 0) scopeRange = value;
+            if (value != 0 && value != 1) scopeRange = value;
             else scopeRange = scopeRangeInit;
         }
 

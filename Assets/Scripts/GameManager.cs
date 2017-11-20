@@ -24,7 +24,6 @@ namespace Completed
 
         public List<GameObject> items = new List<GameObject>();
         public List<GameObject> tiles = new List<GameObject>();
-//        public List<Player> otherPlayers = new List<Player>();
         public List<Enemy> enemies = new List<Enemy>();
 
         public void AddEnemyToList(Enemy script)
@@ -348,8 +347,17 @@ powerSupply : {5}
 			msgTimer = time;
 		}
 
+        public Weapon weaponP = new Weapon(15, 2f, 3f, 1, 0.5f, 2, 5);
+        public Weapon weaponM = new Weapon(4, 1f, 2f, 2, 0.3f, 5, 10);
+        public Weapon weaponS = new Weapon(2, 0.5f, 1.5f, 3, 0.2f, 10, 20);
+
         public GameObject[] bulletMInstances = new GameObject[20];
         public GameObject bulletMTile;
+        public GameObject[] bulletPInstances = new GameObject[20];
+        public GameObject bulletPTile;
+        public GameObject[] bulletSInstances = new GameObject[20];
+        public GameObject bulletSTile;
+
         public GameObject[] shotInstances = new GameObject[8];
         public GameObject shotTile;        
 
@@ -364,13 +372,34 @@ powerSupply : {5}
             explosionInstance.SetActive(false);
 		}
 
-        int bulletIndex = 0;
-        public GameObject GetBullet()
-        {
-            bulletIndex++;
-            if (bulletIndex >= bulletMInstances.Length) bulletIndex = 0;
+        int bulletMIndex = 0;
+        int bulletSIndex = 0;
+        int bulletPIndex = 0;
 
-            return bulletMInstances[bulletIndex];
+        public GameObject GetBullet(int type)
+        {
+            if(type == 0)
+            {
+                bulletSIndex++;
+                if (bulletSIndex >= bulletSInstances.Length) bulletSIndex = 0;
+
+                return bulletSInstances[bulletSIndex];
+            }
+            else if (type == 1)
+            {
+                bulletMIndex++;
+                if (bulletMIndex >= bulletMInstances.Length) bulletMIndex = 0;
+
+                return bulletMInstances[bulletSIndex];
+            }
+            else
+            {
+                bulletPIndex++;
+                if (bulletPIndex >= bulletPInstances.Length) bulletPIndex = 0;
+
+                return bulletPInstances[bulletSIndex];
+            }
+
         }
         
         int shotEffectIndex = 0;
@@ -463,7 +492,6 @@ powerSupply : {5}
             }
 
             return showRangeOneSideView;
-//            return showRange;
         }
         
         public void ShowObjs(Vector3 playerPos, MOVE_DIR dir, int range)
@@ -616,7 +644,17 @@ powerSupply : {5}
                 bulletMInstances[i] = Instantiate(bulletMTile, transform.position, Quaternion.identity);
                 bulletMInstances[i].SetActive(false);
             }
-            
+            for (int i = 0; i < bulletSInstances.Length; i++)
+            {
+                bulletSInstances[i] = Instantiate(bulletSTile, transform.position, Quaternion.identity);
+                bulletSInstances[i].SetActive(false);
+            }
+            for (int i = 0; i < bulletPInstances.Length; i++)
+            {
+                bulletPInstances[i] = Instantiate(bulletPTile, transform.position, Quaternion.identity);
+                bulletPInstances[i].SetActive(false);
+            }
+
 
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
@@ -680,7 +718,7 @@ powerSupply : {5}
             }
             UpdateViewMode();
 
-            UpdateOtherPlayersScope();
+//            UpdateOtherPlayersScope();
 
             if(curPage == PAGE.MISSION) UpdateStorage();
 

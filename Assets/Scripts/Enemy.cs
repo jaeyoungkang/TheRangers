@@ -11,12 +11,16 @@ namespace Completed
         public SpaceShip myShip;
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;
-        private GameObject curBullet;
-        public Weapon weaponS = new Weapon(2, 0.2f, 1.5f, 3, 0.2f, 10);
-        bool shoting = false;
-        Vector3 enemyPos = new Vector3();
-        float bulletSpeed = 30f;
-        public GameObject bulletS;
+
+        Player player;
+
+        class bulletInfo
+        {
+            public GameObject bullet;
+            public Vector3 targetPos = new Vector3();
+        }
+
+        List<bulletInfo> bullets = new List<bulletInfo>();
 
         protected override void OnCantMove<T>(T component)
         {
@@ -25,39 +29,65 @@ namespace Completed
 
         protected override void Start()
         {
-            base.Start();
+            base.Start();            
 
-            myShip = new SpaceShip();
-            myShip.ReadyToDeparture(weaponS);
-            curBullet = bulletS;
+            if(type == 0)
+            {
+                myShip = new SpaceShip(5, 0.4f, 2);
+                myShip.ReadyToDeparture(GameManager.instance.weaponS);
+            }
+            else if (type == 1)
+            {
+                myShip = new SpaceShip(10, 0.5f, 2);
+                myShip.ReadyToDeparture(GameManager.instance.weaponM);
+            }
+            else if (type == 2)
+            {
+                myShip = new SpaceShip(15, 0.6f, 3);
+                myShip.ReadyToDeparture(GameManager.instance.weaponP);
+            }
+            else if (type == 3)
+            {
+                myShip = new SpaceShip(50, 0.6f, 5);
+                myShip.ReadyToDeparture(GameManager.instance.weaponP);
+            }
 
             GameManager.instance.curLevel.AddEnemyToList(this);
-
-            Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
-
-            if (type == 1) renderer.sortingLayerName = "Player";
-            else renderer.sortingLayerName = "Enemy";
-
+            player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         }
 
         void Update()
         {
             if (GameManager.instance.doingSetup) return;
 
-            if (shoting)
+            int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
+            myShip.UpdateScope(value);
+
+            List<bulletInfo> deleteBullet = new List<bulletInfo>();
+            foreach(bulletInfo bInfo in bullets)
             {
-                Vector3 bulletPos = curBullet.transform.position;
-                Vector3 moveDir = enemyPos - bulletPos;
+                Vector3 bulletPos = bInfo.bullet.transform.position;
+                Vector3 moveDir = bInfo.targetPos - bulletPos;
                 float length = moveDir.sqrMagnitude;
                 moveDir.Normalize();
-                bulletPos += (moveDir * Time.deltaTime * bulletSpeed);
-                curBullet.transform.position = bulletPos;
+                bulletPos += (moveDir * Time.deltaTime * myShip.curWeapon.bulletSpeed);
+                bInfo.bullet.transform.position = bulletPos;
 
                 if (length < 0.1f)
                 {
-                    shoting = false;
-                    curBullet.SetActive(false);
+                    bInfo.bullet.SetActive(false);
+                    if (bInfo.targetPos == player.transform.position)
+                    {
+                        StartCoroutine(GameManager.instance.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
+                        player.LoseHP(myShip.curWeapon.weaponDamage);
+                    }
+                    deleteBullet.Add(bInfo);
                 }
+            }
+
+            foreach (bulletInfo bInfo in deleteBullet)
+            {
+                bullets.Remove(bInfo);
             }
 
             if (myShip.canMove == false)
@@ -91,7 +121,7 @@ namespace Completed
         private Vector3 targetPos = Vector3.zero;
         public void AutoMove()
         {
-            if (type == 1)
+            if (type == 2)
             {
                 AutoMoveUnit01();
                 return;
@@ -103,8 +133,6 @@ namespace Completed
             }
 
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
             bool found = false;
             foreach (Vector3 pos in showRange)
             {
@@ -118,49 +146,12 @@ namespace Completed
             }
 
             if (found)
-            {
-                float deltaX = Mathf.Abs(transform.position.x - player.transform.position.x);
-                float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
-
-                bool inRange = false;
-                if (deltaX + deltaY <= weaponRangeMax && deltaX + deltaY >= weaponRangeMin)
-                {
-                    inRange = true;
-                }
-
-                if (inRange)
-                {
-                    if (myShip.curWeapon.canShot)
-                    {
-                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                        player.LoseHP(myShip.curWeapon.weaponDamage);
-                        myShip.curWeapon.canShot = false;
-                        if (shoting == false)
-                        {
-                            curBullet = GameManager.instance.GetBullet();
-                            curBullet.SetActive(true);
-                            curBullet.transform.position = transform.position;
-                            shoting = true;
-                            enemyPos = player.transform.position;
-                            bulletSpeed = 30f;
-                        }
-                    }
-                }
-                else
-                {
-                    int xDir = 0;
-                    int yDir = 0;
-                    if (deltaX < deltaY)
-                    {
-                        xDir = player.transform.position.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
-                    }
-                    else
-                    {
-                        yDir = player.transform.position.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
-                    }
-
-                    AttemptMove<Player>(xDir, yDir);
-                }
+            {              
+                if (myShip.curWeapon.canShot)
+                {                    
+                    myShip.curWeapon.canShot = false;
+                    FireBullet(player.transform.position);                    
+                }              
             }
             else if (targetPos != Vector3.zero)
             {
@@ -197,6 +188,16 @@ namespace Completed
                 }
                 AttemptMove<Player>(xDir, yDir);
             }
+        }
+        
+        public void FireBullet(Vector3 targetPos)
+        {
+            bulletInfo bInfo = new bulletInfo();
+            bInfo.bullet = GameManager.instance.GetBullet(type);
+            bInfo.bullet.SetActive(true);
+            bInfo.bullet.transform.position = transform.position;
+            bInfo.targetPos = targetPos;
+            bullets.Add(bInfo);
         }
 
         public bool CheckDirChanged(int xDir, int yDir)
@@ -302,7 +303,6 @@ namespace Completed
             showRange.Add(range);
             range.x -= 1;
             showRange.Add(range);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
             foreach (Vector3 pos in showRange)
@@ -318,10 +318,9 @@ namespace Completed
             if (found)
             {
                 if (myShip.curWeapon.canShot)
-                {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                    player.LoseHP(myShip.curWeapon.weaponDamage);
+                {                    
                     myShip.curWeapon.canShot = false;
+                    FireBullet(player.transform.position);
                 }
             }
             else
@@ -346,7 +345,6 @@ namespace Completed
         public void AutoMoveUnit01()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             bool found = false;
             foreach (Vector3 pos in showRange)
@@ -361,10 +359,10 @@ namespace Completed
 
             if (found)
             {
-                if (myShip.Shot(0))
+                if (myShip.curWeapon.canShot)
                 {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                    player.LoseHP(myShip.curWeapon.weaponDamage);
+                    myShip.curWeapon.canShot = false;
+                    FireBullet(player.transform.position);
                 }
             }
             else
@@ -379,8 +377,8 @@ namespace Completed
                     case MOVE_DIR.DOWN: xDir = -1; break;
                 }
 
-//                ChangeDir(xDir, yDir);
-//                UpdateDirImage();
+                ChangeDir(xDir, yDir);
+                UpdateDirImage();
                 myShip.Move();
             }
         }
