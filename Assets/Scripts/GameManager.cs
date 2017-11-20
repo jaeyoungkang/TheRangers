@@ -347,9 +347,9 @@ powerSupply : {5}
 			msgTimer = time;
 		}
 
-        public Weapon weaponP = new Weapon(15, 2f, 3f, 1, 0.5f, 2, 5);
-        public Weapon weaponM = new Weapon(4, 1f, 2f, 2, 0.3f, 5, 10);
-        public Weapon weaponS = new Weapon(2, 0.5f, 1.5f, 3, 0.2f, 10, 20);
+        public Weapon weaponS = new Weapon(2, 1f, 2f, 3, 0.2f, 10, 20, "Speed Gun", 0);
+        public Weapon weaponM = new Weapon(4, 2f, 3f, 2, 0.3f, 5, 10, "Normal Gun", 1);
+        public Weapon weaponP = new Weapon(15, 4f, 5f, 1, 0.5f, 2, 5, "Power Gun", 2);        
 
         public GameObject[] bulletMInstances = new GameObject[20];
         public GameObject bulletMTile;
@@ -586,7 +586,10 @@ powerSupply : {5}
                 if (renderer)
                 {
                     Color color = renderer.color;
-                    if (bShow) color = Color.red;
+                    if (bShow)
+                    {
+                        color = Color.gray;                        
+                    }
                     renderer.color = color;
                 }
             }
@@ -718,7 +721,7 @@ powerSupply : {5}
             }
             UpdateViewMode();
 
-//            UpdateOtherPlayersScope();
+            UpdateOtherPlayersScope();
 
             if(curPage == PAGE.MISSION) UpdateStorage();
 
@@ -753,7 +756,7 @@ powerSupply : {5}
 
             foreach(Enemy en in curLevel.enemies)
             {
-                if(en.type == 1)
+                if(en.type == 2)
                 {
                     positions.Add(en.transform.position);
                     dirs.Add(en.curDir);

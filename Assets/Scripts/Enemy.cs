@@ -33,23 +33,23 @@ namespace Completed
 
             if(type == 0)
             {
-                myShip = new SpaceShip(5, 0.4f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.weaponS);
+                myShip = new SpaceShip(3, 0.4f, 2);
+                myShip.ReadyToDeparture(GameManager.instance.weaponS, 50, 0 ,0 );
             }
             else if (type == 1)
             {
-                myShip = new SpaceShip(10, 0.5f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.weaponM);
+                myShip = new SpaceShip(5, 0.5f, 2);
+                myShip.ReadyToDeparture(GameManager.instance.weaponM, 0, 50, 0);
             }
             else if (type == 2)
             {
-                myShip = new SpaceShip(15, 0.6f, 3);
-                myShip.ReadyToDeparture(GameManager.instance.weaponP);
+                myShip = new SpaceShip(10, 1.0f, 3);
+                myShip.ReadyToDeparture(GameManager.instance.weaponP, 0, 0, 50);
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(50, 0.6f, 5);
-                myShip.ReadyToDeparture(GameManager.instance.weaponP);
+                myShip.ReadyToDeparture(GameManager.instance.weaponP, 0, 0, 50);
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);
@@ -146,7 +146,7 @@ namespace Completed
             }
 
             if (found)
-            {              
+            {                
                 if (myShip.curWeapon.canShot)
                 {                    
                     myShip.curWeapon.canShot = false;
@@ -192,12 +192,16 @@ namespace Completed
         
         public void FireBullet(Vector3 targetPos)
         {
-            bulletInfo bInfo = new bulletInfo();
-            bInfo.bullet = GameManager.instance.GetBullet(type);
-            bInfo.bullet.SetActive(true);
-            bInfo.bullet.transform.position = transform.position;
-            bInfo.targetPos = targetPos;
-            bullets.Add(bInfo);
+            int rValue = Random.Range(0, 3);
+            if (rValue == 0)
+            {
+                bulletInfo bInfo = new bulletInfo();
+                bInfo.bullet = GameManager.instance.GetBullet(myShip.curWeapon.bType);
+                bInfo.bullet.SetActive(true);
+                bInfo.bullet.transform.position = transform.position;
+                bInfo.targetPos = targetPos;
+                bullets.Add(bInfo);
+            }            
         }
 
         public bool CheckDirChanged(int xDir, int yDir)

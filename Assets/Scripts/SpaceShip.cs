@@ -14,6 +14,8 @@ namespace Completed
         public bool canMove = true;
         
         public bool startReload = false;
+        public bool startChangeWeapon = false;
+
         public int indexReload = 0;
 
         List<int> storage = new List<int>();
@@ -23,6 +25,9 @@ namespace Completed
         
         public float moveTime;
         public float moveTimeInit = 0.4f;
+
+        public float weaponChangeTime;
+        public float weaponChangeTimeInit = 1f;
 
         public Weapon curWeapon;
 
@@ -36,9 +41,26 @@ namespace Completed
             scopeRangeInit = _scopeRangeInit;
         }
 
-        public void ReadyToDeparture(Weapon weapon)
+        public void SetWeapon(Weapon weapon)
         {
+            if(curWeapon  != null)
+            {
+                totalBullets[curWeapon.bType] = totalBullets[curWeapon.bType] + numOfBullets[curWeapon.bType];
+                numOfBullets[curWeapon.bType] = 0;
+            }                
+
             curWeapon = weapon;
+            startChangeWeapon = true;            
+        }
+
+        public void InitWeaponAmmo(int index, int total)
+        {
+            numOfBullets[index] = 0;
+            totalBullets[index] = total;
+        }
+
+        public void ReadyToDeparture(Weapon weapon, int totalBulletType0, int totalBulletType1, int totalBulletType2)
+        {            
             for (int i = 0; i < numOfBullets.Length; i++)
             {
                 numOfBullets[i] = 0;
@@ -48,17 +70,15 @@ namespace Completed
             {
                 totalBullets[i] = 0;
             }
+            InitWeaponAmmo(0, totalBulletType0);
+            InitWeaponAmmo(1, totalBulletType1);
+            InitWeaponAmmo(2, totalBulletType2);
 
             shield = shieldInit;
-            moveTime = moveTimeInit;
-            curWeapon.Init();            
+            moveTime = moveTimeInit;            
             scopeRange = scopeRangeInit;
-        }
-
-        public void SetupStorage(int Ammo1, int Ammo2, int supply)
-        {
-            totalBullets[0] = Ammo1;
-            totalBullets[1] = Ammo2;
+            weaponChangeTime = weaponChangeTimeInit;
+            SetWeapon(weapon);
         }
 
         public void Move()
@@ -114,6 +134,16 @@ namespace Completed
         public void UpdateWeaponCooling()
         {
             curWeapon.UpdateWeaponCooling();            
+        }
+
+        public void UpdateWeaponChangeTime()
+        {
+            weaponChangeTime -= Time.deltaTime;
+            if (weaponChangeTime <= 0)
+            {
+                weaponChangeTime = weaponChangeTimeInit;
+                startChangeWeapon = false;
+            }
         }
 
         public void UpdateMoveCoolTime()

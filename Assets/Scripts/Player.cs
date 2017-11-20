@@ -9,6 +9,7 @@ namespace Completed
 
     public class Weapon
     {
+        public int bType;
         public int bulletSpeed = 30;
 
         public int capability = 10;
@@ -25,8 +26,9 @@ namespace Completed
         public int shotAniSpeed = 1;
         public float aniDelay = 0.3f;
 
+        public string name;
 
-        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability, int _bulletSpeed)
+        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability, int _bulletSpeed, string _name, int _bType)
         {
             weaponDamage = _damage;
             shotTimeInit = _shotTime;
@@ -35,6 +37,9 @@ namespace Completed
             aniDelay = _aniDelay;
             capability = _capability;
             bulletSpeed = _bulletSpeed;
+            name = _name;
+            bType = _bType;
+            Init();
         }
 
         public void Init()
@@ -105,8 +110,8 @@ namespace Completed
             UpdateDirImage();
 
             myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(GameManager.instance.weaponM);            
-            
+            myShip.ReadyToDeparture(GameManager.instance.weaponM, 30, 10, 5);            
+
             transform.position = Vector3.zero;
 
             shotBtn.onClick.AddListener(AttempAttackAtSight);
@@ -120,9 +125,7 @@ namespace Completed
             moveUpBtn.onClick.AddListener(MoveUp);
             moveDownBtn.onClick.AddListener(MoveDown);
             moveRightBtn.onClick.AddListener(MoveRight);
-            moveLeftBtn.onClick.AddListener(MoveLeft);                
-
-            myShip.SetupStorage(50, 30, 10);
+            moveLeftBtn.onClick.AddListener(MoveLeft);
         }        
                 
         protected override void Start ()
@@ -210,13 +213,13 @@ namespace Completed
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
+            string weaponChangeTimeText = Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString();
+            playerInfo.curWeaponText.text = "Change Time: " + weaponChangeTimeText + "\n\n" + myShip.curWeapon.name;
             playerInfo.foodText.text = "SHIELD : " + myShip.shield;
-            playerInfo.ammoText.text = "[Ammo1 : " + myShip.numOfBullets[0] + "/" + myShip.totalBullets[0] + "]\n\n" +
-                            "[Ammo2 : " + myShip.numOfBullets[1] + "/" + myShip.totalBullets[1] + "]";
+            playerInfo.ammoText.text = "[Ammo : " + myShip.numOfBullets[myShip.curWeapon.bType] + "/" + myShip.totalBullets[myShip.curWeapon.bType] + "]\n\n" + "Reload Time :" + Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString();
             
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
-            if(myShip.startReload) playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString();
-            else playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
+            playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
 
             
             string greenTag = "<color=#00ff00>";
@@ -280,19 +283,35 @@ namespace Completed
             
             GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
             
-            if (myShip.startReload)
+            if(myShip.startChangeWeapon)
+            {
+                myShip.UpdateWeaponChangeTime();
+            }
+            else if (myShip.startReload)
             {
                 myShip.UpdateReload();                
-            }
+            }            
             else if (myShip.curWeapon.canShot)
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    AttempAttack(0);
+                    AttempAttack(myShip.curWeapon.bType);
                 }
                 else if (Input.GetKeyDown(KeyCode.R))
                 {
-                    myShip.Reload(0);
+                    myShip.Reload(myShip.curWeapon.bType);
+                }
+                else if (Input.GetKeyDown(KeyCode.Keypad1))
+                {
+                    myShip.SetWeapon(GameManager.instance.weaponS);
+                }
+                else if (Input.GetKeyDown(KeyCode.Keypad2))
+                {
+                    myShip.SetWeapon(GameManager.instance.weaponM);
+                }
+                else if (Input.GetKeyDown(KeyCode.Keypad3))
+                {
+                    myShip.SetWeapon(GameManager.instance.weaponP);
                 }
             }
             else
@@ -387,7 +406,7 @@ namespace Completed
 
         public void AttempAttackAtSight()
         {
-            if (myShip.Shot(0)) Attack(sight.transform.position);
+            if (myShip.Shot(myShip.curWeapon.bType)) Attack(sight.transform.position);
         }
 
         public void  AttempAttack(int input)
@@ -541,7 +560,7 @@ namespace Completed
         {
             if(shoting == false)
             {
-                curBullet = GameManager.instance.GetBullet(1);
+                curBullet = GameManager.instance.GetBullet(myShip.curWeapon.bType);
                 shoting = true;
                 curBullet.transform.position = transform.position;
                 enemyPos = attackPos;
