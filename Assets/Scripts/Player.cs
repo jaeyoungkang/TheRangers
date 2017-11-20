@@ -24,6 +24,7 @@ namespace Completed
         public int shotAniSpeed = 1;
         public float aniDelay = 0.3f;
 
+
         public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability)
         {
             weaponDamage = _damage;
@@ -62,6 +63,11 @@ namespace Completed
         public SpaceShip myShip;
         public GameObject sight;
 
+        public GameObject bulletM;
+        public GameObject bulletS;
+        public GameObject bulletP;
+        private GameObject curBullet;
+
         public Button shotBtn;
         public Button sightUpBtn;
         public Button sightDownBtn;
@@ -74,9 +80,6 @@ namespace Completed
         public Button moveLeftBtn;
         public Button moveRightBtn;
 
-        public bool autoMode = true;
-        public int unitId = 1;
-        public bool myPlayer = false;
         public GameObject display;
         
         public Weapon weaponP = new Weapon(15, 1.5f, 3, 1, 0.5f, 2);
@@ -84,7 +87,12 @@ namespace Completed
         public Weapon weaponS = new Weapon(2, 0.2f, 1.5f, 3, 0.2f, 10);
 
         public float weaponRangeMin = 0;
-        public float weaponRangeMax = 3;        
+        public float weaponRangeMax = 3;
+
+        Vector3 localSightPos = new Vector3(1, 0, 0);
+        bool shoting = false;
+        Vector3 enemyPos = new Vector3();
+        float bulletSpeed = 30f;
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -97,37 +105,30 @@ namespace Completed
         void LockDir()
         {
             bLockDir = !bLockDir;
-        }
-			
+        }			
 
         public void Init()
         {            
             UpdateDirImage();
 
             myShip = new SpaceShip();
-			myShip.ReadyToDeparture(weaponM); 
+			myShip.ReadyToDeparture(weaponM);
+            curBullet = bulletM;
             
-            if (myPlayer)
-            {
-                transform.position = Vector3.zero;
+            transform.position = Vector3.zero;
 
-                shotBtn.onClick.AddListener(AttempAttackAtSight);
-                sightUpBtn.onClick.AddListener(SightMoveUp);
-                sightDownBtn.onClick.AddListener(SightMoveDown);
-                sightRightBtn.onClick.AddListener(SightMoveRight);
-                sightLeftBtn.onClick.AddListener(SightMoveLeft);
+            shotBtn.onClick.AddListener(AttempAttackAtSight);
+            sightUpBtn.onClick.AddListener(SightMoveUp);
+            sightDownBtn.onClick.AddListener(SightMoveDown);
+            sightRightBtn.onClick.AddListener(SightMoveRight);
+            sightLeftBtn.onClick.AddListener(SightMoveLeft);
 
-                lockDirBtn.onClick.RemoveAllListeners();
-                lockDirBtn.onClick.AddListener(LockDir);
-                moveUpBtn.onClick.AddListener(MoveUp);
-                moveDownBtn.onClick.AddListener(MoveDown);
-                moveRightBtn.onClick.AddListener(MoveRight);
-                moveLeftBtn.onClick.AddListener(MoveLeft);                
-            }
-            else
-            {
-                myShip.SetupStorage(10, 10, 10);
-            }
+            lockDirBtn.onClick.RemoveAllListeners();
+            lockDirBtn.onClick.AddListener(LockDir);
+            moveUpBtn.onClick.AddListener(MoveUp);
+            moveDownBtn.onClick.AddListener(MoveDown);
+            moveRightBtn.onClick.AddListener(MoveRight);
+            moveLeftBtn.onClick.AddListener(MoveLeft);                
 
             myShip.SetupStorage(50, 30, 10);
         }        
@@ -136,16 +137,6 @@ namespace Completed
 		{
 			base.Start ();
             Init();
-
-            if (!myPlayer)
-            {
-                GameManager.instance.curLevel.AddOtherPlayerToList(this);
-
-                Renderer renderer = gameObject.GetComponent<SpriteRenderer>();
-
-                if(unitId == 1) renderer.sortingLayerName = "Player";
-                else renderer.sortingLayerName = "Enemy";                
-            }
         }
 
         void MoveUp() { AttemptMove<Wall>(0, 1); }
@@ -248,7 +239,7 @@ namespace Completed
             myShip.storageSize++;
         }
 
-        Vector3 localSightPos = new Vector3(1, 0, 0);
+        
         private void Update ()
 		{
             if (GameManager.instance.doingSetup) return;
@@ -256,62 +247,58 @@ namespace Completed
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
             myShip.UpdateScope(value);
 
-            if(myPlayer)
+            if(shoting)
             {
-                value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
-                GameManager.instance.ActivateRootBtn(value == 1);
+                Vector3 bulletPos = curBullet.transform.position;
+                Vector3 moveDir = enemyPos - bulletPos;
+                float length = moveDir.sqrMagnitude;
+                moveDir.Normalize();
+                bulletPos += (moveDir*Time.deltaTime* bulletSpeed);
+                curBullet.transform.position = bulletPos;
 
-                if (Input.GetKeyDown(KeyCode.UpArrow))
+                if (length < 0.1f)
                 {
-                    localSightPos.y += 1;
+                    shoting = false;
+                    curBullet.SetActive(false);
                 }
-                else if (Input.GetKeyDown(KeyCode.DownArrow))
-                {
-                    localSightPos.y -= 1;
-                }
-                else if (Input.GetKeyDown(KeyCode.LeftArrow))
-                {
-                    localSightPos.x -= 1;
-                }
-                else if (Input.GetKeyDown(KeyCode.RightArrow))
-                {
-                    localSightPos.x += 1;
-                }
-                UpdateSightPos();
             }
-            
 
-            if (myPlayer)
+            value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
+            GameManager.instance.ActivateRootBtn(value == 1);
+
+            if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
-            }            
-
+                localSightPos.y += 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                localSightPos.y -= 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                localSightPos.x -= 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                localSightPos.x += 1;
+            }
+            UpdateSightPos();
+            
+            GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
+            
             if (myShip.startReload)
             {
                 myShip.UpdateReload();                
             }
             else if (myShip.curWeapon.canShot)
             {
-                if(myPlayer)
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    if (Input.GetKeyDown(KeyCode.Space))
-                    {
-                        AttempAttack(0);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.R))
-                    {
-                        myShip.Reload(0);
-                    }
-
-                    //if (Input.GetKeyDown(KeyCode.Space))
-                    //{
-                    //    myShip.ChargePower();
-                    //}
-                    //else
-                    //{
-                    //    int input = GetAttackInput();
-                    //    if (input != -1) AttempAttack(input);                        
-                    //}
+                    AttempAttack(0);
+                }
+                else if (Input.GetKeyDown(KeyCode.R))
+                {
+                    myShip.Reload(0);
                 }
             }
             else
@@ -398,11 +385,7 @@ namespace Completed
                 LockDir();
             }
 
-            if (!myPlayer && autoMode)
-            {
-                AutoMove();
-            }
-            else if (horizontal != 0 || vertical != 0)
+            if (horizontal != 0 || vertical != 0)
 			{
 				AttemptMove<Wall> (horizontal, vertical);
 			}
@@ -410,206 +393,8 @@ namespace Completed
             
 		}
 
-        public int GetAttackInput()
-        {
-            if (Input.GetKeyDown("1")) return 0;
-            if (Input.GetKeyDown("2")) return 1;
-//            if (Input.GetKeyDown("3")) return 2;
-            
-            return -1;
-        }
-
-        public void AutoMoveUnit03()
-        {
-            List<Vector3> showRange = new List<Vector3>();
-            Vector3 range = transform.position;
-            range.x -= 1;
-            showRange.Add(range);
-            range.x -= 1;
-            showRange.Add(range);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
-            bool found = false;
-            foreach (Vector3 pos in showRange)
-            {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
-                if (player.transform.position == pos)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                if (myShip.Shot(0))
-                {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                    player.LoseHP(myShip.curWeapon.weaponDamage);
-                }
-            }
-            else
-            {
-                if(transform.position.x > 0)
-                {
-                    int xDir = Random.Range(-1, 1);
-                    int yDir = 0;
-
-                    AttemptMove<Player>(xDir, yDir);
-                }
-                else
-                {
-                    Vector3 pos = transform.position;
-                    pos.x = 19;
-                    transform.position = pos;
-                }
-                
-            }
-        }
-
-        public void AutoMoveUnit01()
-        {
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
-            bool found = false;
-            foreach (Vector3 pos in showRange)
-            {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
-                if (player.transform.position == pos)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                if (myShip.Shot(0))
-                {
-                    StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                    player.LoseHP(myShip.curWeapon.weaponDamage);
-                }
-            }
-            else
-            {                
-                int xDir = 0;
-                int yDir = 0;
-                switch (curDir)
-                {
-                    case MOVE_DIR.LEFT: yDir = 1; break;
-                    case MOVE_DIR.RIGHT: yDir = -1; break;
-                    case MOVE_DIR.UP: xDir = 1; break;
-                    case MOVE_DIR.DOWN: xDir = -1; break;
-                }
-
-                ChangeDir(xDir, yDir);
-                UpdateDirImage();
-                myShip.Move();
-            }            
-        }
-
-        private Vector3 targetPos = Vector3.zero; 
-        public void AutoMove()
-        {            
-            if (unitId == 1)
-            {
-                AutoMoveUnit01();
-                return;
-            }
-            else if(unitId == 3)
-            {
-                AutoMoveUnit03();
-                return;
-            }
-
-            List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
-            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-
-            bool found = false;
-            foreach(Vector3 pos in showRange)
-            {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
-                if (player.transform.position == pos)
-                {
-                    found = true;
-                    targetPos = pos;
-                    break;
-                }
-            }
-
-            if(found)
-            {
-                float deltaX = Mathf.Abs(transform.position.x - player.transform.position.x);
-                float deltaY = Mathf.Abs(transform.position.y - player.transform.position.y);
-
-                bool inRange = false;
-                if(deltaX + deltaY <= weaponRangeMax && deltaX + deltaY >= weaponRangeMin)
-                {
-                    inRange = true;
-                }
-
-                if( inRange && (deltaX < Mathf.Epsilon || deltaY < Mathf.Epsilon) )
-                {
-                    if (myShip.Shot(0))
-                    {
-                        StartCoroutine(GameManager.instance.ShowShotEffect(player.transform.position, myShip.curWeapon));
-                        player.LoseHP(myShip.curWeapon.weaponDamage);
-                    }
-                }                
-                else
-                {
-                    int xDir = 0;
-                    int yDir = 0;
-                    if (deltaX < deltaY)
-                    {
-                        xDir = player.transform.position.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
-                    }
-                    else
-                    {
-                        yDir = player.transform.position.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
-                    }
-
-                    AttemptMove<Player>(xDir, yDir);
-                }
-            }
-            else if(targetPos != Vector3.zero)
-            {
-                float deltaX = Mathf.Abs(transform.position.x - targetPos.x);
-                float deltaY = Mathf.Abs(transform.position.y - targetPos.y);
-                int xDir = 0;
-                int yDir = 0;
-                if (deltaX < deltaY)
-                {
-                    xDir = targetPos.x - transform.position.x < Mathf.Epsilon ? -1 : 1;
-                }
-                else
-                {
-                    yDir = targetPos.y - transform.position.y < Mathf.Epsilon ? -1 : 1;
-                }
-
-                AttemptMove<Player>(xDir, yDir);
-                if (deltaX + deltaY <= 2 + Mathf.Epsilon) targetPos = Vector3.zero;
-            }
-            else
-            {
-                int xDir = 0;
-                int yDir = 0;
-
-                int rand = Random.Range(0, 3);
-
-                if (rand == 0)
-                {
-                    xDir = Random.Range(0, 2) == 0 ? 1 : -1;
-                }
-                else if (rand == 1)
-                {
-                    yDir = Random.Range(0, 2) == 0 ? 1 : -1;
-                }
-                AttemptMove<Player>(xDir, yDir);
-            }
-        }
-
+       
+        
         public void AttempAttackAtSight()
         {
             if (myShip.Shot(0)) Attack(sight.transform.position);
@@ -618,9 +403,7 @@ namespace Completed
 
         public void  AttempAttack(int input)
         {
-            if (myShip.Shot(input)) Attack(sight.transform.position);
-//            if(myShip.Shot(input)) Attack2(input);
-            
+            if (myShip.Shot(input)) Attack(sight.transform.position);            
         }
 
         public bool CheckDirChanged(int xDir, int yDir)
@@ -674,73 +457,70 @@ namespace Completed
                 curDir = MOVE_DIR.DOWN;                
             }
             
-            if(myPlayer)
+            if(prevDir == MOVE_DIR.RIGHT)
             {
-                if(prevDir == MOVE_DIR.RIGHT)
+                if ( curDir == MOVE_DIR.UP)
                 {
-                    if ( curDir == MOVE_DIR.UP)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.DOWN)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.LEFT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
-                    }
+                    localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
                 }
-                if (prevDir == MOVE_DIR.UP)
+                else if (curDir == MOVE_DIR.DOWN)
                 {
-                    if (curDir == MOVE_DIR.RIGHT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.DOWN)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.LEFT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
-                    }
+                    localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
                 }
+                else if (curDir == MOVE_DIR.LEFT)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                }
+            }
+            if (prevDir == MOVE_DIR.UP)
+            {
+                if (curDir == MOVE_DIR.RIGHT)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                }
+                else if (curDir == MOVE_DIR.DOWN)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                }
+                else if (curDir == MOVE_DIR.LEFT)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                }
+            }
 
-                if (prevDir == MOVE_DIR.DOWN)
+            if (prevDir == MOVE_DIR.DOWN)
+            {
+                if (curDir == MOVE_DIR.UP)
                 {
-                    if (curDir == MOVE_DIR.UP)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.RIGHT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.LEFT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
-                    }
+                    localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
                 }
-
-                if (prevDir == MOVE_DIR.LEFT)
+                else if (curDir == MOVE_DIR.RIGHT)
                 {
-                    if (curDir == MOVE_DIR.UP)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.DOWN)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
-                    }
-                    else if (curDir == MOVE_DIR.RIGHT)
-                    {
-                        localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
-                    }
+                    localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
                 }
-                UpdateSightPos();
+                else if (curDir == MOVE_DIR.LEFT)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                }
+            }
 
-            }            
+            if (prevDir == MOVE_DIR.LEFT)
+            {
+                if (curDir == MOVE_DIR.UP)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, -90) * localSightPos;
+                }
+                else if (curDir == MOVE_DIR.DOWN)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, 90) * localSightPos;
+                }
+                else if (curDir == MOVE_DIR.RIGHT)
+                {
+                    localSightPos = Quaternion.Euler(0, 0, 180) * localSightPos;
+                }
+            }
+            UpdateSightPos();
+            
         }
         
         public void UpdateDirImage()
@@ -761,6 +541,14 @@ namespace Completed
             StartCoroutine(GameManager.instance.ShowShotEffect(attackPos, myShip.curWeapon));
 
             GameManager.instance.curLevel.AttackOtherPlayer(attackPos);
+            if(shoting == false)
+            {
+                shoting = true;
+                curBullet.transform.position = transform.position;
+                enemyPos = attackPos;
+                bulletSpeed = 30f;
+                curBullet.SetActive(true);
+            }            
         }
         
         protected override void AttemptMove <T> (int xDir, int yDir)
@@ -801,8 +589,6 @@ namespace Completed
 		
 		private void OnTriggerEnter2D (Collider2D other)
 		{
-            if (!myPlayer) return;
-
             if (other.tag == "MissionItem")
             {
                 GameManager.instance.collectionCount++;                
@@ -825,17 +611,11 @@ namespace Completed
 		
 		private void Destoryed()
 		{
-            if (myPlayer)
-            {
 //                SoundManager.instance.PlaySingle(gameOverSound);
                 SoundManager.instance.musicSource.Stop();
                 GameManager.instance.GameOver();
-            }
-            else
-            {
-                GameManager.instance.DestroyOtherPlayer(gameObject);
-                GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
-            }                       
+
+
         }
 	}
 }

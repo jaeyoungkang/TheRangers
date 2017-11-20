@@ -24,17 +24,18 @@ namespace Completed
 
         public List<GameObject> items = new List<GameObject>();
         public List<GameObject> tiles = new List<GameObject>();
-        public List<Player> otherPlayers = new List<Player>();
+//        public List<Player> otherPlayers = new List<Player>();
+        public List<Enemy> enemies = new List<Enemy>();
 
-        public void AddOtherPlayerToList(Player script)
+        public void AddEnemyToList(Enemy script)
         {
-            otherPlayers.Add(script);
+            enemies.Add(script);
         }
 
         public void AttackOtherPlayer(Vector3 targetPos)
         {
             int damage = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.curWeapon.weaponDamage;
-            foreach (Player other in otherPlayers)
+            foreach (Enemy other in enemies)
             {
                 if (targetPos == other.transform.position)
                 {
@@ -46,8 +47,8 @@ namespace Completed
 
         public void RemoveOtherPlayer(GameObject target)
         {
-            Player otherPlayer = target.GetComponent<Player>();
-            otherPlayers.Remove(otherPlayer);
+            Enemy en = target.GetComponent<Enemy>();
+            enemies.Remove(en);
             target.SetActive(false);
         }
 
@@ -92,11 +93,11 @@ namespace Completed
                     break;
             }            
             
-            foreach (Player other in otherPlayers)
+            foreach (Enemy other in enemies)
             {
                 UnityEngine.GameObject.Destroy(other.gameObject);
             }
-            otherPlayers.Clear();
+            enemies.Clear();
 
             foreach(GameObject tile in tiles)
             {
@@ -236,6 +237,7 @@ namespace Completed
 
     public class GameManager : MonoBehaviour
 	{
+        
         public int collectionCount = 0;
         public Level curLevel = new Level();
 		public float levelStartDelay = 2f;						
@@ -345,7 +347,9 @@ powerSupply : {5}
             gameMessage.text = msg;
 			msgTimer = time;
 		}
-        
+
+        public GameObject[] bulletMInstances = new GameObject[20];
+        public GameObject bulletMTile;
         public GameObject[] shotInstances = new GameObject[8];
         public GameObject shotTile;        
 
@@ -359,6 +363,15 @@ powerSupply : {5}
 			yield return new WaitForSeconds(0.5f);
             explosionInstance.SetActive(false);
 		}
+
+        int bulletIndex = 0;
+        public GameObject GetBullet()
+        {
+            bulletIndex++;
+            if (bulletIndex >= bulletMInstances.Length) bulletIndex = 0;
+
+            return bulletMInstances[bulletIndex];
+        }
         
         int shotEffectIndex = 0;
         public IEnumerator ShowShotEffect(Vector3 targetPos, Weapon weapon)
@@ -597,7 +610,14 @@ powerSupply : {5}
                         
             explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
             explosionInstance.SetActive(false);
-            			
+
+            for (int i = 0; i < bulletMInstances.Length; i++)
+            {
+                bulletMInstances[i] = Instantiate(bulletMTile, transform.position, Quaternion.identity);
+                bulletMInstances[i].SetActive(false);
+            }
+            
+
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
 						
@@ -652,7 +672,7 @@ powerSupply : {5}
                 }
 			}
 
-            enemyText.text = "Enemy: " + curLevel.otherPlayers.Count;
+            enemyText.text = "Enemy: " + curLevel.enemies.Count;
             
             if (curViewMode == LOCAL_VIEW)
             {                
@@ -670,7 +690,7 @@ powerSupply : {5}
                 {
                     case 1:
                     case 2:
-                        if (curLevel.otherPlayers.Count == 0)
+                        if (curLevel.enemies.Count == 0)
                         {
                             Win();
                         }
@@ -693,13 +713,13 @@ powerSupply : {5}
             List<MOVE_DIR> dirs = new List<MOVE_DIR>();
             List<int> ranges = new List<int>();
 
-            foreach(Player other in curLevel.otherPlayers)
+            foreach(Enemy en in curLevel.enemies)
             {
-                if(other.unitId == 1)
+                if(en.type == 1)
                 {
-                    positions.Add(other.transform.position);
-                    dirs.Add(other.curDir);
-                    ranges.Add(other.myShip.scopeRange);
+                    positions.Add(en.transform.position);
+                    dirs.Add(en.curDir);
+                    ranges.Add(en.myShip.scopeRange);
                 }                
             }            
 

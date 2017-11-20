@@ -29,7 +29,7 @@ namespace Completed
         public GameObject exit;
 		public GameObject[] floorTiles;									
 		public GameObject[] itemTiles;
- 
+        
         public GameObject shelterTile;
         public GameObject radarTile;
 
@@ -149,7 +149,8 @@ namespace Completed
                 }                
             }
             
-		}
+            
+        }
 
         void LayoutStructure(Vector3 pos, int range)
         {
