@@ -17,8 +17,8 @@ namespace Completed
         public GameObject radarTile;
 
         public GameObject[] enemyTiles;
-		public GameObject[] outerWallTiles;								
-		
+		public GameObject[] outerWallTiles;
+                
 		private Transform boardHolder;									
 		private List <Vector3> gridPositions = new List <Vector3> ();	                          
 		
@@ -80,7 +80,7 @@ namespace Completed
 
             InitialiseList ();
 
-            LayoutStructuresByFile(curLevel.filePath);            
+            LayoutStructuresByFile(curLevel.mapData);            
         }
 
         void LayoutStructure(Vector3 pos, int range)
@@ -112,10 +112,11 @@ namespace Completed
             GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);         
         }
 
-        void LayoutStructuresByFile(string filePath)
+        void LayoutStructuresByFile(string mapData)
         {
-            string[] lines = System.IO.File.ReadAllLines(filePath);
-            
+            string[] stringSeparators = new string[] { "\r\n" };
+            string[] lines = mapData.Split(stringSeparators, System.StringSplitOptions.None);
+                        
             int x = 0;
             int y = lines.Length;
             foreach(string str in lines)

@@ -14,6 +14,8 @@ namespace Completed
         public Level curLevel = new Level();
         public LevelEfx lvEfx = new LevelEfx();
 
+        public TextAsset[] maps;
+
         private GameObject gatewayPage;
         private Text universeText;
         public Text gameMessage;
@@ -300,7 +302,8 @@ namespace Completed
             curLevel.Init();
                         
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
-            universeText = GameObject.Find("GatewayText").GetComponent<Text>();            
+            universeText = GameObject.Find("GatewayText").GetComponent<Text>();
+            gameMessage.gameObject.SetActive(false);
 
             dropItems.Clear();
 
@@ -318,8 +321,8 @@ namespace Completed
         void InitLevel(int levelId)
         {
             doingSetup = true;
-
-            curLevel.Setup(levelId);
+                        
+            curLevel.Setup(levelId, maps[levelId-1].text);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }

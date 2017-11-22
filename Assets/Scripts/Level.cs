@@ -7,9 +7,10 @@ namespace Completed
     [System.Serializable]
     public class Level
     {
+        public string mapData;
+
         public int id;
-        public int columns, rows;
-        public string filePath;
+        public int columns, rows;        
         public int[,] mapOfUnits;
         public int[,] mapOfStructures;
         public int[,] mapOfItems;
@@ -53,29 +54,16 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Setup(int levelId)
+        public void Setup(int levelId, string _mapData)
         {
             Init();
             id = levelId;
-            switch (id)
-            {
-                case 1:
-                    filePath = "map01.txt";
-                    break;
-
-                case 2:
-                    filePath = "map02.txt";
-                    break;
-
-                case 3:
-                    filePath = "map03.txt";
-                    break;
-            }
-
-            string[] lines = System.IO.File.ReadAllLines(filePath);
+            mapData = _mapData;
+            string[] stringSeparators = new string[] { "\r\n" };
+            string[] lines = mapData.Split(stringSeparators, System.StringSplitOptions.None);
             string[] symbols = lines[0].Split(',');
             columns = symbols.Length;
-            rows = lines.Length;
+            rows = lines.Length;            
 
             MakeGameMapOfUnits(columns, rows);
             MakeGameMapOfStructures(columns, rows);
@@ -84,8 +72,7 @@ namespace Completed
 
         public void Init()
         {
-            filePath = "";            
-
+            mapData = "";
             enemies.Clear();
             tiles.Clear();
             items.Clear();
