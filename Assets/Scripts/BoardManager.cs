@@ -7,25 +7,8 @@ namespace Completed
 {
     public class BoardManager : MonoBehaviour
 	{
-		// Using Serializable allows us to embed a class with sub properties in the inspector.
-		[Serializable]
-		public class Count
-		{
-			public int minimum; 			//Minimum value for our Count class.
-			public int maximum; 			//Maximum value for our Count class.
-			
-			
-			//Assignment constructor.
-			public Count (int min, int max)
-			{
-				minimum = min;
-				maximum = max;
-			}
-		}		
-		
 		public int columns = 5;
-		public int rows = 5;
-        public GameObject rootBox;
+		public int rows = 5;        
         public GameObject exit;
 		public GameObject[] floorTiles;									
 		public GameObject[] itemTiles;
@@ -106,50 +89,13 @@ namespace Completed
             GameManager.instance.curLevel.AddItem(obj);
         }       
  
-        public void DropItem(Vector3 dropPos)
-        {
-            GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
-            GameManager.instance.curLevel.SetMapOfItems(dropPos, 1);            
-
-            //int randomValue = Random.Range(0, 8);
-            //if(randomValue < 3)
-            //{
-            //    GameObject item = Instantiate(itemTiles[0], dropPos, Quaternion.identity);
-            //    GameManager.instance.curLevel.AddItem(item);
-            //}
-            //else if(randomValue == 4)
-            //{
-            //    LayoutItem(itemTiles[1], dropPos);
-            //}
-            //else if (randomValue == 5)
-            //{
-            //    LayoutItem(itemTiles[2], dropPos);
-            //}
-        }
-
         public void SetupScene (Level curLevel)
 		{
 			BoardSetup (curLevel);
 
             InitialiseList ();
 
-            LayoutStructuresByFile(curLevel.filePath);
-
-            if(curLevel.id == 3)
-            {
-                int missionItemCount = 0;
-                while(missionItemCount < curLevel.collectMission)
-                {
-                    Vector3 rPos = RandomPosition();
-                    if(curLevel.GetMapOfStructures(rPos) == 0 && curLevel.GetMapOfUnits(rPos) == 0)
-                    {
-                        LayoutItemById(rPos, 7);
-                        missionItemCount++;
-                    }                    
-                }                
-            }
-            
-            
+            LayoutStructuresByFile(curLevel.filePath);            
         }
 
         void LayoutStructure(Vector3 pos, int range)
@@ -172,7 +118,7 @@ namespace Completed
 
         void LayoutItemById(Vector3 pos, int itemId)
         {
-            LayoutItem(itemTiles[itemId], pos);
+            // LayoutItem(itemTiles[itemId], pos);
         }
 
         void LayoutUnitById(Vector3 pos, int unitId)
@@ -207,7 +153,11 @@ namespace Completed
                         LayoutUnitById(pos, unitId);
                     x++;                               
                 }                
-            }                        
+            }
+
+            GameObject obj = Instantiate(exit, new Vector3(rows-1, columns-1, 0), Quaternion.identity);
+
+
         }
 
     }

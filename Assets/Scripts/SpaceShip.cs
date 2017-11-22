@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Completed
 {
+    [System.Serializable]
     public class SpaceShip
     {
         public int storageSize = 5;
@@ -57,6 +58,27 @@ namespace Completed
         {
             numOfBullets[index] = 0;
             totalBullets[index] = total;
+        }
+
+        public void SpeedUp(float addSpeed)
+        {
+            moveTimeInit -= addSpeed;
+        }
+
+        public void AddShield(int addShield)
+        {
+            shieldInit += addShield;
+            RestoreShield();
+        }
+
+        public void RestoreShield()
+        {
+            shield = shieldInit;
+        }
+
+        public void AddAmmo(int index, int ammoNum)
+        {
+            totalBullets[index] += ammoNum;
         }
 
         public void ReadyToDeparture(Weapon weapon, int totalBulletType0, int totalBulletType1, int totalBulletType2)

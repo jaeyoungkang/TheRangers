@@ -34,22 +34,22 @@ namespace Completed
             if(type == 0)
             {
                 myShip = new SpaceShip(3, 0.4f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.weaponS, 50, 0 ,0 );
+                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponS, 50, 0 ,0 );
             }
             else if (type == 1)
             {
                 myShip = new SpaceShip(5, 0.5f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.weaponM, 0, 50, 0);
+                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 0, 50, 0);
             }
             else if (type == 2)
             {
                 myShip = new SpaceShip(10, 1.0f, 3);
-                myShip.ReadyToDeparture(GameManager.instance.weaponP, 0, 0, 50);
+                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponP, 0, 0, 50);
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(50, 0.6f, 5);
-                myShip.ReadyToDeparture(GameManager.instance.weaponP, 0, 0, 50);
+                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponP, 0, 0, 50);
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);
@@ -78,7 +78,7 @@ namespace Completed
                     bInfo.bullet.SetActive(false);
                     if (bInfo.targetPos == player.transform.position)
                     {
-                        StartCoroutine(GameManager.instance.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
+                        StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
                         player.LoseHP(myShip.curWeapon.weaponDamage);
                     }
                     deleteBullet.Add(bInfo);
@@ -196,7 +196,7 @@ namespace Completed
             if (rValue == 0)
             {
                 bulletInfo bInfo = new bulletInfo();
-                bInfo.bullet = GameManager.instance.GetBullet(myShip.curWeapon.bType);
+                bInfo.bullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
                 bInfo.bullet.SetActive(true);
                 bInfo.bullet.transform.position = transform.position;
                 bInfo.targetPos = targetPos;

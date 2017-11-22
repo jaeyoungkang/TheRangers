@@ -1,245 +1,18 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Completed
 {
-	using System.Collections.Generic;
-    using UnityEngine.UI;
-    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };  
-
-    public class Level
-    {
-        public bool missionFinish;
-        public List<int> rewardItems = new List<int>();
-        public int rewardMoney;
-
-        public int collectMission;        
-        public int id;
-        public int columns, rows;
-        public string filePath;
-        public int[,] mapOfUnits;
-        public int[,] mapOfStructures;
-        public int[,] mapOfItems;
-
-        public List<GameObject> items = new List<GameObject>();
-        public List<GameObject> tiles = new List<GameObject>();
-        public List<Enemy> enemies = new List<Enemy>();
-
-        public void AddEnemyToList(Enemy script)
-        {
-            enemies.Add(script);
-        }
-
-        public void AttackOtherPlayer(Vector3 targetPos)
-        {
-            int damage = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.curWeapon.weaponDamage;
-            foreach (Enemy other in enemies)
-            {
-                if (targetPos == other.transform.position)
-                {
-                    other.LoseHP(damage);
-                    return;
-                }
-            }
-        }
-
-        public void RemoveOtherPlayer(GameObject target)
-        {
-            Enemy en = target.GetComponent<Enemy>();
-            enemies.Remove(en);
-            target.SetActive(false);
-        }
-
-        public void AddItem(GameObject obj)
-        {
-            items.Add(obj);
-        }
-
-        public void AddFloor(GameObject obj)
-        {
-            tiles.Add(obj);
-        }
-
-        public void Init(int levelId)
-        {
-            missionFinish = false;
-            filePath = "";
-            rewardItems.Clear();
-            rewardMoney = 0;
-            collectMission = 0;
-
-            id = levelId;
-            switch(id)
-            {
-                case 1:
-                    filePath = "map01.txt";
-                    rewardItems.Add(10);
-                    rewardMoney = 10;
-                    break;
-
-                case 2:
-                    filePath = "map02.txt";
-                    rewardItems.Add(20);
-                    rewardMoney = 10;
-                    break;
-
-                case 3:
-                    filePath = "map03.txt";
-                    collectMission = 3;
-                    rewardItems.Add(30);
-                    rewardMoney = 10;
-                    break;
-            }            
-            
-            foreach (Enemy other in enemies)
-            {
-                UnityEngine.GameObject.Destroy(other.gameObject);
-            }
-            enemies.Clear();
-
-            foreach(GameObject tile in tiles)
-            {
-                UnityEngine.GameObject.Destroy(tile);
-            }
-            tiles.Clear();
-
-            foreach(GameObject item in items)
-            {
-                UnityEngine.GameObject.Destroy(item);
-            }
-
-            string[] lines = System.IO.File.ReadAllLines(filePath);
-            string[] symbols = lines[0].Split(',');
-            columns = symbols.Length;
-            rows = lines.Length;
-
-            MakeGameMapOfUnits(columns, rows);
-            MakeGameMapOfStructures(columns, rows);
-            MakeGameMapOfItems(columns, rows);
-        }
-
-        public void MakeGameMapOfUnits(int columns, int rows)
-        {
-            mapOfUnits = new int[columns, rows];
-            for (int i = 0; i < columns; i++)
-            {
-                for (int j = 0; j < rows; j++)
-                {
-                    mapOfUnits[i, j] = 0;
-                }
-            }
-        }
-
-        public void SetMapOfUnits(Vector3 pos, int value)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfUnits.GetUpperBound(0) < x)
-                return;
-            if (y < 0 || mapOfUnits.GetUpperBound(1) < y)
-                return;
-
-            mapOfUnits[x, y] = value;
-        }
-
-        public int GetMapOfUnits(Vector3 pos)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfUnits.GetUpperBound(0) < x)
-                return 1;
-            if (y < 0 || mapOfUnits.GetUpperBound(1) < y)
-                return 1;
-
-            return mapOfUnits[x, y];
-        }
-        public void MakeGameMapOfItems(int columns, int rows)
-        {
-            mapOfItems= new int[columns, rows];
-            for (int i = 0; i < columns; i++)
-            {
-                for (int j = 0; j < rows; j++)
-                {
-                    mapOfItems[i, j] = 0;
-                }
-            }
-        }
-
-        public void MakeGameMapOfStructures(int columns, int rows)
-        {
-            mapOfStructures = new int[columns, rows];
-            for (int i = 0; i < columns; i++)
-            {
-                for (int j = 0; j < rows; j++)
-                {
-                    mapOfStructures[i, j] = 0;
-                }
-            }
-        }
-
-        public void SetMapOfStructures(Vector3 pos, int value)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfStructures.GetUpperBound(0) < x)
-                return;
-            if (y < 0 || mapOfStructures.GetUpperBound(1) < y)
-                return;
-
-            mapOfStructures[x, y] = value;
-        }
-
-        public int GetMapOfStructures(Vector3 pos)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfStructures.GetUpperBound(0) < x)
-                return 1;
-            if (y < 0 || mapOfStructures.GetUpperBound(1) < y)
-                return 1;
-
-            return mapOfStructures[x, y];
-        }
-
-        public void SetMapOfItems(Vector3 pos, int value)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfItems.GetUpperBound(0) < x)
-                return;
-            if (y < 0 || mapOfItems.GetUpperBound(1) < y)
-                return;
-
-            mapOfItems[x, y] = value;
-        }
-
-        public int GetMapOfItems(Vector3 pos)
-        {
-            int x = (int)pos.x;
-            int y = (int)pos.y;
-
-            if (x < 0 || mapOfItems.GetUpperBound(0) < x)
-                return 1;
-            if (y < 0 || mapOfItems.GetUpperBound(1) < y)
-                return 1;
-
-            return mapOfItems[x, y];
-        }
-    }
-
+    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };
 
     public class GameManager : MonoBehaviour
-	{
-        
-        public int collectionCount = 0;
+	{       
         public Level curLevel = new Level();
-		public float levelStartDelay = 2f;						
+        public LevelEfx lvEfx = new LevelEfx();
+        public float levelStartDelay = 2f;						
 		public float turnDelay = 0.1f;							
 		public int playerFoodPoints = 100;						
 		public static GameManager instance = null;				
@@ -254,89 +27,41 @@ namespace Completed
         public int storageAmmo2 = 0;
         public int powerSupply = 0;
 
-        public List<int> inven = new List<int>();
-        public int money = 10;
-        public string storageText ="";
-
         public bool doingSetup = true;
 
-        void BuyItem(int itemId)
+        public GameObject rootBox;
+        public List<GameObject> dropItems = new List<GameObject>();
+
+        public void DropItem(Vector3 dropPos)
         {
-            switch (itemId)
-            {
-                case 1: storageAmmo1++; money -= 1; break;
-                case 2: storageAmmo2++; money -= 1; break;
-                case 3: powerSupply++; money -= 1; break;
-            }
+            GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
+            GameManager.instance.curLevel.SetMapOfItems(dropPos, 1);
+            dropItems.Add(item);
         }
 
-        void SellItem(int itemId)
+        public GameObject GetDropBox(Vector3 pos)
         {
-            switch (itemId)
+            foreach (GameObject obj in dropItems)
             {
-                case 1: storageAmmo1--; money += 10; break;
-                case 2: storageAmmo2--; money += 10; break;
-                case 3: powerSupply--; money += 10; break;
+                if (obj.transform.position == pos) return obj;
             }
+
+            return null;
         }
 
-        public int gold = 0;
-        public int silver = 0;
-        public int copper = 0;
+        public void ReomveDropItem(GameObject item)
+        {            
+            dropItems.Remove(item);
 
-        void ExtendStorage()
-        {
-            if (money < 10) return;           
-
-            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().ExtendStorage();
-            money -= 10;            
-        }
-
-        // 미션 설명 및 보상 표시 - 보상을 보고 미션을 선택한다.
-        // 미션 완료시 보상 획득
-        // 미션수행과 끝난후 보상으로 업그레이드 미션에서 확실하고 큰 보상은 하나 있어야한다.
-
-        void UpdateStorage()
-        {
-            Player myPlayer = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            if (storageAmmo1 + storageAmmo2 + powerSupply < myPlayer.myShip.storageSize)
+            bool anotherItem = false;
+            foreach(GameObject obj in dropItems)
             {
-                if (Input.GetKeyDown("1")) BuyItem(1);
-                else if (Input.GetKeyDown("2")) BuyItem(2);
-                else if (Input.GetKeyDown("3")) BuyItem(3);
+                if (obj.transform.position == item.transform.position) anotherItem = true;
             }
+            if(anotherItem == false)
+                GameManager.instance.curLevel.SetMapOfItems(item.transform.position, 0);
 
-            if (Input.GetKeyDown("4") && storageAmmo1 > 0) SellItem(1);
-            else if (Input.GetKeyDown("5") && storageAmmo2 > 0) SellItem(2);
-            else if (Input.GetKeyDown("6") && powerSupply > 0) SellItem(3);
-
-            if (Input.GetKeyDown("0"))
-            {
-                ExtendStorage();
-            }
-
-            storageText = string.Format(@"
-Money : {0}
-Storage : {1} / {2}
-Ammo1 : {3}
-Ammo2 : {4}
-powerSupply : {5}
-                ", money, storageAmmo1 + storageAmmo2 + powerSupply, myPlayer.myShip.storageSize, storageAmmo1, storageAmmo2, powerSupply);
-
-            string itemName = GetItemName(curLevel.rewardItems[0]);
-            storageText += string.Format("\n\n 미션 보상 \n {0} $\n {1}", curLevel.rewardMoney, itemName);
-        }
-
-        public string GetItemName(int itemId)
-        {
-            string itemName = "";
-            switch (itemId)
-            {
-                case 10: itemName = "쿠퍼 광석"; break;
-                case 20: itemName = "실버 광석"; break;
-                case 30: itemName = "골드 광석"; break;
-            }
-            return itemName;
+            item.SetActive(false);
         }
 
         public void UpdateGameMssage(string msg, float time)
@@ -347,87 +72,13 @@ powerSupply : {5}
 			msgTimer = time;
 		}
 
-        public Weapon weaponS = new Weapon(2, 1f, 2f, 3, 0.2f, 10, 20, "Speed Gun", 0);
-        public Weapon weaponM = new Weapon(4, 2f, 3f, 2, 0.3f, 5, 10, "Normal Gun", 1);
-        public Weapon weaponP = new Weapon(15, 4f, 5f, 1, 0.5f, 2, 5, "Power Gun", 2);        
-
-        public GameObject[] bulletMInstances = new GameObject[20];
-        public GameObject bulletMTile;
-        public GameObject[] bulletPInstances = new GameObject[20];
-        public GameObject bulletPTile;
-        public GameObject[] bulletSInstances = new GameObject[20];
-        public GameObject bulletSTile;
-
-        public GameObject[] shotInstances = new GameObject[8];
-        public GameObject shotTile;        
-
-        public GameObject explosionInstance;
-		public GameObject explosionTile;
-
-		public IEnumerator ShowExplosionEffect(Vector3 targetPos)
-		{
-            explosionInstance.transform.position = targetPos;
-            explosionInstance.SetActive(true);
-			yield return new WaitForSeconds(0.5f);
-            explosionInstance.SetActive(false);
-		}
-
-        int bulletMIndex = 0;
-        int bulletSIndex = 0;
-        int bulletPIndex = 0;
-
-        public GameObject GetBullet(int type)
-        {
-            if(type == 0)
-            {
-                bulletSIndex++;
-                if (bulletSIndex >= bulletSInstances.Length) bulletSIndex = 0;
-
-                return bulletSInstances[bulletSIndex];
-            }
-            else if (type == 1)
-            {
-                bulletMIndex++;
-                if (bulletMIndex >= bulletMInstances.Length) bulletMIndex = 0;
-
-                return bulletMInstances[bulletSIndex];
-            }
-            else
-            {
-                bulletPIndex++;
-                if (bulletPIndex >= bulletPInstances.Length) bulletPIndex = 0;
-
-                return bulletPInstances[bulletSIndex];
-            }
-
-        }
-        
-        int shotEffectIndex = 0;
-        public IEnumerator ShowShotEffect(Vector3 targetPos, Weapon weapon)
-        {
-            GameObject shotInstance = shotInstances[shotEffectIndex];
-            Animator anim = shotInstance.GetComponent<Animator>();
-            if(anim)
-            {
-                anim.speed = weapon.shotAniSpeed;
-            }
-
-            shotEffectIndex++;
-            if (shotEffectIndex >= shotInstances.Length) shotEffectIndex = 0;
-
-            shotInstance.transform.position = targetPos;
-            shotInstance.SetActive(true);
-            yield return new WaitForSeconds(weapon.aniDelay);
-            shotInstance.SetActive(false);            
-        }
-
         public void DestroyOtherPlayer(GameObject target)
         {
-            StartCoroutine(ShowExplosionEffect(target.transform.position));
+            StartCoroutine(lvEfx.ShowExplosionEffect(target.transform.position));
 
             curLevel.RemoveOtherPlayer(target);
 
-            boardScript.DropItem(target.transform.position);
+            DropItem(target.transform.position);            
         }
                 
 
@@ -630,38 +281,13 @@ powerSupply : {5}
             instance.InitGame();
         }
 
-		
-		void InitGame()
+        void InitGame()
 		{
-            for(int i=0; i< shotInstances.Length; i++)
-            {
-                shotInstances[i] = Instantiate(shotTile, transform.position, Quaternion.identity);
-                shotInstances[i].SetActive(false);
-            }
-                        
-            explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
-            explosionInstance.SetActive(false);
-
-            for (int i = 0; i < bulletMInstances.Length; i++)
-            {
-                bulletMInstances[i] = Instantiate(bulletMTile, transform.position, Quaternion.identity);
-                bulletMInstances[i].SetActive(false);
-            }
-            for (int i = 0; i < bulletSInstances.Length; i++)
-            {
-                bulletSInstances[i] = Instantiate(bulletSTile, transform.position, Quaternion.identity);
-                bulletSInstances[i].SetActive(false);
-            }
-            for (int i = 0; i < bulletPInstances.Length; i++)
-            {
-                bulletPInstances[i] = Instantiate(bulletPTile, transform.position, Quaternion.identity);
-                bulletPInstances[i].SetActive(false);
-            }
-
+            lvEfx.Init();
+            curLevel.Init();
 
             enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
-            gameMessage = GameObject.Find("Msg").GetComponent<Text>();
-						
+            gameMessage = GameObject.Find("Msg").GetComponent<Text>();						
             
             InitViewMode();
             InitPages();
@@ -671,8 +297,7 @@ powerSupply : {5}
         {
             doingSetup = true;
 
-            collectionCount = 0;
-            curLevel.Init(levelId);
+            curLevel.Setup(levelId);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
@@ -682,15 +307,10 @@ powerSupply : {5}
             HideLevelImage();
         }
 
-        public void GotoMission(int id)
+        public void GotoMission()
         {
-            InitLevel(id);
+            InitLevel(3);
             ChangePage(PAGE.MISSION);
-        }
-
-        public void GotoMissionListPage()
-        {
-            ChangePage(PAGE.MISSION_LIST);
         }
 
         void HideLevelImage()
@@ -698,9 +318,7 @@ powerSupply : {5}
             ChangePage(PAGE.SPACE);
 			doingSetup = false;
             SetLocalViewMode();
-//            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().myShip.SetupStorage(storageAmmo1 * 2, storageAmmo2 * 2, powerSupply);
         }
-
         
 		void Update()
 		{
@@ -722,30 +340,6 @@ powerSupply : {5}
             UpdateViewMode();
 
             UpdateOtherPlayersScope();
-
-            if(curPage == PAGE.MISSION) UpdateStorage();
-
-            if(curPage == PAGE.SPACE && curLevel.missionFinish == false)
-            {
-                switch(curLevel.id)
-                {
-                    case 1:
-                    case 2:
-                        if (curLevel.enemies.Count == 0)
-                        {
-                            Win();
-                        }
-                        break;
-
-                    case 3:
-                        if(curLevel.collectMission == collectionCount)
-                        {
-                            Win();
-                        }
-                        break;
-                }
-                
-            }
         }
 
         void UpdateOtherPlayersScope()
@@ -770,13 +364,8 @@ powerSupply : {5}
         public void Win()
         {
             curLevel.missionFinish = true;
-            string resultMsg = "Winner Winner Chicken Dinner!";
-            string itemName = GetItemName(curLevel.rewardItems[0]);
-            resultMsg += string.Format("\n\n 미션 보상 \n {0} $\n {1}", curLevel.rewardMoney, itemName);
+            string resultMsg = "Winner Winner Chicken Dinner!";            
             spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);
-
-            money += curLevel.rewardMoney;
-            inven.AddRange(curLevel.rewardItems);
         }
 
         public void GameOver()
@@ -907,15 +496,13 @@ powerSupply : {5}
         GameObject frontPage;
         GameObject mainPage;
         GameObject missionPage;
-        GameObject missionListPage;
         GameObject spacePage;
 
         public void InitPages()
         {
             frontPage = GameObject.Find("FrontPage");
             mainPage = GameObject.Find("MainPage");
-            missionPage = GameObject.Find("MissionPage");
-            missionListPage = GameObject.Find("MissionListPage");
+            missionPage = GameObject.Find("MissionPage");            
             spacePage = GameObject.Find("SpacePage");
 
             ChangePage(PAGE.FRONT);
@@ -923,7 +510,6 @@ powerSupply : {5}
         
         public void GotoMain()
         {
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
             ChangePage(PAGE.MAIN);
         }
 
@@ -933,7 +519,6 @@ powerSupply : {5}
             bool activeFront = false;
             bool activeMain = false;
             bool activeMission = false;
-            bool activeMissionList = false;
             bool activeSpace = false;
 
             switch (nextPage)
@@ -941,22 +526,20 @@ powerSupply : {5}
                 case PAGE.FRONT: activeFront = true; break;
                 case PAGE.MAIN: activeMain = true; break;
                 case PAGE.MISSION: activeMission = true; break;
-                case PAGE.MISSION_LIST: activeMissionList = true; break;
                 case PAGE.SPACE: activeSpace = true; break;
             }
 
             frontPage.SetActive(activeFront);
             mainPage.SetActive(activeMain);
-            missionPage.SetActive(activeMission);
-            missionListPage.SetActive(activeMissionList);
+            missionPage.SetActive(activeMission);            
             spacePage.SetActive(activeSpace);
 
             curPage = nextPage;
         }
 
-        public void ActivateRootBtn(bool bActive)
-        {
-            spacePage.GetComponent<SpacePage>().ActivateRootBtn(bActive);
+        public void ActivateRootBtn(Vector3 pos)
+        {            
+            spacePage.GetComponent<SpacePage>().ActivateSearchBtn(pos);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Completed
 {
     public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
 
+    [System.Serializable]
     public class Weapon
     {
         public int bType;
@@ -110,7 +111,7 @@ namespace Completed
             UpdateDirImage();
 
             myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(GameManager.instance.weaponM, 30, 10, 5);            
+            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 30, 10, 5);            
 
             transform.position = Vector3.zero;
 
@@ -255,13 +256,12 @@ namespace Completed
                 {
                     shoting = false;
                     curBullet.SetActive(false);
-                    StartCoroutine(GameManager.instance.ShowShotEffect(enemyPos, myShip.curWeapon));
+                    StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(enemyPos, myShip.curWeapon));
                     GameManager.instance.curLevel.AttackOtherPlayer(enemyPos);
                 }
             }
-
-            value = GameManager.instance.curLevel.GetMapOfItems(transform.position);
-            GameManager.instance.ActivateRootBtn(value == 1);
+            
+            GameManager.instance.ActivateRootBtn(transform.position);
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
@@ -303,15 +303,19 @@ namespace Completed
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad1))
                 {
-                    myShip.SetWeapon(GameManager.instance.weaponS);
+                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponS);
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad2))
                 {
-                    myShip.SetWeapon(GameManager.instance.weaponM);
+                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponM);
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad3))
                 {
-                    myShip.SetWeapon(GameManager.instance.weaponP);
+                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponP);
+                }
+                else if(Input.GetKeyDown(KeyCode.Escape))
+                {
+                    Restart();
                 }
             }
             else
@@ -560,7 +564,7 @@ namespace Completed
         {
             if(shoting == false)
             {
-                curBullet = GameManager.instance.GetBullet(myShip.curWeapon.bType);
+                curBullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
                 shoting = true;
                 curBullet.transform.position = transform.position;
                 enemyPos = attackPos;
@@ -606,17 +610,16 @@ namespace Completed
 		
 		private void OnTriggerEnter2D (Collider2D other)
 		{
-            if (other.tag == "MissionItem")
+            if (other.tag == "Exit")
             {
-                GameManager.instance.collectionCount++;                
-                other.gameObject.SetActive(false);
+                Restart();
             }
         }
         
 		private void Restart ()
 		{
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
-		}		
+		}
 		
     	public void LoseHP (int loss)
 		{

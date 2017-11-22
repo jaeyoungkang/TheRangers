@@ -17,7 +17,7 @@ namespace Completed
 
         void Update()
         {            
-            subText.text = GameManager.instance.storageText;
+
         }
     }
 }
