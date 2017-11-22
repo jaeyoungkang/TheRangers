@@ -11,7 +11,7 @@ namespace Completed
 
         void Start()
         {
-            missionBtn.onClick.AddListener(GameManager.instance.GotoMission);
+            missionBtn.onClick.AddListener(GameManager.instance.GoIntoGateway);
         }
     }
 }

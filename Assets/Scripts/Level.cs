@@ -7,7 +7,6 @@ namespace Completed
     [System.Serializable]
     public class Level
     {
-        public bool missionFinish;
         public int id;
         public int columns, rows;
         public string filePath;
@@ -85,7 +84,6 @@ namespace Completed
 
         public void Init()
         {
-            missionFinish = false;
             filePath = "";            
 
             enemies.Clear();

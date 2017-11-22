@@ -232,7 +232,6 @@ namespace Completed
 
         public void ChangeDir(int xDir, int yDir)
         {
-            MOVE_DIR prevDir = curDir;
             if (xDir == 1)
             {
                 curDir = MOVE_DIR.RIGHT;

@@ -7,8 +7,6 @@ namespace Completed
     [System.Serializable]
     public class SpaceShip
     {
-        public int storageSize = 5;
-
         public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
 
@@ -18,8 +16,6 @@ namespace Completed
         public bool startChangeWeapon = false;
 
         public int indexReload = 0;
-
-        List<int> storage = new List<int>();
 
         public int shield;
         public int shieldInit = 10;

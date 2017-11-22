@@ -6,31 +6,31 @@ using System.Collections.Generic;
 
 namespace Completed
 {
-    public enum PAGE { FRONT, MAIN, MISSION, MISSION_LIST, SPACE };
+    public enum PAGE { FRONT, MAIN, GATEWAY, SPACE };
 
     public class GameManager : MonoBehaviour
-	{       
+	{
+        public static GameManager instance = null;
         public Level curLevel = new Level();
         public LevelEfx lvEfx = new LevelEfx();
-        public float levelStartDelay = 2f;						
-		public float turnDelay = 0.1f;							
-		public int playerFoodPoints = 100;						
-		public static GameManager instance = null;				
-                
-        private Text enemyText;
+
+        private GameObject gatewayPage;
+        private Text universeText;
         public Text gameMessage;
         public float msgTimer = 0;
 
         private BoardManager boardScript;
 
-        public int storageAmmo1 = 0;
-        public int storageAmmo2 = 0;
-        public int powerSupply = 0;
-
         public bool doingSetup = true;
 
         public GameObject rootBox;
         public List<GameObject> dropItems = new List<GameObject>();
+
+        public int numberOfUniverse = 1;
+        public int numberOfUniverseInit = 1;
+        public int numberOfUniverseEnd = 3;
+
+        public SpaceShip myShip;        
 
         public void DropItem(Vector3 dropPos)
         {
@@ -257,12 +257,12 @@ namespace Completed
                 Destroy(gameObject);	
 			
 			DontDestroyOnLoad(gameObject);
-			
-            
-            
-            boardScript = GetComponent<BoardManager>();			
+		    
+            boardScript = GetComponent<BoardManager>();
+            myShip = new SpaceShip(10, 0.4f, 2);
+            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 8, 4, 2);
 
-			InitGame();
+            InitGame();
 		}
 
         //this is called only once, and the paramter tell it to be called only after the scene was loaded
@@ -276,21 +276,43 @@ namespace Completed
 
         //This is called each time a scene is loaded.
         static private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+        {              
+            if (instance.numberOfUniverse == instance.numberOfUniverseInit)
+            {
+                instance.InitGame();
+                instance.GotoMain();
+            }
+            else
+            {
+                instance.InitGame();
+                instance.GoIntoGateway();
+            }
+        }
+
+        public void Restart()
         {
-//            instance.level++;
-            instance.InitGame();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
         }
 
         void InitGame()
-		{
+		{            
             lvEfx.Init();
             curLevel.Init();
+                        
+            gameMessage = GameObject.Find("Msg").GetComponent<Text>();
+            universeText = GameObject.Find("GatewayText").GetComponent<Text>();            
 
-            enemyText = GameObject.Find("EnemyText").GetComponent<Text>();
-            gameMessage = GameObject.Find("Msg").GetComponent<Text>();						
-            
+            dropItems.Clear();
+
             InitViewMode();
             InitPages();
+        }
+
+        public void GoIntoGateway()
+        {
+            universeText.text = "제 " + numberOfUniverse + " 우주";
+            ChangePage(PAGE.GATEWAY);            
+            Invoke("StartMission", 2f);
         }
 
         void InitLevel(int levelId)
@@ -303,25 +325,16 @@ namespace Completed
         }
 
         public void StartMission()
-        {
-            HideLevelImage();
-        }
-
-        public void GotoMission()
-        {
-            InitLevel(3);
-            ChangePage(PAGE.MISSION);
-        }
-
-        void HideLevelImage()
 		{
-            ChangePage(PAGE.SPACE);
-			doingSetup = false;
+            InitLevel(numberOfUniverse);
+            ChangePage(PAGE.SPACE);			
             SetLocalViewMode();
+            doingSetup = false;
         }
         
 		void Update()
 		{
+            if (doingSetup) return;
 			if (msgTimer >= 0) {
 				msgTimer -= Time.deltaTime;
 				if (msgTimer <= 0) {
@@ -331,8 +344,6 @@ namespace Completed
                 }
 			}
 
-            enemyText.text = "Enemy: " + curLevel.enemies.Count;
-            
             if (curViewMode == LOCAL_VIEW)
             {                
                 CameraScoll(camera.transform.position);
@@ -359,17 +370,33 @@ namespace Completed
             }            
 
             ShowEnemyScope(positions, dirs, ranges);
-        }        
+        }
+
+        public void NextUniverse()
+        {
+            numberOfUniverse++;
+            doingSetup = true;            
+            string resultMsg = "다음 우주로 이동합니다!";
+            spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);                        
+        }
+
+        public bool IsEnd()
+        {
+            return numberOfUniverse == numberOfUniverseEnd;
+        }
 
         public void Win()
         {
-            curLevel.missionFinish = true;
-            string resultMsg = "Winner Winner Chicken Dinner!";            
+            doingSetup = true;
+            numberOfUniverse = numberOfUniverseInit;
+            string resultMsg = "탐색 임무 완수!";
             spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);
         }
 
         public void GameOver()
 		{
+            doingSetup = true;
+            numberOfUniverse = numberOfUniverseInit;
             spacePage.GetComponent<SpacePage>().ShowResult("You died.");
 		}
 
@@ -492,49 +519,45 @@ namespace Completed
             LeftFrame.transform.position = MoveLeftFrame;
         }
 
-        PAGE curPage = PAGE.FRONT;
         GameObject frontPage;
         GameObject mainPage;
-        GameObject missionPage;
         GameObject spacePage;
 
         public void InitPages()
         {
             frontPage = GameObject.Find("FrontPage");
             mainPage = GameObject.Find("MainPage");
-            missionPage = GameObject.Find("MissionPage");            
             spacePage = GameObject.Find("SpacePage");
+            gatewayPage = GameObject.Find("GatewayPage");
 
             ChangePage(PAGE.FRONT);
         }
-        
+
         public void GotoMain()
-        {
+        {         
             ChangePage(PAGE.MAIN);
         }
-
         
         public void ChangePage(PAGE nextPage)
         {
             bool activeFront = false;
             bool activeMain = false;
-            bool activeMission = false;
+            bool activeGateway = false;
             bool activeSpace = false;
 
             switch (nextPage)
             {
                 case PAGE.FRONT: activeFront = true; break;
                 case PAGE.MAIN: activeMain = true; break;
-                case PAGE.MISSION: activeMission = true; break;
+                case PAGE.GATEWAY: activeGateway = true; break;
                 case PAGE.SPACE: activeSpace = true; break;
             }
 
             frontPage.SetActive(activeFront);
             mainPage.SetActive(activeMain);
-            missionPage.SetActive(activeMission);            
+            gatewayPage.SetActive(activeGateway);            
             spacePage.SetActive(activeSpace);
-
-            curPage = nextPage;
+            
         }
 
         public void ActivateRootBtn(Vector3 pos)

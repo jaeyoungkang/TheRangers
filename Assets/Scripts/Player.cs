@@ -110,8 +110,7 @@ namespace Completed
         {            
             UpdateDirImage();
 
-            myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 30, 10, 5);            
+            myShip = GameManager.instance.myShip;
 
             transform.position = Vector3.zero;
 
@@ -135,10 +134,10 @@ namespace Completed
             Init();
         }
 
-        void MoveUp() { AttemptMove<Wall>(0, 1); }
-        void MoveDown() { AttemptMove<Wall>(0, -1); }
-        void MoveRight() { AttemptMove<Wall>(1, 0); }
-        void MoveLeft() { AttemptMove<Wall>(-1, 1); }
+        void MoveUp() { AttemptMove<Enemy>(0, 1); }
+        void MoveDown() { AttemptMove<Enemy>(0, -1); }
+        void MoveRight() { AttemptMove<Enemy>(1, 0); }
+        void MoveLeft() { AttemptMove<Enemy>(-1, 1); }
 
         void UpdateSightPos()
         {
@@ -221,21 +220,8 @@ namespace Completed
             
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
             playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
-
-            
-            string greenTag = "<color=#00ff00>";
-
-            string colorTag = greenTag;
-            string HpText = colorTag + string.Format("최대 실드 {0} </color>\n\n", myShip.shieldInit);
-            string SpeedText = colorTag + string.Format("이동 대기 시간 {0:N2}초 </color>\n\n", myShip.moveTimeInit);
-        }       
-
-        public void ExtendStorage()
-        {
-            myShip.storageSize++;
         }
 
-        
         private void Update ()
 		{
             if (GameManager.instance.doingSetup) return;
@@ -312,10 +298,6 @@ namespace Completed
                 else if (Input.GetKeyDown(KeyCode.Keypad3))
                 {
                     myShip.SetWeapon(GameManager.instance.lvEfx.weaponP);
-                }
-                else if(Input.GetKeyDown(KeyCode.Escape))
-                {
-                    Restart();
                 }
             }
             else
@@ -404,7 +386,7 @@ namespace Completed
 
             if (horizontal != 0 || vertical != 0)
 			{
-				AttemptMove<Wall> (horizontal, vertical);
+				AttemptMove<Enemy> (horizontal, vertical);
 			}
 		}
 
@@ -612,15 +594,17 @@ namespace Completed
 		{
             if (other.tag == "Exit")
             {
-                Restart();
+                if(GameManager.instance.IsEnd())
+                {
+                    GameManager.instance.Win();
+                }
+                else
+                {
+                    GameManager.instance.NextUniverse();
+                }                
             }
         }
-        
-		private void Restart ()
-		{
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
-		}
-		
+                
     	public void LoseHP (int loss)
 		{
             if (myShip.Shield()) myShip.Damaged(loss);

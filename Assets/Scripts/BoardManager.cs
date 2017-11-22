@@ -71,21 +71,6 @@ namespace Completed
         void LayoutItem(GameObject tile, Vector3 pos)
         {
             GameObject obj = Instantiate(tile, pos, Quaternion.identity);
-            GameObject objToShow = Instantiate(tile, pos, Quaternion.identity);
-            Renderer renderer = objToShow.GetComponent<SpriteRenderer>();
-            if (renderer)
-            {
-                renderer.sortingLayerName = "Map";
-                objToShow.transform.SetParent(obj.transform);
-                BoxCollider2D boxCol = objToShow.GetComponent<BoxCollider2D>();
-                boxCol.enabled = false;
-            }
-            Scroll scrollItem = obj.GetComponent<Scroll>();
-            if (scrollItem)
-            {
-                scrollItem.GenerateNumber();
-            }
-
             GameManager.instance.curLevel.AddItem(obj);
         }       
  
@@ -155,9 +140,16 @@ namespace Completed
                 }                
             }
 
-            GameObject obj = Instantiate(exit, new Vector3(rows-1, columns-1, 0), Quaternion.identity);
+            Vector3 exitPos = new Vector3();            
+            while(true)
+            {
+                exitPos.x = Random.Range(1, columns);
+                exitPos.y = Random.Range(1, rows);
+                if(GameManager.instance.curLevel.GetMapOfStructures(exitPos) == 0)
+                    break;
+            }           
 
-
+            Instantiate(exit, exitPos, Quaternion.identity);
         }
 
     }

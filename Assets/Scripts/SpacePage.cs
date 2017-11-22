@@ -29,7 +29,7 @@ namespace Completed
 
         void Start()
         {            
-            backBtn.onClick.AddListener(GameManager.instance.GotoMain);
+            backBtn.onClick.AddListener(GameManager.instance.Restart);
             searchBtn.onClick.AddListener(OpenSearchPanel);
             getItemBtns[0].onClick.AddListener(() => GetItem(0));
             getItemBtns[1].onClick.AddListener(() => GetItem(1));
@@ -40,8 +40,6 @@ namespace Completed
 
         public void ActivateSearchBtn(Vector3 pos)
         {
-            int value = GameManager.instance.curLevel.GetMapOfItems(pos);
-
             searchBox = GameManager.instance.GetDropBox(pos);
             if (searchBox == null)
             {

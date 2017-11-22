@@ -23,6 +23,8 @@ namespace Completed
         public GameObject explosionInstance;
         public GameObject explosionTile;
 
+        int shotEffectIndex = 0;
+
         public void Init()
         {
             for (int i = 0; i < shotInstances.Length; i++)
@@ -88,8 +90,7 @@ namespace Completed
             }
 
         }
-
-        int shotEffectIndex = 0;
+                
         public IEnumerator ShowShotEffect(Vector3 targetPos, Weapon weapon)
         {
             GameObject shotInstance = shotInstances[shotEffectIndex];
