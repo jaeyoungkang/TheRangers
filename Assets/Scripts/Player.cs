@@ -66,8 +66,9 @@ namespace Completed
     }
 
     public class Player : MovingObject
-	{
+    {
         public SpaceShip myShip;
+        public List<Weapon> myWeapons;
         public GameObject sight;
 
         private GameObject curBullet;
@@ -85,7 +86,7 @@ namespace Completed
         public Button moveLeftBtn;
         public Button moveRightBtn;
 
-        public GameObject display;       
+        public GameObject display;
 
         public float weaponRangeMin = 0;
         public float weaponRangeMax = 3;
@@ -100,18 +101,19 @@ namespace Completed
 
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject[] dirSprits;
+        
 
         bool bLockDir = false;
         void LockDir()
         {
             bLockDir = !bLockDir;
-        }			
+        }
 
         public void Init()
-        {            
+        {
             UpdateDirImage();
-
             myShip = GameManager.instance.myShip;
+            myWeapons = GameManager.instance.myWeapons;
 
             transform.position = Vector3.zero;
 
@@ -128,8 +130,50 @@ namespace Completed
             moveDownBtn.onClick.AddListener(MoveDown);
             moveRightBtn.onClick.AddListener(MoveRight);
             moveLeftBtn.onClick.AddListener(MoveLeft);
-        }        
-                
+
+            PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
+            playerInfo.Weapon1.onClick.AddListener(ChangeWeapon1);
+            playerInfo.Weapon2.onClick.AddListener(ChangeWeapon2);
+            playerInfo.Weapon3.onClick.AddListener(ChangeWeapon3);
+        }
+
+        void UpdateWeaponBtn(int index)
+        {
+            PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
+            Vector3 normal = new Vector3(1, 1, 1);
+            Vector3 selected = new Vector3(1.2f, 1.2f, 1);
+
+            playerInfo.Weapon1.transform.localScale = normal;
+            playerInfo.Weapon2.transform.localScale = normal;
+            playerInfo.Weapon3.transform.localScale = normal;
+
+            switch(index)
+            {
+                case 1: playerInfo.Weapon1.transform.localScale = selected; break;
+                case 2: playerInfo.Weapon2.transform.localScale = selected; break;
+                case 3: playerInfo.Weapon3.transform.localScale = selected; break;
+            }
+        }
+
+        void ChangeWeapon1()
+        {
+            myShip.SetWeapon(GameManager.instance.lvEfx.weaponS);
+            UpdateWeaponBtn(1);
+        }
+
+        void ChangeWeapon2()
+        {
+            myShip.SetWeapon(GameManager.instance.lvEfx.weaponM);
+            UpdateWeaponBtn(2);
+        }
+
+        void ChangeWeapon3()
+        {
+            myShip.SetWeapon(GameManager.instance.lvEfx.weaponP);
+            UpdateWeaponBtn(3);
+        }
+
+
         protected override void Start ()
 		{
 			base.Start ();
@@ -139,7 +183,7 @@ namespace Completed
         void MoveUp() { AttemptMove<Enemy>(0, 1); }
         void MoveDown() { AttemptMove<Enemy>(0, -1); }
         void MoveRight() { AttemptMove<Enemy>(1, 0); }
-        void MoveLeft() { AttemptMove<Enemy>(-1, 1); }
+        void MoveLeft() { AttemptMove<Enemy>(-1, 0); }
 
         void UpdateSightPos()
         {
@@ -215,13 +259,24 @@ namespace Completed
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
-            string weaponChangeTimeText = Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString();
-            playerInfo.curWeaponText.text = "Change Time: " + weaponChangeTimeText + "\n\n" + myShip.curWeapon.name;
-            playerInfo.foodText.text = "SHIELD : " + myShip.shield;
-            playerInfo.ammoText.text = "[Ammo : " + myShip.numOfBullets[myShip.curWeapon.bType] + "/" + myShip.totalBullets[myShip.curWeapon.bType] + "]\n\n" + "Reload Time :" + Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString();
-            
+            playerInfo.changeTimeText.text = "Change Time(" + Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString() + ")";
+            playerInfo.SheildText.text = "보호막(" + myShip.shield + ")";
+
+            Vector3 normal = new Vector3(1, 1, 1);
+            Vector3 selected = new Vector3(1.2f, 1.2f, 1);
+
+            string ammoNum1 = "W1 " + myShip.numOfBullets[0] + "/" + myShip.totalBullets[0];
+            string ammoNum2 = "W2 " + myShip.numOfBullets[1] + "/" + myShip.totalBullets[1];
+            string ammoNum3 = "W3 " + myShip.numOfBullets[2] + "/" + myShip.totalBullets[2];            
+
+            playerInfo.Weapon1.GetComponentInChildren<Text>().text = ammoNum1;
+            playerInfo.Weapon2.GetComponentInChildren<Text>().text = ammoNum2;
+            playerInfo.Weapon3.GetComponentInChildren<Text>().text = ammoNum3;
+
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
-            playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
+
+            reloadBtn.GetComponentInChildren<Text>().text = "RELOAD\n(" + Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString() +")";
+            shotBtn.GetComponentInChildren<Text>().text = "SHOT!\n(" + Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString() + ")";
         }
 
         private void Update ()
@@ -291,15 +346,18 @@ namespace Completed
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad1))
                 {
-                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponS);
+                    myShip.SetWeapon(myWeapons[0]);
+                    UpdateWeaponBtn(1);
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad2))
                 {
-                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponM);
+                    myShip.SetWeapon(myWeapons[1]);
+                    UpdateWeaponBtn(2);
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad3))
                 {
-                    myShip.SetWeapon(GameManager.instance.lvEfx.weaponP);
+                    myShip.SetWeapon(myWeapons[2]);
+                    UpdateWeaponBtn(3);
                 }
             }
             else

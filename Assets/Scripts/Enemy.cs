@@ -9,8 +9,7 @@ namespace Completed
         public int type = 0;
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public SpaceShip myShip;
-        public float weaponRangeMin = 0;
-        public float weaponRangeMax = 3;
+        public List<Weapon> myWeapons = new List<Weapon>();
 
         Player player;
 
@@ -29,27 +28,31 @@ namespace Completed
 
         protected override void Start()
         {
-            base.Start();            
+            base.Start();
+            myWeapons.Clear();
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(3));
 
-            if(type == 0)
+            if (type == 0)
             {
                 myShip = new SpaceShip(3, 0.4f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponS, 50, 0 ,0 );
+                myShip.ReadyToDeparture(myWeapons[0], 50, 0 ,0 );
             }
             else if (type == 1)
             {
                 myShip = new SpaceShip(5, 0.5f, 2);
-                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 0, 50, 0);
+                myShip.ReadyToDeparture(myWeapons[1], 0, 50, 0);
             }
             else if (type == 2)
             {
                 myShip = new SpaceShip(10, 1.0f, 3);
-                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponP, 0, 0, 50);
+                myShip.ReadyToDeparture(myWeapons[2], 0, 0, 50);
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(50, 0.6f, 5);
-                myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponP, 0, 0, 50);
+                myShip.ReadyToDeparture(myWeapons[2], 0, 0, 50);
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);

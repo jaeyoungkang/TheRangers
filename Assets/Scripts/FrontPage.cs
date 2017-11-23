@@ -12,7 +12,7 @@ namespace Completed
         // Use this for initialization
         void Start()
         {
-            startBtn.onClick.AddListener(GameManager.instance.GotoMain);
+            startBtn.onClick.AddListener(GameManager.instance.GoIntoGateway);
         }
 
         // Update is called once per frame

@@ -5,11 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerInfo : MonoBehaviour {
 
-    public Text foodText;
-    public Text curWeaponText;
-    public Text ammoText;
+    public Text SheildText;
     public Text coolTimeText;
-    public Text shotTimeText;
+    public Text changeTimeText;
+
+    public Button Weapon1;
+    public Button Weapon2;
+    public Button Weapon3;
 
     // Use this for initialization
     void Start () {

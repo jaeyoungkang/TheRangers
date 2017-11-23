@@ -7,8 +7,8 @@ namespace Completed
     public class LevelEfx : MonoBehaviour
     {
         public Weapon weaponS = new Weapon(2, 1f, 2f, 3, 0.2f, 8, 20, "Speed Gun", 0);
-        public Weapon weaponM = new Weapon(4, 2f, 3f, 2, 0.3f, 4, 10, "Normal Gun", 1);
-        public Weapon weaponP = new Weapon(15, 4f, 5f, 1, 0.5f, 2, 5, "Power Gun", 2);
+        public Weapon weaponM = new Weapon(4, 1.5f, 3f, 2, 0.3f, 4, 10, "Normal Gun", 1);
+        public Weapon weaponP = new Weapon(15, 3f, 5f, 1, 0.5f, 2, 5, "Power Gun", 2);
 
         public GameObject[] bulletMInstances = new GameObject[20];
         public GameObject bulletMTile;
@@ -24,6 +24,18 @@ namespace Completed
         public GameObject explosionTile;
 
         int shotEffectIndex = 0;
+
+        public Weapon GetWeapon(int index)
+        {
+            switch(index)
+            {
+                case 1: return new Weapon(2, 1f, 2f, 3, 0.2f, 8, 20, "Speed Gun", 0);
+                case 2: return new Weapon(4, 2f, 3f, 2, 0.3f, 4, 10, "Normal Gun", 1);
+                case 3: return new Weapon(15, 4f, 5f, 1, 0.5f, 2, 5, "Power Gun", 2);
+            }
+
+            return new Weapon(4, 2f, 3f, 2, 0.3f, 4, 10, "Normal Gun", 1);
+        }
 
         public void Init()
         {

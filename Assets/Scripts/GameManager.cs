@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Completed
 {
-    public enum PAGE { FRONT, MAIN, GATEWAY, SPACE };
+    public enum PAGE { FRONT, GATEWAY, SPACE };
 
     public class GameManager : MonoBehaviour
 	{
@@ -32,7 +32,8 @@ namespace Completed
         public int numberOfUniverseInit = 1;
         public int numberOfUniverseEnd = 3;
 
-        public SpaceShip myShip;        
+        public SpaceShip myShip;
+        public List<Weapon> myWeapons = new List<Weapon>();
 
         public void DropItem(Vector3 dropPos)
         {
@@ -260,12 +261,22 @@ namespace Completed
 			
 			DontDestroyOnLoad(gameObject);
 		    
-            boardScript = GetComponent<BoardManager>();
-            myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 8, 4, 2);
+            boardScript = GetComponent<BoardManager>();            
 
             InitGame();
-		}
+            ResetPlayerInfo();
+
+        }
+
+        void ResetPlayerInfo()
+        {
+            myShip = new SpaceShip(10, 0.4f, 2);
+            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 8, 4, 2);
+            myWeapons.Clear();
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(3));
+        }
 
         //this is called only once, and the paramter tell it to be called only after the scene was loaded
         //(otherwise, our Scene Load callback would be called the very first load, and we don't want that)
@@ -282,7 +293,7 @@ namespace Completed
             if (instance.numberOfUniverse == instance.numberOfUniverseInit)
             {
                 instance.InitGame();
-                instance.GotoMain();
+                instance.ResetPlayerInfo();
             }
             else
             {
@@ -306,8 +317,6 @@ namespace Completed
             gameMessage.gameObject.SetActive(false);
 
             dropItems.Clear();
-
-            InitViewMode();
             InitPages();
         }
 
@@ -331,7 +340,6 @@ namespace Completed
 		{
             InitLevel(numberOfUniverse);
             ChangePage(PAGE.SPACE);			
-            SetLocalViewMode();
             doingSetup = false;
         }
         
@@ -347,13 +355,16 @@ namespace Completed
                 }
 			}
 
-            if (curViewMode == LOCAL_VIEW)
-            {                
-                CameraScoll(camera.transform.position);
-            }
-            UpdateViewMode();
-
+            CameraChasePlayer();
             UpdateOtherPlayersScope();
+        }
+
+        void CameraChasePlayer()
+        {
+            Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+            playerPos.z = -10;
+            Camera camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+            camera.transform.position = playerPos;
         }
 
         void UpdateOtherPlayersScope()
@@ -403,161 +414,32 @@ namespace Completed
             spacePage.GetComponent<SpacePage>().ShowResult("You died.");
 		}
 
-        public Camera camera;
-        public int MaxSize = 16;
-        public int MinSize = 6;
-        public Vector3 WorldPos = new Vector3(9.5f, 6f, -10f);
-        public Vector3 LocalPos = new Vector3(4.5f, 4.5f, -10f);
-        public GameObject TopFrame, BottomFrame, LeftFrame, RightFrame;
-
-        const int WORLD_VIEW = 1;
-        const int LOCAL_VIEW = 2;
-        int curViewMode = LOCAL_VIEW;
-        int preViewMode = LOCAL_VIEW;
-        
-        void SetLocalViewMode()
-        {
-            camera.orthographicSize = MinSize;
-            preViewMode = curViewMode;
-            TopFrame.SetActive(true);
-            BottomFrame.SetActive(true);
-            RightFrame.SetActive(true);
-            LeftFrame.SetActive(true);
-
-        }
-
-        void UpdateViewMode()
-        {            
-            int speed = 10;
-            if (curViewMode != preViewMode)
-            {
-                if (curViewMode == WORLD_VIEW)
-                {
-                    camera.orthographicSize = camera.orthographicSize + speed * Time.deltaTime;
-
-                    if (camera.orthographicSize > MaxSize)
-                    {
-                        camera.orthographicSize = MaxSize;
-                        preViewMode = curViewMode;
-                    }
-                }
-
-                if (curViewMode == LOCAL_VIEW)
-                {
-                    CameraScoll(LocalPos);
-                    camera.orthographicSize = camera.orthographicSize - speed * Time.deltaTime;
-                    if (camera.orthographicSize < MinSize)
-                    {
-                        camera.orthographicSize = MinSize;
-                        preViewMode = curViewMode;
-                        TopFrame.SetActive(true);
-                        BottomFrame.SetActive(true);
-                        RightFrame.SetActive(true);
-                        LeftFrame.SetActive(true);
-                    }
-                }
-            }            
-        }
-
-        void InitViewMode()
-        {
-            camera = GameObject.Find("Main Camera").GetComponent<Camera>();
-            TopFrame = GameObject.Find("FrameTop");
-            BottomFrame = GameObject.Find("FrameBottom");
-            RightFrame = GameObject.Find("FrameRight");
-            LeftFrame = GameObject.Find("FrameLeft");
-
-            camera.orthographicSize = MinSize;
-            camera.transform.position = LocalPos;
-            TopFrame.SetActive(false);
-            BottomFrame.SetActive(false);
-            RightFrame.SetActive(false);
-            LeftFrame.SetActive(false);
-        }
-
-        void CameraScoll(Vector3 MoveCamera)
-        {
-            Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;            
-            Vector3 MoveTopFrame = TopFrame.transform.position;
-            Vector3 MoveBottomFrame = BottomFrame.transform.position;
-            Vector3 MoveRightFrame = RightFrame.transform.position;
-            Vector3 MoveLeftFrame = LeftFrame.transform.position;
-
-            if (boardScript.columns > 10)
-            {
-                if (playerPos.x > 5 && playerPos.x < 15)
-                {
-                    MoveCamera.x = LocalPos.x + playerPos.x - 5;
-                    MoveRightFrame.x = 14.5f + playerPos.x - 5;
-                    MoveLeftFrame.x = -5.5f + playerPos.x - 5;
-                }
-                if (playerPos.x >= 15)
-                {
-                    MoveCamera.x = 14.5f;
-                    MoveRightFrame.x = 25.5f;
-                    MoveLeftFrame.x = 4.5f;
-                }
-            }
-
-            if (boardScript.rows > 10)
-            {
-                if (playerPos.y > 5 && playerPos.y < 15)
-                {
-                    MoveCamera.y = LocalPos.y + playerPos.y - 5;
-                    MoveTopFrame.y = 14.5f + playerPos.y - 5;
-                    MoveBottomFrame.y = -5.5f + playerPos.y - 5;
-                }
-                if (playerPos.y >= 15)
-                {
-                    MoveCamera.y = 13.5f;
-                    MoveTopFrame.y = 24.5f;
-                    MoveBottomFrame.y = 4.5f;
-                }
-            }
-
-            camera.transform.position = MoveCamera;
-            TopFrame.transform.position = MoveTopFrame;
-            BottomFrame.transform.position = MoveBottomFrame;
-            RightFrame.transform.position = MoveRightFrame;
-            LeftFrame.transform.position = MoveLeftFrame;
-        }
-
         GameObject frontPage;
-        GameObject mainPage;
         GameObject spacePage;
 
         public void InitPages()
         {
             frontPage = GameObject.Find("FrontPage");
-            mainPage = GameObject.Find("MainPage");
             spacePage = GameObject.Find("SpacePage");
             gatewayPage = GameObject.Find("GatewayPage");
 
             ChangePage(PAGE.FRONT);
         }
 
-        public void GotoMain()
-        {         
-            ChangePage(PAGE.MAIN);
-        }
-        
         public void ChangePage(PAGE nextPage)
         {
             bool activeFront = false;
-            bool activeMain = false;
             bool activeGateway = false;
             bool activeSpace = false;
 
             switch (nextPage)
             {
                 case PAGE.FRONT: activeFront = true; break;
-                case PAGE.MAIN: activeMain = true; break;
                 case PAGE.GATEWAY: activeGateway = true; break;
                 case PAGE.SPACE: activeSpace = true; break;
             }
 
             frontPage.SetActive(activeFront);
-            mainPage.SetActive(activeMain);
             gatewayPage.SetActive(activeGateway);            
             spacePage.SetActive(activeSpace);
             
