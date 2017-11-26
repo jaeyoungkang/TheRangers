@@ -59,17 +59,18 @@ namespace Completed
         public void SpeedUp(float addSpeed)
         {
             moveTimeInit -= addSpeed;
+            moveTime = moveTimeInit;
         }
 
         public void AddShield(int addShield)
         {
             shieldInit += addShield;
-            RestoreShield();
         }
 
-        public void RestoreShield()
+        public void RestoreShield(int restore)
         {
-            shield = shieldInit;
+            shield += restore;
+            if (shield > shieldInit) shield = shieldInit;
         }
 
         public void AddAmmo(int index, int ammoNum)
@@ -77,7 +78,7 @@ namespace Completed
             totalBullets[index] += ammoNum;
         }
 
-        public void ReadyToDeparture(Weapon weapon, int totalBulletType0, int totalBulletType1, int totalBulletType2)
+        public void ReadyToDeparture(int totalBulletType0, int totalBulletType1, int totalBulletType2)
         {            
             for (int i = 0; i < numOfBullets.Length; i++)
             {
@@ -96,7 +97,6 @@ namespace Completed
             moveTime = moveTimeInit;            
             scopeRange = scopeRangeInit;
             weaponChangeTime = weaponChangeTimeInit;
-            SetWeapon(weapon);
         }
 
         public void Move()
@@ -126,6 +126,7 @@ namespace Completed
 
         public void Reload(int index)
         {
+            if (totalBullets[index] == 0) return;
             startReload = true;
             indexReload = index;
         }
@@ -143,6 +144,7 @@ namespace Completed
                 int maxReloadAmmo = curWeapon.capability - numOfBullets[indexReload];
 
                 if (totalBullets[indexReload] >= maxReloadAmmo) relaodNum = maxReloadAmmo;
+                else relaodNum = totalBullets[indexReload];
 
                 totalBullets[indexReload] -= relaodNum;
                 numOfBullets[indexReload] += relaodNum;

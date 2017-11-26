@@ -36,23 +36,27 @@ namespace Completed
 
             if (type == 0)
             {
-                myShip = new SpaceShip(3, 0.4f, 2);
-                myShip.ReadyToDeparture(myWeapons[0], 50, 0 ,0 );
+                myShip = new SpaceShip(5, 0.4f, 2);
+                myShip.ReadyToDeparture(50, 0 ,0 );
+                myShip.SetWeapon(myWeapons[0]);
             }
             else if (type == 1)
             {
-                myShip = new SpaceShip(5, 0.5f, 2);
-                myShip.ReadyToDeparture(myWeapons[1], 0, 50, 0);
+                myShip = new SpaceShip(8, 0.5f, 2);
+                myShip.ReadyToDeparture(0, 50, 0);
+                myShip.SetWeapon(myWeapons[1]);
             }
             else if (type == 2)
             {
-                myShip = new SpaceShip(10, 1.0f, 3);
-                myShip.ReadyToDeparture(myWeapons[2], 0, 0, 50);
+                myShip = new SpaceShip(12, 1.0f, 3);
+                myShip.ReadyToDeparture(0, 0, 50);
+                myShip.SetWeapon(myWeapons[2]);
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(50, 0.6f, 5);
-                myShip.ReadyToDeparture(myWeapons[2], 0, 0, 50);
+                myShip.ReadyToDeparture(0, 0, 50);
+                myShip.SetWeapon(myWeapons[2]);
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);
@@ -391,7 +395,7 @@ namespace Completed
 
         private void Destoryed()
         {
-            GameManager.instance.DestroyOtherPlayer(gameObject);
+            GameManager.instance.DestroyOtherPlayer(gameObject, type);
             GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
         }
         

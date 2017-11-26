@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class PlayerInfo : MonoBehaviour {
 
-    public Text SheildText;
+    public Text moneyText;
+    public Text sheildText;
     public Text coolTimeText;
     public Text changeTimeText;
 

@@ -49,6 +49,23 @@ namespace Completed
             reloadTime = reloadTimeInit;
         }
 
+        public void AddCapability(int addCap)
+        {
+            capability += addCap;
+        }
+
+        public void ShotTimeUp(float addSpeed)
+        {
+            shotTimeInit -= addSpeed;
+            Init();
+        }
+
+        public void ReloadSpeedUp(float addSpeed)
+        {
+            Init();
+            reloadTimeInit -= addSpeed;
+        }
+
         public void UpdateReload()
         {
             reloadTime -= Time.deltaTime;            
@@ -88,9 +105,6 @@ namespace Completed
 
         public GameObject display;
 
-        public float weaponRangeMin = 0;
-        public float weaponRangeMax = 3;
-
         Vector3 localSightPos = new Vector3(1, 0, 0);
         bool shoting = false;
         Vector3 enemyPos = new Vector3();
@@ -101,7 +115,13 @@ namespace Completed
 
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public GameObject[] dirSprits;
-        
+
+        public int money;
+
+        public void AddMoney(int addMoney)
+        {
+            money += addMoney;
+        }
 
         bool bLockDir = false;
         void LockDir()
@@ -112,8 +132,10 @@ namespace Completed
         public void Init()
         {
             UpdateDirImage();
+            money = 100;
             myShip = GameManager.instance.myShip;
             myWeapons = GameManager.instance.myWeapons;
+            ChangeWeapon1();
 
             transform.position = Vector3.zero;
 
@@ -157,19 +179,19 @@ namespace Completed
 
         void ChangeWeapon1()
         {
-            myShip.SetWeapon(GameManager.instance.lvEfx.weaponS);
+            myShip.SetWeapon(myWeapons[0]);
             UpdateWeaponBtn(1);
         }
 
         void ChangeWeapon2()
         {
-            myShip.SetWeapon(GameManager.instance.lvEfx.weaponM);
+            myShip.SetWeapon(myWeapons[1]);
             UpdateWeaponBtn(2);
         }
 
         void ChangeWeapon3()
         {
-            myShip.SetWeapon(GameManager.instance.lvEfx.weaponP);
+            myShip.SetWeapon(myWeapons[2]);
             UpdateWeaponBtn(3);
         }
 
@@ -259,8 +281,9 @@ namespace Completed
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
+            playerInfo.moneyText.text = "Money " + money;
             playerInfo.changeTimeText.text = "Change Time(" + Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString() + ")";
-            playerInfo.SheildText.text = "보호막(" + myShip.shield + ")";
+            playerInfo.sheildText.text = "보호막(" + myShip.shield + "/" + myShip.shieldInit + ")";
 
             Vector3 normal = new Vector3(1, 1, 1);
             Vector3 selected = new Vector3(1.2f, 1.2f, 1);
@@ -335,7 +358,50 @@ namespace Completed
                 myShip.UpdateReload();                
             }            
             else if (myShip.curWeapon.canShot)
-            {
+            {                
+                if (Input.GetKeyDown("0"))
+                {
+                    myShip.AddAmmo(0, 8);
+                }
+                if (Input.GetKeyDown("1"))
+                {
+                    myShip.AddAmmo(1, 4);
+                }
+                if (Input.GetKeyDown("2"))
+                {
+                    myShip.AddAmmo(2, 2);
+                }
+                if (Input.GetKeyDown("3"))
+                {
+                    myShip.RestoreShield(5);
+                }
+                if (Input.GetKeyDown("4"))
+                {
+                    myShip.AddShield(1);
+                }
+                if (Input.GetKeyDown("5"))
+                {
+                    myShip.SpeedUp(0.01f);
+                }
+                if (Input.GetKeyDown("6"))
+                {
+                    myWeapons[0].ReloadSpeedUp(0.1f);
+                    myWeapons[1].ReloadSpeedUp(0.1f);
+                    myWeapons[2].ReloadSpeedUp(0.1f);
+                }
+                if (Input.GetKeyDown("7"))
+                {
+                    myWeapons[0].ShotTimeUp(0.1f);
+                }
+                if (Input.GetKeyDown("8"))
+                {
+                    myWeapons[1].ShotTimeUp(0.1f);
+                }
+                if (Input.GetKeyDown("9"))
+                {
+                    myWeapons[2].ShotTimeUp(0.1f);
+                }
+
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     AttempAttack(myShip.curWeapon.bType);

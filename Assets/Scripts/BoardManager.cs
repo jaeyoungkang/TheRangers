@@ -10,7 +10,8 @@ namespace Completed
 		public int columns = 5;
 		public int rows = 5;        
         public GameObject exit;
-		public GameObject[] floorTiles;									
+        public GameObject shop;
+        public GameObject[] floorTiles;									
 		public GameObject[] itemTiles;
         
         public GameObject shelterTile;
@@ -141,16 +142,30 @@ namespace Completed
                 }                
             }
 
-            Vector3 exitPos = new Vector3();            
+            Vector3 randomPos = new Vector3();            
             while(true)
             {
-                exitPos.x = Random.Range(1, columns);
-                exitPos.y = Random.Range(1, rows);
-                if(GameManager.instance.curLevel.GetMapOfStructures(exitPos) == 0)
+                randomPos.x = Random.Range(1, columns);
+                randomPos.y = Random.Range(1, rows);
+                if(GameManager.instance.curLevel.GetMapOfStructures(randomPos) == 0)
                     break;
-            }           
+            }
 
-            Instantiate(exit, exitPos, Quaternion.identity);
+            Instantiate(exit, randomPos, Quaternion.identity);
+
+            if(Random.Range(0, 2) == 1)
+            {
+                while (true)
+                {
+                    randomPos.x = Random.Range(1, columns);
+                    randomPos.y = Random.Range(1, rows);
+                    if (GameManager.instance.curLevel.GetMapOfStructures(randomPos) == 0)
+                        break;
+                }
+                GameManager.instance.LayoutShop(randomPos);
+            }
+
+            
         }
 
     }

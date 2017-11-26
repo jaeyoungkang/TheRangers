@@ -7,6 +7,12 @@ using System.Collections.Generic;
 namespace Completed
 {
     public enum PAGE { FRONT, GATEWAY, SPACE };
+    public class DropInfo
+    {
+        public bool shop = false;
+        public GameObject obj;
+        public int[] ids;
+    }
 
     public class GameManager : MonoBehaviour
 	{
@@ -26,7 +32,8 @@ namespace Completed
         public bool doingSetup = true;
 
         public GameObject rootBox;
-        public List<GameObject> dropItems = new List<GameObject>();
+
+        public List<DropInfo> dropItems = new List<DropInfo>();
 
         public int numberOfUniverse = 1;
         public int numberOfUniverseInit = 1;
@@ -35,36 +42,84 @@ namespace Completed
         public SpaceShip myShip;
         public List<Weapon> myWeapons = new List<Weapon>();
 
-        public void DropItem(Vector3 dropPos)
+        public int[] GenerateDropItemIds(int type)
+        {
+            int[] dropIds = new int[3];
+            if (type == 100)
+            {                
+                return new int[3] {0,1,2 };
+            }
+            
+            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 0, 7, 10 };
+            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 1, 1, 8, 11 };
+            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 2, 2, 9, 12 };
+            List<int> pointer = ItemSetA1;
+            switch(type)
+            {
+                case 0: pointer = ItemSetA1; break;
+                case 1: pointer = ItemSetB1; break;
+                case 2: pointer = ItemSetC1; break;
+            }
+
+            List<int> ItemSetA2 = new List<int> { 3, 3, 3, 6, 6, 6, 4, 5 };
+
+            List<int> ItemSetA3 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 15 };
+
+
+            dropIds[0] = pointer[Random.Range(0, pointer.Count)];
+            dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA2.Count)];
+            dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
+
+            return dropIds;
+        }
+
+        public void LayoutShop(Vector3 pos)
+        {
+            GameObject item = Instantiate(rootBox, pos, Quaternion.identity);
+            GameManager.instance.curLevel.SetMapOfItems(pos, 1);
+            DropInfo dInfo = new DropInfo();
+            dInfo.shop = true;
+            dInfo.obj = item;
+            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,8,9 };
+
+            dropItems.Add(dInfo);
+        }
+
+        public void DropItem(Vector3 dropPos, int type)
         {
             GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
             GameManager.instance.curLevel.SetMapOfItems(dropPos, 1);
-            dropItems.Add(item);
-        }
+            DropInfo dInfo = new DropInfo();
+            dInfo.obj = item;
+            dInfo.ids = GenerateDropItemIds(type);
 
-        public GameObject GetDropBox(Vector3 pos)
+            dropItems.Add(dInfo);
+        }
+        
+
+        public DropInfo GetDropBox(Vector3 pos)
         {
-            foreach (GameObject obj in dropItems)
+            foreach (DropInfo dInfo in dropItems)
             {
-                if (obj.transform.position == pos) return obj;
+                if (dInfo.obj.transform.position == pos) return dInfo;
             }
 
             return null;
         }
 
-        public void ReomveDropItem(GameObject item)
+        public void ReomveDropItem(DropInfo item)
         {            
             dropItems.Remove(item);
 
             bool anotherItem = false;
-            foreach(GameObject obj in dropItems)
+            foreach(DropInfo dInfo in dropItems)
             {
-                if (obj.transform.position == item.transform.position) anotherItem = true;
+                if (dInfo.obj.transform.position == item.obj.transform.position) anotherItem = true;
             }
             if(anotherItem == false)
-                GameManager.instance.curLevel.SetMapOfItems(item.transform.position, 0);
+                GameManager.instance.curLevel.SetMapOfItems(item.obj.transform.position, 0);
 
-            item.SetActive(false);
+            item.obj.SetActive(false);
         }
 
         public void UpdateGameMssage(string msg, float time)
@@ -75,13 +130,13 @@ namespace Completed
 			msgTimer = time;
 		}
 
-        public void DestroyOtherPlayer(GameObject target)
+        public void DestroyOtherPlayer(GameObject target, int type)
         {
             StartCoroutine(lvEfx.ShowExplosionEffect(target.transform.position));
 
             curLevel.RemoveOtherPlayer(target);
 
-            DropItem(target.transform.position);            
+            DropItem(target.transform.position, type);
         }
                 
 
@@ -271,7 +326,7 @@ namespace Completed
         void ResetPlayerInfo()
         {
             myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(GameManager.instance.lvEfx.weaponM, 8, 4, 2);
+            myShip.ReadyToDeparture(8, 4, 2);
             myWeapons.Clear();
             myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
             myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
