@@ -81,7 +81,9 @@ namespace Completed
 
             InitialiseList ();
 
-            LayoutStructuresByFile(curLevel.mapData);            
+            LayoutStructuresByFile(curLevel.mapData);
+            LayoutResourceItemsRandomly(curLevel.missionItemCount+1);
+            LayoutEnemiesRandomly(curLevel.enemyInfo);
         }
 
         void LayoutStructure(Vector3 pos, int range)
@@ -102,14 +104,47 @@ namespace Completed
             GameManager.instance.curLevel.SetMapOfStructures(pos, range);
         }
 
+        void LayoutEnemiesRandomly(Dictionary<int, int> eInfos)
+        {
+            foreach(KeyValuePair<int,int> eInfo in eInfos)
+            {
+                for (int i = 0; i < eInfo.Value; i++)
+                {
+                    Vector3 rPos = GetRandomPosRefMap();
+                    LayoutItemById(rPos, 1); LayoutUnitById(rPos, eInfo.Key);
+                }
+            }
+        }
+
+        void LayoutResourceItemsRandomly(int missionItemCount)
+        {
+            int resourceCount = missionItemCount;
+
+            for (int i = 0; i < resourceCount; i++)
+            {
+                List<int> resourceItems = new List<int>() { 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4 };
+
+                int index = Random.Range(0, resourceItems.Count);
+                int itemId = resourceItems[index];
+                Vector3 rPos = GetRandomPosRefMap();
+                LayoutItemById(rPos, itemId);
+            }
+
+            for (int i = 0; i < missionItemCount; i++)
+            {
+                Vector3 rPos = GetRandomPosRefMap();
+                LayoutItemById(rPos, 1);
+            }
+        }
+
         void LayoutItemById(Vector3 pos, int itemId)
         {
-            // LayoutItem(itemTiles[itemId], pos);
+            LayoutItem(itemTiles[itemId-1], pos);
         }
 
         void LayoutUnitById(Vector3 pos, int unitId)
         {
-            Instantiate(enemyTiles[unitId - 1], pos, Quaternion.identity);
+            Instantiate(enemyTiles[unitId], pos, Quaternion.identity);
             GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);         
         }
 
@@ -134,38 +169,32 @@ namespace Completed
                     int unitId = value / 100;
                     if (structureId != 0)
                         LayoutStructure(pos, structureId);
-                    if(itemId != 0)
-                        LayoutItemById(pos, itemId);
-                    if (unitId != 0)
-                        LayoutUnitById(pos, unitId);
+                    
                     x++;                               
                 }                
             }
 
-            Vector3 randomPos = new Vector3();            
-            while(true)
-            {
-                randomPos.x = Random.Range(1, columns);
-                randomPos.y = Random.Range(1, rows);
-                if(GameManager.instance.curLevel.GetMapOfStructures(randomPos) == 0)
-                    break;
-            }
-
+            Vector3 randomPos = GetRandomPosRefMap();
             Instantiate(exit, randomPos, Quaternion.identity);
 
             if(Random.Range(0, 2) == 1)
             {
-                while (true)
-                {
-                    randomPos.x = Random.Range(1, columns);
-                    randomPos.y = Random.Range(1, rows);
-                    if (GameManager.instance.curLevel.GetMapOfStructures(randomPos) == 0)
-                        break;
-                }
+                randomPos = GetRandomPosRefMap();
                 GameManager.instance.LayoutShop(randomPos);
-            }
+            }            
+        }
 
-            
+        Vector3 GetRandomPosRefMap()
+        {
+            Vector3 rPos = new Vector3();
+            while (true)
+            {
+                rPos = RandomPosition();
+                if (GameManager.instance.curLevel.GetMapOfStructures(rPos) == 0)
+                    break;
+            }            
+
+            return rPos;
         }
 
     }

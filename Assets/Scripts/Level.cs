@@ -9,6 +9,9 @@ namespace Completed
     {
         public string mapData;
 
+        public Dictionary<int, int> enemyInfo = new Dictionary<int, int>();
+                
+        public int missionItemCount;
         public int id;
         public int columns, rows;        
         public int[,] mapOfUnits;
@@ -54,9 +57,11 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Setup(int levelId, string _mapData)
+        public void Setup(int levelId, string _mapData, int _missionItemCount, Dictionary<int, int> eInfo)
         {
             Init();
+            enemyInfo = eInfo;
+            missionItemCount = _missionItemCount;
             id = levelId;
             mapData = _mapData;
             string[] stringSeparators = new string[] { "\r\n" };
@@ -76,6 +81,7 @@ namespace Completed
             enemies.Clear();
             tiles.Clear();
             items.Clear();
+            enemyInfo.Clear();
         }
 
         public void MakeGameMapOfUnits(int columns, int rows)

@@ -27,6 +27,7 @@ namespace Completed
         public Image[] shopItemIcons;
         public Text[] shopItemDescriptions;
         public Text moneyText;
+        
 
         public GameObject result;
         public Button backBtn;
@@ -180,7 +181,7 @@ namespace Completed
         // Update is called once per frame
         void Update()
         {
-            moneyText.text = "MONEY : " + GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().money;
+            moneyText.text = "MONEY : " + GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().money;            
         }
     }
 }

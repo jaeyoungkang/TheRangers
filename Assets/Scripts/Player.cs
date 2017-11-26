@@ -117,6 +117,7 @@ namespace Completed
         public GameObject[] dirSprits;
 
         public int money;
+        public int missionItemCount;
 
         public void AddMoney(int addMoney)
         {
@@ -132,7 +133,8 @@ namespace Completed
         public void Init()
         {
             UpdateDirImage();
-            money = 100;
+            money = 0;
+            missionItemCount = 0;
             myShip = GameManager.instance.myShip;
             myWeapons = GameManager.instance.myWeapons;
             ChangeWeapon1();
@@ -281,6 +283,7 @@ namespace Completed
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
+            playerInfo.missionItemText.text = "크리스탈 : " + missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
             playerInfo.moneyText.text = "Money " + money;
             playerInfo.changeTimeText.text = "Change Time(" + Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString() + ")";
             playerInfo.sheildText.text = "보호막(" + myShip.shield + "/" + myShip.shieldInit + ")";
@@ -307,7 +310,7 @@ namespace Completed
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
-            myShip.UpdateScope(value);
+            myShip.UpdateScope(value);            
 
             if(shoting)
             {
@@ -687,14 +690,43 @@ namespace Completed
 		{
             if (other.tag == "Exit")
             {
-                if(GameManager.instance.IsEnd())
+                if (missionItemCount >= GameManager.instance.curLevel.missionItemCount)
                 {
-                    GameManager.instance.Win();
+                    if (GameManager.instance.IsEnd())
+                    {
+                        GameManager.instance.Win();
+                    }
+                    else
+                    {
+                        GameManager.instance.NextUniverse();
+                    }
                 }
                 else
                 {
-                    GameManager.instance.NextUniverse();
-                }                
+                    GameManager.instance.UpdateGameMssage("크리스탈을 더 수집해야함!", 2f);
+                }
+                
+            }
+            else if( other.tag == "MissionItem")
+            {
+                missionItemCount++;
+                other.gameObject.SetActive(false);
+            }
+            else if (other.tag == "Resource")
+            {
+                if(other.name.Contains("Gold"))
+                {
+                    money += 100;
+                }
+                else if (other.name.Contains("Silver"))
+                {
+                    money += 40;
+                }
+                else if (other.name.Contains("Copper"))
+                {
+                    money += 10;
+                }
+                other.gameObject.SetActive(false);
             }
         }
                 

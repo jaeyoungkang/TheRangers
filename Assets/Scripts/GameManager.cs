@@ -385,8 +385,19 @@ namespace Completed
         void InitLevel(int levelId)
         {
             doingSetup = true;
-                        
-            curLevel.Setup(levelId, maps[levelId-1].text);
+
+            Dictionary<int, int> eInfo = new Dictionary<int, int>();
+
+            switch(levelId)
+            {
+                case 1: eInfo.Add(0, 1); break;
+                case 2: eInfo.Add(0, 2); eInfo.Add(1, 1); break;
+                case 3: eInfo.Add(0, 3); eInfo.Add(1, 2); eInfo.Add(2, 1); break;
+                case 4: eInfo.Add(0, 4); eInfo.Add(1, 3); eInfo.Add(2, 2); break;
+                case 5: eInfo.Add(0, 5); eInfo.Add(1, 4); eInfo.Add(2, 3); break;
+            }
+
+            curLevel.Setup(levelId, maps[levelId-1].text, levelId+1, eInfo);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
