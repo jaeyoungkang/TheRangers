@@ -81,9 +81,20 @@ namespace Completed
 
             InitialiseList ();
 
-            LayoutStructuresByFile(curLevel.mapData);
+//            LayoutStructuresByFile(curLevel.mapData);
+            LayoutStructuresRandomly(curLevel.structureInfo);
             LayoutResourceItemsRandomly(curLevel.missionItemCount+1);
             LayoutEnemiesRandomly(curLevel.enemyInfo);
+
+            Vector3 randomPos = GetRandomPosRefMap();
+            Instantiate(exit, randomPos, Quaternion.identity);
+
+            if (Random.Range(0, 2) == 1)
+            {
+                randomPos = GetRandomPosRefMap();
+                GameManager.instance.LayoutShop(randomPos);
+            }
+
         }
 
         void LayoutStructure(Vector3 pos, int range)
@@ -104,6 +115,18 @@ namespace Completed
             GameManager.instance.curLevel.SetMapOfStructures(pos, range);
         }
 
+        void LayoutStructuresRandomly(Dictionary<int, int> sInfos)
+        {
+            foreach (KeyValuePair<int, int> sInfo in sInfos)
+            {
+                for (int i = 0; i < sInfo.Value; i++)
+                {
+                    Vector3 rPos = GetRandomPosRefMap();
+                    LayoutStructure(rPos, sInfo.Key);
+                }
+            }
+        }
+
         void LayoutEnemiesRandomly(Dictionary<int, int> eInfos)
         {
             foreach(KeyValuePair<int,int> eInfo in eInfos)
@@ -111,7 +134,7 @@ namespace Completed
                 for (int i = 0; i < eInfo.Value; i++)
                 {
                     Vector3 rPos = GetRandomPosRefMap();
-                    LayoutItemById(rPos, 1); LayoutUnitById(rPos, eInfo.Key);
+                    LayoutUnitById(rPos, eInfo.Key);
                 }
             }
         }
@@ -122,7 +145,7 @@ namespace Completed
 
             for (int i = 0; i < resourceCount; i++)
             {
-                List<int> resourceItems = new List<int>() { 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4 };
+                List<int> resourceItems = new List<int>() { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3 };
 
                 int index = Random.Range(0, resourceItems.Count);
                 int itemId = resourceItems[index];
@@ -173,15 +196,6 @@ namespace Completed
                     x++;                               
                 }                
             }
-
-            Vector3 randomPos = GetRandomPosRefMap();
-            Instantiate(exit, randomPos, Quaternion.identity);
-
-            if(Random.Range(0, 2) == 1)
-            {
-                randomPos = GetRandomPosRefMap();
-                GameManager.instance.LayoutShop(randomPos);
-            }            
         }
 
         Vector3 GetRandomPosRefMap()

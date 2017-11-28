@@ -133,7 +133,7 @@ namespace Completed
         public void Init()
         {
             UpdateDirImage();
-            money = 0;
+            money = GameManager.instance.money;
             missionItemCount = 0;
             myShip = GameManager.instance.myShip;
             myWeapons = GameManager.instance.myWeapons;

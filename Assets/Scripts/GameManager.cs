@@ -39,6 +39,7 @@ namespace Completed
         public int numberOfUniverseInit = 1;
         public int numberOfUniverseEnd = 3;
 
+        public int money;
         public SpaceShip myShip;
         public List<Weapon> myWeapons = new List<Weapon>();
 
@@ -63,7 +64,7 @@ namespace Completed
 
             List<int> ItemSetA2 = new List<int> { 3, 3, 3, 6, 6, 6, 4, 5 };
 
-            List<int> ItemSetA3 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 15 };
+            List<int> ItemSetA3 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, };
 
 
             dropIds[0] = pointer[Random.Range(0, pointer.Count)];
@@ -325,6 +326,7 @@ namespace Completed
 
         void ResetPlayerInfo()
         {
+            money = 0;
             myShip = new SpaceShip(10, 0.4f, 2);
             myShip.ReadyToDeparture(8, 4, 2);
             myWeapons.Clear();
@@ -386,18 +388,29 @@ namespace Completed
         {
             doingSetup = true;
 
-            Dictionary<int, int> eInfo = new Dictionary<int, int>();
+            Dictionary<int, int> eInfos = new Dictionary<int, int>();
 
             switch(levelId)
             {
-                case 1: eInfo.Add(0, 1); break;
-                case 2: eInfo.Add(0, 2); eInfo.Add(1, 1); break;
-                case 3: eInfo.Add(0, 3); eInfo.Add(1, 2); eInfo.Add(2, 1); break;
-                case 4: eInfo.Add(0, 4); eInfo.Add(1, 3); eInfo.Add(2, 2); break;
-                case 5: eInfo.Add(0, 5); eInfo.Add(1, 4); eInfo.Add(2, 3); break;
+                case 1: eInfos.Add(0, 1); break;
+                case 2: eInfos.Add(0, 2); eInfos.Add(1, 1); break;
+                case 3: eInfos.Add(0, 5); eInfos.Add(1, 2); eInfos.Add(2, 1); break;
+                case 4: eInfos.Add(0, 5); eInfos.Add(1, 4); eInfos.Add(2, 2); break;
+                case 5: eInfos.Add(0, 5); eInfos.Add(1, 5); eInfos.Add(2, 3); break;
             }
 
-            curLevel.Setup(levelId, maps[levelId-1].text, levelId+1, eInfo);
+            Dictionary<int, int> sInfos = new Dictionary<int, int>();
+
+            switch (levelId)
+            {
+                case 1: sInfos.Add(1, 6); sInfos.Add(3, 5); break;
+                case 2: sInfos.Add(1, 10); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
+                case 3: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 2); break;
+                case 4: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
+                case 5: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
+            }
+
+            curLevel.Setup(levelId, maps[levelId-1].text, levelId+1, eInfos, sInfos);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
@@ -457,7 +470,7 @@ namespace Completed
             numberOfUniverse++;
             doingSetup = true;            
             string resultMsg = "다음 우주로 이동합니다!";
-            spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);                        
+            spacePage.GetComponent<SpacePage>().ShowResult("탐색 완료", resultMsg, "Next");
         }
 
         public bool IsEnd()
@@ -469,15 +482,15 @@ namespace Completed
         {
             doingSetup = true;
             numberOfUniverse = numberOfUniverseInit;
-            string resultMsg = "탐색 임무 완수!";
-            spacePage.GetComponent<SpacePage>().ShowResult(resultMsg);
+            string resultMsg = "우주의 끝에 도달하였습니다. 지구로 귀환합니다.!";
+            spacePage.GetComponent<SpacePage>().ShowResult("탐색 임무 완수", resultMsg, "Come Back to Earth");
         }
 
         public void GameOver()
 		{
             doingSetup = true;
             numberOfUniverse = numberOfUniverseInit;
-            spacePage.GetComponent<SpacePage>().ShowResult("You died.");
+            spacePage.GetComponent<SpacePage>().ShowResult("탐색 실패", "우주의 미아가 되었습니다...", "첫화면으로");
 		}
 
         GameObject frontPage;

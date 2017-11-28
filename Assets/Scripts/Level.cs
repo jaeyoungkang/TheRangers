@@ -10,7 +10,8 @@ namespace Completed
         public string mapData;
 
         public Dictionary<int, int> enemyInfo = new Dictionary<int, int>();
-                
+        public Dictionary<int, int> structureInfo = new Dictionary<int, int>();
+
         public int missionItemCount;
         public int id;
         public int columns, rows;        
@@ -57,10 +58,11 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Setup(int levelId, string _mapData, int _missionItemCount, Dictionary<int, int> eInfo)
+        public void Setup(int levelId, string _mapData, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo)
         {
             Init();
             enemyInfo = eInfo;
+            structureInfo = sInfo;
             missionItemCount = _missionItemCount;
             id = levelId;
             mapData = _mapData;

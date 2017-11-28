@@ -32,7 +32,8 @@ namespace Completed
         public GameObject result;
         public Button backBtn;
         public Text resultMsg;
-        
+        public Text resultTitle;
+
         public ItemInfo[] itemInfos;
 
         void Start()
@@ -122,7 +123,7 @@ namespace Completed
                 case 11: player.myWeapons[1].AddCapability(2); break;
                 case 12: player.myWeapons[2].AddCapability(1); break;
                 case 13: player.AddMoney(10); break;
-                case 14: player.AddMoney(30); break;
+                case 14: player.AddMoney(40); break;
                 case 15: player.AddMoney(100); break;
             }
 
@@ -172,8 +173,10 @@ namespace Completed
             }            
         }
 
-        public void ShowResult(string msg)
+        public void ShowResult(string titleMsg, string msg, string btnString)
         {
+            backBtn.GetComponentInChildren<Text>().text = btnString;
+            resultTitle.text = titleMsg;
             resultMsg.text = msg;
             result.SetActive(true);
         }
