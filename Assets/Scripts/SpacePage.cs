@@ -112,15 +112,17 @@ namespace Completed
                 case 4: player.myShip.ShieldUp(); break;
                 case 5: player.myShip.SpeedUp(); break;
                 case 6: player.myShip.WeaponChangeSpeedUp(); break;
-                case 7: player.myWeapons[0].ShotTimeUp(0.1f); break;
-                case 8: player.myWeapons[1].ShotTimeUp(0.1f); break;
-                case 9: player.myWeapons[2].ShotTimeUp(0.1f); break;
-                case 10: break;
-                case 11: break;
-                case 12: break;
-                case 13: player.AddMoney(10); break;
-                case 14: player.AddMoney(40); break;
-                case 15: player.AddMoney(100); break;
+                case 7: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1)); break;
+                case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS2)); break;
+                case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3)); break;
+                case 10: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1)); break;
+                case 11: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN2)); break;
+                case 12: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3)); break;
+                case 13: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1)); break;
+                case 14: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP2)); break;
+                case 15: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3)); break;
+                case 16: player.AddMoney(10); break;
+                case 17: player.AddMoney(40); break;
             }
 
             

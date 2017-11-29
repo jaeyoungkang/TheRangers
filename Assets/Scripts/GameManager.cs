@@ -49,9 +49,9 @@ namespace Completed
                 return new int[3] {0,1,2 };
             }
             
-            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 0, 7, 10 };
-            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 1, 1, 8, 11 };
-            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 2, 2, 9, 12 };
+            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 3 };
+            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 1, 3 };
+            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 2, 3 };
             List<int> pointer = ItemSetA1;
             switch(type)
             {
@@ -59,14 +59,21 @@ namespace Completed
                 case 1: pointer = ItemSetB1; break;
                 case 2: pointer = ItemSetC1; break;
             }
-
-            List<int> ItemSetA2 = new List<int> { 3, 3, 3, 6, 6, 6, 4, 5 };
-
-            List<int> ItemSetA3 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, };
-
-
             dropIds[0] = pointer[Random.Range(0, pointer.Count)];
-            dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA2.Count)];
+
+            List<int> ItemSetA2 = new List<int> { 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9, };
+            List<int> ItemSetB2 = new List<int> { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 12 };
+            List<int> ItemSetC2 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 15 };
+            switch (type)
+            {
+                case 0: pointer = ItemSetA2; break;
+                case 1: pointer = ItemSetB2; break;
+                case 2: pointer = ItemSetC2; break;
+            }
+            dropIds[1] = pointer[Random.Range(0, pointer.Count)];
+
+            List<int> ItemSetA3 = new List<int> { 16, 16, 16, 16, 16, 16, 16, 16, 16, 17};           
+            
             dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
 
             return dropIds;
@@ -79,7 +86,15 @@ namespace Completed
             DropInfo dInfo = new DropInfo();
             dInfo.shop = true;
             dInfo.obj = item;
-            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,8,9 };
+            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,10,13 };
+
+            List<int> randomListA = new List<int> { 7, 7, 7, 7, 7, 7, 7, 8, 8, 9 };
+            List<int> randomListB = new List<int> { 10, 10, 10, 10, 10, 10, 10, 11, 11, 12 };
+            List<int> randomListC = new List<int> { 13, 13, 13, 13, 13, 13, 13, 14, 14, 15 };
+
+            dInfo.ids[7] = Random.Range(0, randomListA.Count);
+            dInfo.ids[8] = Random.Range(0, randomListB.Count);
+            dInfo.ids[9] = Random.Range(0, randomListC.Count);
 
             dropItems.Add(dInfo);
         }
@@ -328,9 +343,9 @@ namespace Completed
             myShip = new SpaceShip(2, 2, 4);
             myShip.ReadyToDeparture(6, 2, 1);
             myWeapons.Clear();
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(3));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1));
         }
 
         //this is called only once, and the paramter tell it to be called only after the scene was loaded

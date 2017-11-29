@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Completed
 {
+    public enum WEAPON { WS1, WS2, WS3, WS4, WN1, WN2, WN3, WP1, WP2, WP3 };
     public class LevelEfx : MonoBehaviour
     {
         public GameObject[] bulletMInstances = new GameObject[20];
@@ -21,14 +22,22 @@ namespace Completed
 
         int shotEffectIndex = 0;
 
-        public Weapon GetWeapon(int index)
+        public Weapon GetWeapon(WEAPON index)
         {
             switch(index)
             {
-                case 1: return new Weapon(2, 0.3f, 3, 0.2f, 20, "Speed Gun", 0);
+                case WEAPON.WS1: return new Weapon(2, 0.3f, 3, 0.2f, 20, "Speed Gun 1", 0);
+                case WEAPON.WS2: return new Weapon(3, 0.35f, 3, 0.2f, 20, "Speed Gun 2", 0);
+                case WEAPON.WS3: return new Weapon(3, 0.3f, 3, 0.2f, 20, "Speed Gun A", 0);
+                case WEAPON.WS4: return new Weapon(3, 0.25f, 3, 0.2f, 25, "Speed Gun S", 0);
                 default:
-                case 2: return new Weapon(4, 0.6f, 2, 0.3f, 10, "Normal Gun", 1);
-                case 3: return new Weapon(15, 1f, 1, 0.5f, 5, "Power Gun", 2);                
+                case WEAPON.WN1: return new Weapon(4, 0.6f, 2, 0.3f, 10, "Normal Gun A", 1);
+                case WEAPON.WN2: return new Weapon(4, 0.5f, 2, 0.3f, 8, "Normal Gun B", 1);
+                case WEAPON.WN3: return new Weapon(6, 0.7f, 2, 0.3f, 10, "Normal Gun C", 1);
+
+                case WEAPON.WP1: return new Weapon(12, 1f, 1, 0.5f, 6, "Power Gun A", 2);
+                case WEAPON.WP2: return new Weapon(12, 1f, 1, 0.5f, 5, "Power Gun B", 2);
+                case WEAPON.WP3: return new Weapon(15, 1f, 1, 0.5f, 4, "Power Gun C", 2);
             }
         }
 

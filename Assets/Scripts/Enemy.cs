@@ -30,9 +30,9 @@ namespace Completed
         {
             base.Start();
             myWeapons.Clear();
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(3));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1));
+            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1));
 
             if (type == 0)
             {
