@@ -9,6 +9,7 @@ namespace Completed
     public class ItemInfo
     {
         public int id;
+        public int grade;
         public Sprite image;
         public string desc;
         public int price;
@@ -23,6 +24,7 @@ namespace Completed
         public Text[] itemDescriptions;
         public Button searchBtn;
 
+        public GameObject[] shopItemPanels;
         public Button[] shopBuyItemBtns;
         public Image[] shopItemIcons;
         public Text[] shopItemDescriptions;
@@ -115,14 +117,20 @@ namespace Completed
                 case 7: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1)); break;
                 case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS2)); break;
                 case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3)); break;
-                case 10: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1)); break;
-                case 11: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN2)); break;
-                case 12: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3)); break;
-                case 13: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1)); break;
-                case 14: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP2)); break;
-                case 15: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3)); break;
-                case 16: player.AddMoney(10); break;
-                case 17: player.AddMoney(40); break;
+                case 10: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4)); break;
+
+                case 11: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1)); break;
+                case 12: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN2)); break;
+                case 13: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3)); break;
+                case 14: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4)); break;
+
+                case 15: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1)); break;
+                case 16: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP2)); break;
+                case 17: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3)); break;
+                case 18: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4)); break;
+
+                case 19: player.AddMoney(10); break;
+                case 20: player.AddMoney(40); break;
             }
 
             
@@ -130,9 +138,18 @@ namespace Completed
 
         public void OpenShopPanel()
         {
+            Color blue = new Color(0, 0f, 0.8f);
+            Color green = new Color(0, 0.8f, 0.0f);
+            Color gold = new Color(0.9f, 0.9f, 0.0f);
+
             shopPanel.SetActive(true);
             for (int i = 0; i < 10; i++)
             {
+                Color panelColor = Color.white;
+                if(itemInfos[searchBox.ids[i]].grade == 1) panelColor = green;
+                else if (itemInfos[searchBox.ids[i]].grade == 2) panelColor = blue;
+                else if (itemInfos[searchBox.ids[i]].grade == 3) panelColor = gold;
+                shopItemPanels[i].GetComponent<Image>().color = panelColor;
                 shopItemIcons[i].sprite = itemInfos[searchBox.ids[i]].image;
                 shopItemDescriptions[i].text = itemInfos[searchBox.ids[i]].desc +  "\n 가격[" + itemInfos[searchBox.ids[i]].price + "]";
             }

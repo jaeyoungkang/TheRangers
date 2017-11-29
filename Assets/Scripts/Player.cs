@@ -338,7 +338,15 @@ namespace Completed
                 myShip.UpdateWeaponChangeTime();
             }
             else if (myShip.curWeapon.canShot)
-            {                
+            {
+                if (Input.GetKeyDown(KeyCode.Keypad1)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3));
+                if (Input.GetKeyDown(KeyCode.Keypad4)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4));
+                if (Input.GetKeyDown(KeyCode.Keypad2)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3));
+                if (Input.GetKeyDown(KeyCode.Keypad5)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4));
+                if (Input.GetKeyDown(KeyCode.Keypad3)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3));
+                if (Input.GetKeyDown(KeyCode.Keypad6)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4));
+
+
                 if (Input.GetKeyDown("0"))
                 {
                     myShip.AddAmmo(0, 4);

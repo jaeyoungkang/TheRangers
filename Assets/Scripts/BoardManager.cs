@@ -88,7 +88,7 @@ namespace Completed
             Vector3 randomPos = GetRandomPosRefMap();
             Instantiate(exit, randomPos, Quaternion.identity);
 
-            if (Random.Range(0, 2) == 1)
+//            if (Random.Range(0, 2) == 1)
             {
                 randomPos = GetRandomPosRefMap();
                 GameManager.instance.LayoutShop(randomPos);

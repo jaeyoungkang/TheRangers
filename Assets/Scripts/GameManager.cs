@@ -86,15 +86,20 @@ namespace Completed
             DropInfo dInfo = new DropInfo();
             dInfo.shop = true;
             dInfo.obj = item;
-            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,10,13 };
+            dInfo.ids = new int[10] {0,1,2,3,4,5,6,0,0,0 };
 
-            List<int> randomListA = new List<int> { 7, 7, 7, 7, 7, 7, 7, 8, 8, 9 };
-            List<int> randomListB = new List<int> { 10, 10, 10, 10, 10, 10, 10, 11, 11, 12 };
-            List<int> randomListC = new List<int> { 13, 13, 13, 13, 13, 13, 13, 14, 14, 15 };
+            List<int> randomListA = new List<int> { 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 9, 9, 10 };
+            List<int> randomListB = new List<int> { 11, 11, 12, 13, 14 };
+            List<int> randomListC = new List<int> { 15, 16, 17, 18 };
 
-            dInfo.ids[7] = Random.Range(0, randomListA.Count);
-            dInfo.ids[8] = Random.Range(0, randomListB.Count);
-            dInfo.ids[9] = Random.Range(0, randomListC.Count);
+            //dInfo.ids[7] = Random.Range(0, randomListA.Count);
+            //dInfo.ids[8] = Random.Range(0, randomListB.Count);
+            //dInfo.ids[9] = Random.Range(0, randomListC.Count);
+
+            dInfo.ids[7] = 8;
+            dInfo.ids[8] = 13;
+            dInfo.ids[9] = 18;
+
 
             dropItems.Add(dInfo);
         }
