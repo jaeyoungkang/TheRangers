@@ -13,7 +13,6 @@ namespace Completed
         public int bType;
         public int bulletSpeed = 30;
 
-        public int capability = 10;
         public int weaponDamage = 4;
 
         public bool canShot = true;
@@ -21,22 +20,17 @@ namespace Completed
         public float shotTime;
         public float shotTimeInit = 1f;
 
-        public float reloadTime;
-        public float reloadTimeInit = 1.5f;
-
         public int shotAniSpeed = 1;
         public float aniDelay = 0.3f;
 
         public string name;
 
-        public Weapon(int _damage, float _shotTime, float _reloadTime, int _shotAniSpeed, float _aniDelay, int _capability, int _bulletSpeed, string _name, int _bType)
+        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType)
         {
             weaponDamage = _damage;
             shotTimeInit = _shotTime;
-            reloadTimeInit = _reloadTime;
             shotAniSpeed = _shotAniSpeed;
             aniDelay = _aniDelay;
-            capability = _capability;
             bulletSpeed = _bulletSpeed;
             name = _name;
             bType = _bType;
@@ -46,29 +40,12 @@ namespace Completed
         public void Init()
         {
             shotTime = shotTimeInit;
-            reloadTime = reloadTimeInit;
-        }
-
-        public void AddCapability(int addCap)
-        {
-            capability += addCap;
         }
 
         public void ShotTimeUp(float addSpeed)
         {
             shotTimeInit -= addSpeed;
             Init();
-        }
-
-        public void ReloadSpeedUp(float addSpeed)
-        {
-            Init();
-            reloadTimeInit -= addSpeed;
-        }
-
-        public void UpdateReload()
-        {
-            reloadTime -= Time.deltaTime;            
         }
 
         public void UpdateWeaponCooling()
@@ -90,7 +67,6 @@ namespace Completed
 
         private GameObject curBullet;
 
-        public Button reloadBtn;
         public Button shotBtn;
         public Button sightUpBtn;
         public Button sightDownBtn;
@@ -141,14 +117,24 @@ namespace Completed
 
             transform.position = Vector3.zero;
 
-            reloadBtn.onClick.AddListener(ReloadByTouch);
+            shotBtn.onClick.RemoveAllListeners();
+            sightUpBtn.onClick.RemoveAllListeners();
+            sightDownBtn.onClick.RemoveAllListeners();
+            sightRightBtn.onClick.RemoveAllListeners();
+            sightLeftBtn.onClick.RemoveAllListeners();
+
+            lockDirBtn.onClick.RemoveAllListeners();
+            moveUpBtn.onClick.RemoveAllListeners();
+            moveDownBtn.onClick.RemoveAllListeners();
+            moveRightBtn.onClick.RemoveAllListeners();
+            moveLeftBtn.onClick.RemoveAllListeners();
+            
             shotBtn.onClick.AddListener(AttempAttackAtSight);
             sightUpBtn.onClick.AddListener(SightMoveUp);
             sightDownBtn.onClick.AddListener(SightMoveDown);
             sightRightBtn.onClick.AddListener(SightMoveRight);
             sightLeftBtn.onClick.AddListener(SightMoveLeft);
-
-            lockDirBtn.onClick.RemoveAllListeners();
+                        
             lockDirBtn.onClick.AddListener(LockDir);
             moveUpBtn.onClick.AddListener(MoveUp);
             moveDownBtn.onClick.AddListener(MoveDown);
@@ -156,6 +142,10 @@ namespace Completed
             moveLeftBtn.onClick.AddListener(MoveLeft);
 
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
+
+            playerInfo.Weapon1.onClick.RemoveAllListeners();
+            playerInfo.Weapon2.onClick.RemoveAllListeners();
+            playerInfo.Weapon3.onClick.RemoveAllListeners();
             playerInfo.Weapon1.onClick.AddListener(ChangeWeapon1);
             playerInfo.Weapon2.onClick.AddListener(ChangeWeapon2);
             playerInfo.Weapon3.onClick.AddListener(ChangeWeapon3);
@@ -248,32 +238,24 @@ namespace Completed
 
         void SightMoveUp()
         {
-            if (!myShip.canMove) return;
-            myShip.canMove = false;
             localSightPos.y += 1;
             UpdateSightPos();
         }
 
         void SightMoveRight()
         {
-            if (!myShip.canMove) return;
-            myShip.canMove = false;
             localSightPos.x += 1;
             UpdateSightPos();
         }
 
         void SightMoveLeft()
         {
-            if (!myShip.canMove) return;
-            myShip.canMove = false;
             localSightPos.x -= 1;
             UpdateSightPos();
         }
 
         void SightMoveDown()
         {
-            if (!myShip.canMove) return;
-            myShip.canMove = false;
             localSightPos.y -= 1;            
             UpdateSightPos();
         }
@@ -286,14 +268,14 @@ namespace Completed
             playerInfo.missionItemText.text = "크리스탈 : " + missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
             playerInfo.moneyText.text = "Money " + money;
             playerInfo.changeTimeText.text = "Change Time(" + Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString() + ")";
-            playerInfo.sheildText.text = "보호막(" + myShip.shield + "/" + myShip.shieldInit + ")";
+            playerInfo.sheildText.text = "보호막(" + myShip.shield + "/" + myShip.shieldInits[myShip.shieldLevel] + ")";
 
             Vector3 normal = new Vector3(1, 1, 1);
             Vector3 selected = new Vector3(1.2f, 1.2f, 1);
 
-            string ammoNum1 = "W1 " + myShip.numOfBullets[0] + "/" + myShip.totalBullets[0];
-            string ammoNum2 = "W2 " + myShip.numOfBullets[1] + "/" + myShip.totalBullets[1];
-            string ammoNum3 = "W3 " + myShip.numOfBullets[2] + "/" + myShip.totalBullets[2];            
+            string ammoNum1 = "W1 " + myShip.totalBullets[0];
+            string ammoNum2 = "W2 " + myShip.totalBullets[1];
+            string ammoNum3 = "W3 " + myShip.totalBullets[2];            
 
             playerInfo.Weapon1.GetComponentInChildren<Text>().text = ammoNum1;
             playerInfo.Weapon2.GetComponentInChildren<Text>().text = ammoNum2;
@@ -301,7 +283,6 @@ namespace Completed
 
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
 
-            reloadBtn.GetComponentInChildren<Text>().text = "RELOAD\n(" + Mathf.FloorToInt(myShip.curWeapon.reloadTime * 100).ToString() +")";
             shotBtn.GetComponentInChildren<Text>().text = "SHOT!\n(" + Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString() + ")";
         }
 
@@ -356,23 +337,19 @@ namespace Completed
             {
                 myShip.UpdateWeaponChangeTime();
             }
-            else if (myShip.startReload)
-            {
-                myShip.UpdateReload();                
-            }            
             else if (myShip.curWeapon.canShot)
             {                
                 if (Input.GetKeyDown("0"))
                 {
-                    myShip.AddAmmo(0, 8);
+                    myShip.AddAmmo(0, 4);
                 }
                 if (Input.GetKeyDown("1"))
                 {
-                    myShip.AddAmmo(1, 4);
+                    myShip.AddAmmo(1, 2);
                 }
                 if (Input.GetKeyDown("2"))
                 {
-                    myShip.AddAmmo(2, 2);
+                    myShip.AddAmmo(2, 1);
                 }
                 if (Input.GetKeyDown("3"))
                 {
@@ -380,17 +357,11 @@ namespace Completed
                 }
                 if (Input.GetKeyDown("4"))
                 {
-                    myShip.AddShield(1);
+                    myShip.ShieldUp();
                 }
                 if (Input.GetKeyDown("5"))
                 {
-                    myShip.SpeedUp(0.01f);
-                }
-                if (Input.GetKeyDown("6"))
-                {
-                    myWeapons[0].ReloadSpeedUp(0.1f);
-                    myWeapons[1].ReloadSpeedUp(0.1f);
-                    myWeapons[2].ReloadSpeedUp(0.1f);
+                    myShip.SpeedUp();
                 }
                 if (Input.GetKeyDown("7"))
                 {
@@ -408,10 +379,6 @@ namespace Completed
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     AttempAttack(myShip.curWeapon.bType);
-                }
-                else if (Input.GetKeyDown(KeyCode.R))
-                {
-                    myShip.Reload(myShip.curWeapon.bType);
                 }
                 else if (Input.GetKeyDown(KeyCode.Keypad1))
                 {
@@ -480,11 +447,6 @@ namespace Completed
 				AttemptMove<Enemy> (horizontal, vertical);
 			}
 		}
-
-        public void ReloadByTouch()
-        {
-            myShip.Reload(myShip.curWeapon.bType);
-        }
 
         public void AttempAttackAtSight()
         {

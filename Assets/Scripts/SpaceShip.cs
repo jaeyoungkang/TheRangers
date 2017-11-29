@@ -7,70 +7,72 @@ namespace Completed
     [System.Serializable]
     public class SpaceShip
     {
-        public int[] numOfBullets = new int[3];
         public int[] totalBullets = new int[3];
 
         public bool canMove = true;
         
-        public bool startReload = false;
         public bool startChangeWeapon = false;
 
         public int indexReload = 0;
 
         public int shield;
-        public int shieldInit = 10;
-        
+        public int[] shieldInits = new int[] { 0, 5, 10, 12, 14, 16, 18, 20, 40 };
+        public int shieldLevel = 0;
+
         public float moveTime;
-        public float moveTimeInit = 0.4f;
+                                           // 0   1     2    3      4     5       6      7   
+        public float[] speed = new float[] { 1f, 0,6f, 0.5f, 0.45f, 0.4f, 0.35f, 0.30f, 0.25f};
+        public int speedLevel = 0;
 
         public float weaponChangeTime;
-        public float weaponChangeTimeInit = 1f;
+        public float[] weaponChange = new float[] {1f, 0.8f, 0.6f, 0.4f, 0.2f};
+        public int weaponChangeLevel = 0;
 
         public Weapon curWeapon;
 
         public int scopeRange;
         public int scopeRangeInit = 2;
 
-        public SpaceShip(int _shieldInit, float _moveTimeInit, int _scopeRangeInit)
+        public SpaceShip(int _shieldLevel, int _scopeRangeInit, int _speedLevel)
         {
-            shieldInit = _shieldInit;
-            moveTimeInit = _moveTimeInit;
+            shieldLevel = _shieldLevel;
             scopeRangeInit = _scopeRangeInit;
+            speedLevel = _speedLevel;
         }
 
         public void SetWeapon(Weapon weapon)
         {
-            if(curWeapon  != null)
-            {
-                totalBullets[curWeapon.bType] = totalBullets[curWeapon.bType] + numOfBullets[curWeapon.bType];
-                numOfBullets[curWeapon.bType] = 0;
-            }                
-
             curWeapon = weapon;
             startChangeWeapon = true;            
         }
 
         public void InitWeaponAmmo(int index, int total)
         {
-            numOfBullets[index] = 0;
             totalBullets[index] = total;
         }
 
-        public void SpeedUp(float addSpeed)
+        public void WeaponChangeSpeedUp()
         {
-            moveTimeInit -= addSpeed;
-            moveTime = moveTimeInit;
+            weaponChangeLevel++;
+            if (weaponChangeLevel >= weaponChange.Length) weaponChangeLevel = weaponChange.Length;
         }
 
-        public void AddShield(int addShield)
+        public void SpeedUp()
         {
-            shieldInit += addShield;
+            speedLevel++;
+            if (speedLevel >= speed.Length) speedLevel = speed.Length;
+        }
+
+        public void ShieldUp()
+        {
+            shieldLevel++;
+            if (shieldLevel > shieldInits.Length) shieldLevel = shieldInits.Length;
         }
 
         public void RestoreShield(int restore)
         {
             shield += restore;
-            if (shield > shieldInit) shield = shieldInit;
+            if (shield > shieldInits[shieldLevel]) shield = shieldInits[shieldLevel];
         }
 
         public void AddAmmo(int index, int ammoNum)
@@ -80,23 +82,14 @@ namespace Completed
 
         public void ReadyToDeparture(int totalBulletType0, int totalBulletType1, int totalBulletType2)
         {            
-            for (int i = 0; i < numOfBullets.Length; i++)
-            {
-                numOfBullets[i] = 0;
-            }
-
-            for (int i = 0; i < totalBullets.Length; i++)
-            {
-                totalBullets[i] = 0;
-            }
             InitWeaponAmmo(0, totalBulletType0);
             InitWeaponAmmo(1, totalBulletType1);
             InitWeaponAmmo(2, totalBulletType2);
 
-            shield = shieldInit;
-            moveTime = moveTimeInit;            
+            shield = shieldInits[shieldLevel];
+            moveTime = speed[speedLevel];
             scopeRange = scopeRangeInit;
-            weaponChangeTime = weaponChangeTimeInit;
+            weaponChangeTime = weaponChange[weaponChangeLevel];
         }
 
         public void Move()
@@ -108,12 +101,13 @@ namespace Completed
         {
             if (curWeapon.canShot == false) return false;
 
-            if (numOfBullets[input] <= 0)
+            if (totalBullets[input] <= 0)
             {
                 return false;
             }
 
-            numOfBullets[input]--;
+            totalBullets[input]--;
+
             curWeapon.canShot = false;
             return true;
         }
@@ -122,35 +116,7 @@ namespace Completed
         {
             if (value != 0 && value != 1) scopeRange = value;
             else scopeRange = scopeRangeInit;
-        }
-
-        public void Reload(int index)
-        {
-            if (totalBullets[index] == 0) return;
-            startReload = true;
-            indexReload = index;
-        }
-
-        public void UpdateReload()
-        {
-            curWeapon.UpdateReload();
-            
-            if (curWeapon.reloadTime <= 0)
-            {
-                curWeapon.reloadTime = curWeapon.reloadTimeInit;
-                startReload = false;
-                
-                int relaodNum = numOfBullets[indexReload];
-                int maxReloadAmmo = curWeapon.capability - numOfBullets[indexReload];
-
-                if (totalBullets[indexReload] >= maxReloadAmmo) relaodNum = maxReloadAmmo;
-                else relaodNum = totalBullets[indexReload];
-
-                totalBullets[indexReload] -= relaodNum;
-                numOfBullets[indexReload] += relaodNum;
-            }
-        }
-
+        }        
         public void UpdateWeaponCooling()
         {
             curWeapon.UpdateWeaponCooling();            
@@ -161,7 +127,7 @@ namespace Completed
             weaponChangeTime -= Time.deltaTime;
             if (weaponChangeTime <= 0)
             {
-                weaponChangeTime = weaponChangeTimeInit;
+                weaponChangeTime = weaponChange[weaponChangeLevel];
                 startChangeWeapon = false;
             }
         }
@@ -171,7 +137,7 @@ namespace Completed
             moveTime -= Time.deltaTime;
             if (moveTime <= 0)
             {
-                moveTime = moveTimeInit;
+                moveTime = speed[speedLevel];
                 canMove = true;
             }
         }

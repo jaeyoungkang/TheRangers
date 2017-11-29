@@ -7,8 +7,7 @@ namespace Completed
     [System.Serializable]
     public class Level
     {
-        public string mapData;
-
+        public Dictionary<int, int> resourceInfo = new Dictionary<int, int>();
         public Dictionary<int, int> enemyInfo = new Dictionary<int, int>();
         public Dictionary<int, int> structureInfo = new Dictionary<int, int>();
 
@@ -58,19 +57,16 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Setup(int levelId, string _mapData, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo)
+        public void Setup(int levelId, int _rows, int _columns, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo, Dictionary<int, int> rInfo)
         {
             Init();
             enemyInfo = eInfo;
             structureInfo = sInfo;
+            resourceInfo = rInfo;
             missionItemCount = _missionItemCount;
             id = levelId;
-            mapData = _mapData;
-            string[] stringSeparators = new string[] { "\r\n" };
-            string[] lines = mapData.Split(stringSeparators, System.StringSplitOptions.None);
-            string[] symbols = lines[0].Split(',');
-            columns = symbols.Length;
-            rows = lines.Length;            
+            columns = _columns;
+            rows = _rows;            
 
             MakeGameMapOfUnits(columns, rows);
             MakeGameMapOfStructures(columns, rows);
@@ -79,7 +75,6 @@ namespace Completed
 
         public void Init()
         {
-            mapData = "";
             enemies.Clear();
             tiles.Clear();
             items.Clear();

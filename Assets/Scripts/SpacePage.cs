@@ -105,23 +105,19 @@ namespace Completed
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
             switch (searchBox.ids[index])
             {
-                case 0: player.myShip.AddAmmo(0, 8); break;
-                case 1: player.myShip.AddAmmo(1, 4); break;
-                case 2: player.myShip.AddAmmo(2, 2); break;
-                case 3: player.myShip.RestoreShield(5); break;
-                case 4: player.myShip.AddShield(1); break;
-                case 5: player.myShip.SpeedUp(0.01f); break;
-                case 6:
-                    player.myWeapons[0].ReloadSpeedUp(0.1f);
-                    player.myWeapons[1].ReloadSpeedUp(0.1f);
-                    player.myWeapons[2].ReloadSpeedUp(0.1f);
-                    break;
+                case 0: player.myShip.AddAmmo(0, 4); break;
+                case 1: player.myShip.AddAmmo(1, 2); break;
+                case 2: player.myShip.AddAmmo(2, 1); break;
+                case 3: player.myShip.RestoreShield(4); break;
+                case 4: player.myShip.ShieldUp(); break;
+                case 5: player.myShip.SpeedUp(); break;
+                case 6: player.myShip.WeaponChangeSpeedUp(); break;
                 case 7: player.myWeapons[0].ShotTimeUp(0.1f); break;
                 case 8: player.myWeapons[1].ShotTimeUp(0.1f); break;
                 case 9: player.myWeapons[2].ShotTimeUp(0.1f); break;
-                case 10: player.myWeapons[0].AddCapability(3); break;
-                case 11: player.myWeapons[1].AddCapability(2); break;
-                case 12: player.myWeapons[2].AddCapability(1); break;
+                case 10: break;
+                case 11: break;
+                case 12: break;
                 case 13: player.AddMoney(10); break;
                 case 14: player.AddMoney(40); break;
                 case 15: player.AddMoney(100); break;

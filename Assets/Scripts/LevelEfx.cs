@@ -25,12 +25,11 @@ namespace Completed
         {
             switch(index)
             {
-                case 1: return new Weapon(2, 0.5f, 1.5f, 3, 0.2f, 8, 20, "Speed Gun", 0);
-                case 2: return new Weapon(4, 1.0f, 2f, 2, 0.3f, 4, 10, "Normal Gun", 1);
-                case 3: return new Weapon(15, 2f, 3f, 1, 0.5f, 2, 5, "Power Gun", 2);
+                case 1: return new Weapon(2, 0.3f, 3, 0.2f, 20, "Speed Gun", 0);
+                default:
+                case 2: return new Weapon(4, 0.6f, 2, 0.3f, 10, "Normal Gun", 1);
+                case 3: return new Weapon(15, 1f, 1, 0.5f, 5, "Power Gun", 2);                
             }
-
-            return new Weapon(4, 2f, 3f, 2, 0.3f, 4, 10, "Normal Gun", 1);
         }
 
         public void Init()

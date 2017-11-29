@@ -81,9 +81,8 @@ namespace Completed
 
             InitialiseList ();
 
-//            LayoutStructuresByFile(curLevel.mapData);
             LayoutStructuresRandomly(curLevel.structureInfo);
-            LayoutResourceItemsRandomly(curLevel.missionItemCount+1);
+            LayoutResourceItemsRandomly(curLevel.missionItemCount+1, curLevel.resourceInfo);
             LayoutEnemiesRandomly(curLevel.enemyInfo);
 
             Vector3 randomPos = GetRandomPosRefMap();
@@ -139,18 +138,21 @@ namespace Completed
             }
         }
 
-        void LayoutResourceItemsRandomly(int missionItemCount)
+        void LayoutResourceItemsRandomly(int missionItemCount, Dictionary<int, int> rInfos)
         {
-            int resourceCount = missionItemCount;
-
-            for (int i = 0; i < resourceCount; i++)
+            foreach (KeyValuePair<int, int> rInfo in rInfos)
             {
-                List<int> resourceItems = new List<int>() { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3 };
+                int maxCount = 0;
+                if(rInfo.Key == 0) maxCount = 4;
+                else if (rInfo.Key == 1) maxCount = 2;
+                else if (rInfo.Key == 2) maxCount = 1;
 
-                int index = Random.Range(0, resourceItems.Count);
-                int itemId = resourceItems[index];
-                Vector3 rPos = GetRandomPosRefMap();
-                LayoutItemById(rPos, itemId);
+                int count = rInfo.Value + Random.Range(0, maxCount);
+                for (int i = 0; i < count; i++)
+                {
+                    Vector3 rPos = GetRandomPosRefMap();
+                    LayoutItemById(rPos, rInfo.Key);
+                }                
             }
 
             for (int i = 0; i < missionItemCount; i++)

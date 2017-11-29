@@ -20,8 +20,6 @@ namespace Completed
         public Level curLevel = new Level();
         public LevelEfx lvEfx = new LevelEfx();
 
-        public TextAsset[] maps;
-
         private GameObject gatewayPage;
         private Text universeText;
         public Text gameMessage;
@@ -327,8 +325,8 @@ namespace Completed
         void ResetPlayerInfo()
         {
             money = 0;
-            myShip = new SpaceShip(10, 0.4f, 2);
-            myShip.ReadyToDeparture(8, 4, 2);
+            myShip = new SpaceShip(2, 2, 4);
+            myShip.ReadyToDeparture(6, 2, 1);
             myWeapons.Clear();
             myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(1));
             myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(2));
@@ -403,14 +401,32 @@ namespace Completed
 
             switch (levelId)
             {
-                case 1: sInfos.Add(1, 6); sInfos.Add(3, 5); break;
-                case 2: sInfos.Add(1, 10); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
-                case 3: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 2); break;
-                case 4: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
-                case 5: sInfos.Add(1, 10); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
+                case 1: sInfos.Add(1, 10); sInfos.Add(3, 5); break;
+                case 2: sInfos.Add(1, 20); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
+                case 3: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 2); break;
+                case 4: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
+                case 5: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
             }
 
-            curLevel.Setup(levelId, maps[levelId-1].text, levelId+1, eInfos, sInfos);
+            Dictionary<int, int> rInfos = new Dictionary<int, int>();
+
+            switch (levelId)
+            {
+                case 1: rInfos.Add(2, 3); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
+                case 2: rInfos.Add(2, 5); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
+                case 3: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 0); break;
+                case 4: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
+                case 5: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
+            }
+            int colums = 20;
+            int rows = 10;
+
+            if(levelId>1)
+            {
+                rows = 20;
+            }
+
+            curLevel.Setup(levelId, rows, colums, levelId + 1, eInfos, sInfos, rInfos);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
