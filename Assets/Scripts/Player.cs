@@ -82,6 +82,7 @@ namespace Completed
         public Button moveRightBtn;
 
         public GameObject display;
+        public GameObject shield;
 
         Vector3 localSightPos = new Vector3(1, 0, 0);
         bool shoting = false;
@@ -169,6 +170,12 @@ namespace Completed
                 case 2: playerInfo.Weapon2.transform.localScale = selected; break;
                 case 3: playerInfo.Weapon3.transform.localScale = selected; break;
             }
+        }
+
+        public void SetWeapon(Weapon wepon, int index)
+        {
+            myWeapons[index] = wepon;
+            myShip.SetWeapon(myWeapons[index]);
         }
 
         void ChangeWeapon1()
@@ -267,17 +274,45 @@ namespace Completed
             if (display == null) return;
             PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
 
-            playerInfo.missionItemText.text = "크리스탈 : " + missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
-            playerInfo.moneyText.text = "Money " + money;
-            playerInfo.changeTimeText.text = "Change Time(" + Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString() + ")";
-            playerInfo.sheildText.text = "보호막(" + myShip.shield + "/" + myShip.shieldInits[myShip.shieldLevel] + ")";
+            playerInfo.missionItemText.text = missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
+            playerInfo.moneyText.text = money.ToString();
+            playerInfo.changeTimeText.text = Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString();
+            playerInfo.sheildText.text = myShip.shield + "/" + myShip.shieldInits[myShip.shieldLevel];
 
             Vector3 normal = new Vector3(1, 1, 1);
             Vector3 selected = new Vector3(1.2f, 1.2f, 1);
 
-            string ammoNum1 = "W1 " + myShip.totalBullets[0];
-            string ammoNum2 = "W2 " + myShip.totalBullets[1];
-            string ammoNum3 = "W3 " + myShip.totalBullets[2];            
+            string ammoNum1 = ": " + myShip.totalBullets[0].ToString();
+            string ammoNum2 = ": " + myShip.totalBullets[1].ToString();
+            string ammoNum3 = ": " + myShip.totalBullets[2].ToString();
+                        
+            Color btnColor = Color.white;
+            switch (myWeapons[0].grade)
+            {
+                case 1: btnColor = Color.green; break;
+                case 2: btnColor = Color.blue; break;
+                case 3: btnColor = Color.red; break;
+            }
+            playerInfo.Weapon1.GetComponent<Image>().color = btnColor;
+
+            btnColor = Color.white;
+            switch (myWeapons[1].grade)
+            {
+                case 1: btnColor = Color.green; break;
+                case 2: btnColor = Color.blue; break;
+                case 3: btnColor = Color.red; break;
+            }
+            playerInfo.Weapon2.GetComponent<Image>().color = btnColor;
+
+            btnColor = Color.white;
+            switch (myWeapons[2].grade)
+            {
+                case 1: btnColor = Color.green; break;
+                case 2: btnColor = Color.blue; break;
+                case 3: btnColor = Color.red; break;
+            }
+            playerInfo.Weapon3.GetComponent<Image>().color = btnColor;
+
 
             playerInfo.Weapon1.GetComponentInChildren<Text>().text = ammoNum1;
             playerInfo.Weapon2.GetComponentInChildren<Text>().text = ammoNum2;
@@ -293,9 +328,9 @@ namespace Completed
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
-            myShip.UpdateScope(value);            
+            myShip.UpdateScope(value);
 
-            if(shoting)
+            if (shoting)
             {
                 Vector3 bulletPos = curBullet.transform.position;
                 Vector3 moveDir = enemyPos - bulletPos;
@@ -309,7 +344,7 @@ namespace Completed
                     shoting = false;
                     curBullet.GetComponent<SpriteRenderer>().color = Color.white;
                     curBullet.SetActive(false);
-                    StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(enemyPos, myShip.curWeapon));
+//                    StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(enemyPos, myShip.curWeapon));
                     GameManager.instance.curLevel.AttackOtherPlayer(enemyPos);
                 }
             }
@@ -342,13 +377,27 @@ namespace Completed
             }
             else if (myShip.curWeapon.canShot)
             {
-                if (Input.GetKeyDown(KeyCode.Keypad4)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3));
-                if (Input.GetKeyDown(KeyCode.Keypad7)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4));
-                if (Input.GetKeyDown(KeyCode.Keypad5)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3));
-                if (Input.GetKeyDown(KeyCode.Keypad8)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4));
-                if (Input.GetKeyDown(KeyCode.Keypad6)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3));
-                if (Input.GetKeyDown(KeyCode.Keypad9)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4));
+                if (Input.GetKeyDown(KeyCode.Keypad4)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3),0);
+                if (Input.GetKeyDown(KeyCode.Keypad7)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4),0);
+                if (Input.GetKeyDown(KeyCode.Keypad5)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3),1);
+                if (Input.GetKeyDown(KeyCode.Keypad8)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4),1);
+                if (Input.GetKeyDown(KeyCode.Keypad6)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3),2);
+                if (Input.GetKeyDown(KeyCode.Keypad9)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4),2);
 
+                if (Input.GetKeyDown("i"))
+                {
+                    LoseHP(2);
+                }
+
+                if (Input.GetKeyDown("o"))
+                {
+                    GameManager.instance.DropItem(transform.position, 1);
+                }
+
+                if (Input.GetKeyDown("p"))
+                {
+                    GameManager.instance.LayoutShop(transform.position);
+                }
 
                 if (Input.GetKeyDown("0"))
                 {
@@ -712,10 +761,32 @@ namespace Completed
                 other.gameObject.SetActive(false);
             }
         }
-                
-    	public void LoseHP (int loss)
+
+        public System.Collections.IEnumerator ShieldEffect(SpaceShip myShip)
+        {
+            Color sColor = shield.GetComponent<SpriteRenderer>().color;
+            sColor.a = 0.8f;
+            shield.GetComponent<SpriteRenderer>().color = sColor;
+            float shiledRate = (float)myShip.shield / (float)myShip.shieldInits[myShip.shieldLevel];
+            yield return new WaitForSeconds(0.2f);
+            
+            if (shiledRate > 0.8f) sColor.a = 0.35f;
+            else if (shiledRate > 0.5f) sColor.a = 0.25f;
+            else if (shiledRate > 0.2f) sColor.a = 0.15f;
+            else sColor.a = 0.0f;
+
+            shield.GetComponent<SpriteRenderer>().color = sColor;
+
+        }
+
+        public void LoseHP (int loss)
 		{
-            if (myShip.Shield()) myShip.Damaged(loss);
+            if (myShip.Shield())
+            {
+                myShip.Damaged(loss);
+                StartCoroutine(ShieldEffect(myShip));
+            }
+
             else Destoryed();
 
             if (myShip.shield < 0) Destoryed();

@@ -20,6 +20,7 @@ namespace Completed
         public GameObject searchPanel;
         public Button closeShopBtn;
         public Button[] getItemBtns;
+        public Image[] itemBgs;
         public Image[] itemIcons;
         public Text[] itemDescriptions;
         public Button searchBtn;
@@ -114,20 +115,20 @@ namespace Completed
                 case 4: player.myShip.ShieldUp(); break;
                 case 5: player.myShip.SpeedUp(); break;
                 case 6: player.myShip.WeaponChangeSpeedUp(); break;
-                case 7: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1)); break;
-                case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS2)); break;
-                case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3)); break;
-                case 10: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4)); break;
+                case 7: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1),0); break;
+                case 8: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS2), 0); break;
+                case 9: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3), 0); break;
+                case 10: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4), 0); break;
 
-                case 11: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1)); break;
-                case 12: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN2)); break;
-                case 13: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3)); break;
-                case 14: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4)); break;
+                case 11: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1), 1); break;
+                case 12: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN2), 1); break;
+                case 13: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3), 1); break;
+                case 14: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4), 1); break;
 
-                case 15: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1)); break;
-                case 16: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP2)); break;
-                case 17: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3)); break;
-                case 18: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4)); break;
+                case 15: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1), 2); break;
+                case 16: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP2), 2); break;
+                case 17: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3), 2); break;
+                case 18: player.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4), 2); break;
 
                 case 19: player.AddMoney(10); break;
                 case 20: player.AddMoney(40); break;
@@ -167,10 +168,19 @@ namespace Completed
 
         public void OpenDropItemPanel()
         {
+            Color blue = new Color(0, 0f, 0.8f);
+            Color green = new Color(0, 0.8f, 0.0f);
+            Color gold = new Color(0.9f, 0.9f, 0.0f);
+
             searchPanel.SetActive(true);
 
             for (int i = 0; i < 3; i++)
             {
+                Color panelColor = Color.white;
+                if (itemInfos[searchBox.ids[i]].grade == 1) panelColor = green;
+                else if (itemInfos[searchBox.ids[i]].grade == 2) panelColor = blue;
+                else if (itemInfos[searchBox.ids[i]].grade == 3) panelColor = gold;
+                itemBgs[i].GetComponent<Image>().color = panelColor;                
                 itemIcons[i].sprite = itemInfos[searchBox.ids[i]].image;
                 itemDescriptions[i].text = itemInfos[searchBox.ids[i]].desc;
             }

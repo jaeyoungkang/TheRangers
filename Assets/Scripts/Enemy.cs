@@ -12,6 +12,7 @@ namespace Completed
         public List<Weapon> myWeapons = new List<Weapon>();
 
         Player player;
+        public GameObject shield;
 
         class bulletInfo
         {
@@ -23,6 +24,23 @@ namespace Completed
 
         protected override void OnCantMove<T>(T component)
         {
+
+        }
+
+        public System.Collections.IEnumerator ShieldEffect(SpaceShip myShip)
+        {
+            Color sColor = shield.GetComponent<SpriteRenderer>().color;
+            sColor.a = 0.8f;
+            shield.GetComponent<SpriteRenderer>().color = sColor;
+            float shiledRate = (float)myShip.shield / (float)myShip.shieldInits[myShip.shieldLevel];
+            yield return new WaitForSeconds(0.2f);
+            
+            if (shiledRate > 0.8f) sColor.a = 0.35f;
+            else if (shiledRate > 0.5f) sColor.a = 0.25f;
+            else if (shiledRate > 0.2f) sColor.a = 0.15f;
+            else sColor.a = 0.0f;
+
+            shield.GetComponent<SpriteRenderer>().color = sColor;
 
         }
 
@@ -85,7 +103,7 @@ namespace Completed
                     bInfo.bullet.SetActive(false);
                     if (bInfo.targetPos == player.transform.position)
                     {
-                        StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
+//                        StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
                         player.LoseHP(myShip.curWeapon.weaponDamage);
                     }
                     deleteBullet.Add(bInfo);
@@ -115,7 +133,11 @@ namespace Completed
 
         public void LoseHP(int damage)
         {
-            if (myShip.Shield()) myShip.Damaged(damage);
+            if (myShip.Shield())
+            {
+                myShip.Damaged(damage);
+                StartCoroutine(ShieldEffect(myShip));
+            }
             else Destoryed();
 
             if (myShip.shield < 0) Destoryed();
