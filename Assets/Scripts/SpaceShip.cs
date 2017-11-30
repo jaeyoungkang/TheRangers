@@ -67,6 +67,7 @@ namespace Completed
         {
             shieldLevel++;
             if (shieldLevel > shieldInits.Length) shieldLevel = shieldInits.Length;
+            RestoreShield(shieldInits[shieldLevel]);
         }
 
         public void RestoreShield(int restore)

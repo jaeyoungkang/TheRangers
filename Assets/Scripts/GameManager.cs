@@ -61,9 +61,16 @@ namespace Completed
             }
             dropIds[0] = pointer[Random.Range(0, pointer.Count)];
 
-            List<int> ItemSetA2 = new List<int> { 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 9, };
-            List<int> ItemSetB2 = new List<int> { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 12 };
-            List<int> ItemSetC2 = new List<int> { 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 15 };
+            List<int> ItemSetA2 = new List<int> { 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, };
+            List<int> ItemSetB2 = new List<int> { 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, };
+            List<int> ItemSetC2 = new List<int> { 15, 15, 15, 15, 15, 15, 15, 15, 16, 16, };
+
+            if(GameManager.instance.curLevel.id >= 5)
+            {
+                ItemSetA2.Add(9);
+                ItemSetB2.Add(11);
+                ItemSetC2.Add(17);
+            }
             switch (type)
             {
                 case 0: pointer = ItemSetA2; break;
@@ -72,8 +79,12 @@ namespace Completed
             }
             dropIds[1] = pointer[Random.Range(0, pointer.Count)];
 
-            List<int> ItemSetA3 = new List<int> { 16, 16, 16, 16, 16, 16, 16, 16, 16, 17};           
-            
+            List<int> ItemSetA3 = new List<int> { 19, 19, 19, 19, 19, 19, 19, 19, 20, 20 };
+            if (GameManager.instance.curLevel.id >= 5)
+            {
+                ItemSetA3.Add(21);
+            }
+
             dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
 
             return dropIds;
@@ -89,16 +100,16 @@ namespace Completed
             dInfo.ids = new int[10] {0,1,2,3,4,5,6,0,0,0 };
 
             List<int> randomListA = new List<int> { 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 9, 9, 10 };
-            List<int> randomListB = new List<int> { 11, 11, 12, 13, 14 };
-            List<int> randomListC = new List<int> { 15, 16, 17, 18 };
+            List<int> randomListB = new List<int> { 11, 11, 11, 11, 11, 11, 11, 11, 12, 13, 14 };
+            List<int> randomListC = new List<int> { 15, 15, 15, 15, 15, 15, 15, 15, 16, 17, 18 };
 
-            //dInfo.ids[7] = Random.Range(0, randomListA.Count);
-            //dInfo.ids[8] = Random.Range(0, randomListB.Count);
-            //dInfo.ids[9] = Random.Range(0, randomListC.Count);
+            dInfo.ids[7] = randomListA[Random.Range(0, randomListA.Count)];
+            dInfo.ids[8] = randomListB[Random.Range(0, randomListB.Count)];
+            dInfo.ids[9] = randomListC[Random.Range(0, randomListC.Count)];
 
-            dInfo.ids[7] = 8;
-            dInfo.ids[8] = 13;
-            dInfo.ids[9] = 18;
+            //dInfo.ids[7] = 8;
+            //dInfo.ids[8] = 13;
+            //dInfo.ids[9] = 18;
 
 
             dropItems.Add(dInfo);
@@ -118,10 +129,13 @@ namespace Completed
 
         public DropInfo GetDropBox(Vector3 pos)
         {
-            foreach (DropInfo dInfo in dropItems)
+            for (int i=1; i<dropItems.Count; i++)
             {
+                DropInfo dInfo = dropItems[i];
                 if (dInfo.obj.transform.position == pos) return dInfo;
             }
+
+            if(dropItems[0].obj.transform.position == pos) return dropItems[0];
 
             return null;
         }
@@ -345,7 +359,7 @@ namespace Completed
         void ResetPlayerInfo()
         {
             money = 0;
-            myShip = new SpaceShip(2, 2, 4);
+            myShip = new SpaceShip(2, 2, 5);
             myShip.ReadyToDeparture(6, 2, 1);
             myWeapons.Clear();
             myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1));
@@ -432,11 +446,11 @@ namespace Completed
 
             switch (levelId)
             {
-                case 1: rInfos.Add(2, 3); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
-                case 2: rInfos.Add(2, 5); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
-                case 3: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 0); break;
-                case 4: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
-                case 5: rInfos.Add(2, 5); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
+                case 1: rInfos.Add(2, 5); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
+                case 2: rInfos.Add(2, 8); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
+                case 3: rInfos.Add(2, 8); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
+                case 4: rInfos.Add(2, 8); rInfos.Add(3, 3); rInfos.Add(4, 1); break;
+                case 5: rInfos.Add(2, 8); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
             }
             int colums = 20;
             int rows = 10;

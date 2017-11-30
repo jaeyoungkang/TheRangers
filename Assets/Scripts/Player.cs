@@ -10,6 +10,7 @@ namespace Completed
     [System.Serializable]
     public class Weapon
     {
+        public int grade;
         public int bType;
         public int bulletSpeed = 30;
 
@@ -25,7 +26,7 @@ namespace Completed
 
         public string name;
 
-        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType)
+        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType, int _grade)
         {
             weaponDamage = _damage;
             shotTimeInit = _shotTime;
@@ -34,6 +35,7 @@ namespace Completed
             bulletSpeed = _bulletSpeed;
             name = _name;
             bType = _bType;
+            grade = _grade;
             Init();
         }
 
@@ -305,6 +307,7 @@ namespace Completed
                 if (length < 0.1f)
                 {
                     shoting = false;
+                    curBullet.GetComponent<SpriteRenderer>().color = Color.white;
                     curBullet.SetActive(false);
                     StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(enemyPos, myShip.curWeapon));
                     GameManager.instance.curLevel.AttackOtherPlayer(enemyPos);
@@ -339,12 +342,12 @@ namespace Completed
             }
             else if (myShip.curWeapon.canShot)
             {
-                if (Input.GetKeyDown(KeyCode.Keypad1)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3));
-                if (Input.GetKeyDown(KeyCode.Keypad4)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4));
-                if (Input.GetKeyDown(KeyCode.Keypad2)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3));
-                if (Input.GetKeyDown(KeyCode.Keypad5)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4));
-                if (Input.GetKeyDown(KeyCode.Keypad3)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3));
-                if (Input.GetKeyDown(KeyCode.Keypad6)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4));
+                if (Input.GetKeyDown(KeyCode.Keypad4)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3));
+                if (Input.GetKeyDown(KeyCode.Keypad7)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4));
+                if (Input.GetKeyDown(KeyCode.Keypad5)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3));
+                if (Input.GetKeyDown(KeyCode.Keypad8)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4));
+                if (Input.GetKeyDown(KeyCode.Keypad6)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3));
+                if (Input.GetKeyDown(KeyCode.Keypad9)) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4));
 
 
                 if (Input.GetKeyDown("0"))
@@ -616,6 +619,16 @@ namespace Completed
                 shoting = true;
                 curBullet.transform.position = transform.position;
                 enemyPos = attackPos;
+
+                Color bulletColor = Color.white;
+                switch(myShip.curWeapon.grade)
+                {
+                    case 1: bulletColor = Color.green; break;
+                    case 2: bulletColor = Color.blue; break;
+                    case 3: bulletColor = Color.red; break;
+                }
+
+                curBullet.GetComponent<SpriteRenderer>().color = bulletColor;
                 curBullet.SetActive(true);                
             }            
         }
@@ -684,15 +697,15 @@ namespace Completed
             }
             else if (other.tag == "Resource")
             {
-                if(other.name.Contains("Gold"))
+                if(other.name.Contains("gold"))
                 {
                     money += 100;
                 }
-                else if (other.name.Contains("Silver"))
+                else if (other.name.Contains("blue"))
                 {
                     money += 40;
                 }
-                else if (other.name.Contains("Copper"))
+                else if (other.name.Contains("bronze"))
                 {
                     money += 10;
                 }
