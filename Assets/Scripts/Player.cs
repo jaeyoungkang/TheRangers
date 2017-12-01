@@ -87,6 +87,7 @@ namespace Completed
         Vector3 localSightPos = new Vector3(1, 0, 0);
         bool shoting = false;
         Vector3 enemyPos = new Vector3();
+        float timeLimit = 60;
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
         private Vector2 touchOrigin = -Vector2.one;	//Used to store location of screen touch origin for mobile controls.
@@ -111,6 +112,7 @@ namespace Completed
 
         public void Init()
         {
+            timeLimit = 100;
             UpdateDirImage();
             money = GameManager.instance.money;
             missionItemCount = 0;
@@ -320,7 +322,18 @@ namespace Completed
 
             playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
 
-            shotBtn.GetComponentInChildren<Text>().text = "SHOT!\n(" + Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString() + ")";
+            shotBtn.GetComponentInChildren<Text>().text = "SHOT!";
+
+            playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
+            playerInfo.timeLimitText.text = Mathf.FloorToInt(timeLimit).ToString();
+            if(timeLimit <= 10)
+            {
+                playerInfo.timeLimitText.color = Color.red;
+            }
+            else
+            {
+                playerInfo.timeLimitText.color = Color.white;
+            }
         }
 
         private void Update ()
@@ -329,6 +342,14 @@ namespace Completed
             UpdateDisplay();
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
             myShip.UpdateScope(value);
+            timeLimit -= Time.deltaTime;
+
+            if(timeLimit <= 0 )
+            {
+                LoseHP(2);
+                timeLimit = 10;
+                GameManager.instance.UpdateGameMssage("시간을 오바했다!", 1f);
+            }
 
             if (shoting)
             {

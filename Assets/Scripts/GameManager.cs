@@ -49,9 +49,9 @@ namespace Completed
                 return new int[3] {0,1,2 };
             }
             
-            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 3 };
-            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 1, 3 };
-            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 2, 3 };
+            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 3};
+            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 3};
+            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 3 };
             List<int> pointer = ItemSetA1;
             switch(type)
             {
@@ -65,7 +65,7 @@ namespace Completed
             List<int> ItemSetB2 = new List<int> { 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, };
             List<int> ItemSetC2 = new List<int> { 15, 15, 15, 15, 15, 15, 15, 15, 16, 16, };
 
-            if(GameManager.instance.curLevel.id >= 5)
+            if(GameManager.instance.curLevel.id >= 4)
             {
                 ItemSetA2.Add(9);
                 ItemSetB2.Add(11);
@@ -106,12 +106,7 @@ namespace Completed
             dInfo.ids[7] = randomListA[Random.Range(0, randomListA.Count)];
             dInfo.ids[8] = randomListB[Random.Range(0, randomListB.Count)];
             dInfo.ids[9] = randomListC[Random.Range(0, randomListC.Count)];
-
-            //dInfo.ids[7] = 8;
-            //dInfo.ids[8] = 13;
-            //dInfo.ids[9] = 18;
-
-
+            
             dropItems.Add(dInfo);
         }
 

@@ -27,7 +27,7 @@ namespace Completed
             switch(index)
             {
                 case WEAPON.WS1: return new Weapon(2, 0.3f, 3, 0.2f, 20, "Speed Gun 1", 0, 0);
-                case WEAPON.WS2: return new Weapon(3, 0.35f, 3, 0.2f, 20, "Speed Gun 2", 0, 1);
+                case WEAPON.WS2: return new Weapon(2, 0.25f, 3, 0.2f, 20, "Speed Gun 2", 0, 1);
                 case WEAPON.WS3: return new Weapon(3, 0.3f, 3, 0.2f, 20, "Speed Gun A", 0, 2);
                 case WEAPON.WS4: return new Weapon(3, 0.25f, 3, 0.2f, 25, "Speed Gun S", 0, 3);
                 default:

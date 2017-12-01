@@ -10,6 +10,8 @@ public class PlayerInfo : MonoBehaviour {
     public Text sheildText;
     public Text coolTimeText;
     public Text changeTimeText;
+    public Text shotTimeText;
+    public Text timeLimitText;
 
     public Button Weapon1;
     public Button Weapon2;
