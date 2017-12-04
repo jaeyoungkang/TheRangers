@@ -7,17 +7,12 @@ public class PlayerInfo : MonoBehaviour {
 
     public Text missionItemText;
     public Text moneyText;
-    public Text sheildText;
-    public Text coolTimeText;
-    public Text changeTimeText;
-    public Text shotTimeText;
     public Text timeLimitText;
 
-    public Button Weapon1;
-    public Button Weapon2;
-    public Button Weapon3;
+    public Text sheildText;
+    public Text weaponPowerText;
+    public Button weaponButton;
 
-    // Use this for initialization
     void Start () {
 		
 	}

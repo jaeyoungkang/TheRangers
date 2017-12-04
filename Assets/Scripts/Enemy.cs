@@ -9,7 +9,6 @@ namespace Completed
         public int type = 0;
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public SpaceShip myShip;
-        public List<Weapon> myWeapons = new List<Weapon>();
 
         Player player;
         public GameObject shield;
@@ -46,35 +45,31 @@ namespace Completed
 
         protected override void Start()
         {
-            base.Start();
-            myWeapons.Clear();
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1));
+            base.Start();           
 
             if (type == 0)
             {
                 myShip = new SpaceShip(1, 2, 6);
-                myShip.ReadyToDeparture(50, 0 ,0 );
-                myShip.SetWeapon(myWeapons[0]);
+                myShip.ReadyToDeparture(50);
+                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
             }
             else if (type == 1)
             {
                 myShip = new SpaceShip(2, 2, 4);
-                myShip.ReadyToDeparture(0, 50, 0);
-                myShip.SetWeapon(myWeapons[1]);
+                myShip.ReadyToDeparture(50);
+                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
             }
             else if (type == 2)
             {
                 myShip = new SpaceShip(3, 3, 0);
-                myShip.ReadyToDeparture(0, 0, 50);
-                myShip.SetWeapon(myWeapons[2]);
+                myShip.ReadyToDeparture(50);
+                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(4, 5, 1);
-                myShip.ReadyToDeparture(0, 0, 50);
-                myShip.SetWeapon(myWeapons[2]);
+                myShip.ReadyToDeparture(50);
+                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);

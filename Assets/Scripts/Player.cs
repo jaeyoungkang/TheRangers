@@ -10,6 +10,7 @@ namespace Completed
     [System.Serializable]
     public class Weapon
     {
+        public int consume = 1;
         public int grade;
         public int bType;
         public int bulletSpeed = 30;
@@ -26,7 +27,7 @@ namespace Completed
 
         public string name;
 
-        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType, int _grade)
+        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType, int _grade, int _consume)
         {
             weaponDamage = _damage;
             shotTimeInit = _shotTime;
@@ -36,6 +37,7 @@ namespace Completed
             name = _name;
             bType = _bType;
             grade = _grade;
+            consume = _consume;
             Init();
         }
 
@@ -64,7 +66,6 @@ namespace Completed
     public class Player : MovingObject
     {
         public SpaceShip myShip;
-        public List<Weapon> myWeapons;
         public GameObject sight;
 
         private GameObject curBullet;
@@ -117,8 +118,6 @@ namespace Completed
             money = GameManager.instance.money;
             missionItemCount = 0;
             myShip = GameManager.instance.myShip;
-            myWeapons = GameManager.instance.myWeapons;
-            ChangeWeapon1();
 
             transform.position = Vector3.zero;
 
@@ -144,60 +143,8 @@ namespace Completed
             moveUpBtn.onClick.AddListener(MoveUp);
             moveDownBtn.onClick.AddListener(MoveDown);
             moveRightBtn.onClick.AddListener(MoveRight);
-            moveLeftBtn.onClick.AddListener(MoveLeft);
-
-            PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
-
-            playerInfo.Weapon1.onClick.RemoveAllListeners();
-            playerInfo.Weapon2.onClick.RemoveAllListeners();
-            playerInfo.Weapon3.onClick.RemoveAllListeners();
-            playerInfo.Weapon1.onClick.AddListener(ChangeWeapon1);
-            playerInfo.Weapon2.onClick.AddListener(ChangeWeapon2);
-            playerInfo.Weapon3.onClick.AddListener(ChangeWeapon3);
+            moveLeftBtn.onClick.AddListener(MoveLeft);            
         }
-
-        void UpdateWeaponBtn(int index)
-        {
-            PlayerInfo playerInfo = display.GetComponent<PlayerInfo>();
-            Vector3 normal = new Vector3(1, 1, 1);
-            Vector3 selected = new Vector3(1.2f, 1.2f, 1);
-
-            playerInfo.Weapon1.transform.localScale = normal;
-            playerInfo.Weapon2.transform.localScale = normal;
-            playerInfo.Weapon3.transform.localScale = normal;
-
-            switch(index)
-            {
-                case 1: playerInfo.Weapon1.transform.localScale = selected; break;
-                case 2: playerInfo.Weapon2.transform.localScale = selected; break;
-                case 3: playerInfo.Weapon3.transform.localScale = selected; break;
-            }
-        }
-
-        public void SetWeapon(Weapon wepon, int index)
-        {
-            myWeapons[index] = wepon;
-            myShip.SetWeapon(myWeapons[index]);
-        }
-
-        void ChangeWeapon1()
-        {
-            myShip.SetWeapon(myWeapons[0]);
-            UpdateWeaponBtn(1);
-        }
-
-        void ChangeWeapon2()
-        {
-            myShip.SetWeapon(myWeapons[1]);
-            UpdateWeaponBtn(2);
-        }
-
-        void ChangeWeapon3()
-        {
-            myShip.SetWeapon(myWeapons[2]);
-            UpdateWeaponBtn(3);
-        }
-
 
         protected override void Start ()
 		{
@@ -278,53 +225,24 @@ namespace Completed
 
             playerInfo.missionItemText.text = missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
             playerInfo.moneyText.text = money.ToString();
-            playerInfo.changeTimeText.text = Mathf.FloorToInt(myShip.weaponChangeTime * 100).ToString();
             playerInfo.sheildText.text = myShip.shield + "/" + myShip.shieldInits[myShip.shieldLevel];
 
-            Vector3 normal = new Vector3(1, 1, 1);
-            Vector3 selected = new Vector3(1.2f, 1.2f, 1);
-
-            string ammoNum1 = ": " + myShip.totalBullets[0].ToString();
-            string ammoNum2 = ": " + myShip.totalBullets[1].ToString();
-            string ammoNum3 = ": " + myShip.totalBullets[2].ToString();
-                        
+                       
             Color btnColor = Color.white;
-            switch (myWeapons[0].grade)
+            switch (myShip.curWeapon.grade)
             {
                 case 1: btnColor = Color.green; break;
                 case 2: btnColor = Color.blue; break;
                 case 3: btnColor = Color.red; break;
             }
-            playerInfo.Weapon1.GetComponent<Image>().color = btnColor;
+            playerInfo.weaponButton.GetComponent<Image>().color = btnColor;
+            playerInfo.weaponButton.GetComponentInChildren<Text>().text = myShip.curWeapon.name + "\n" + "consume [" + myShip.curWeapon.consume + "]";
+            playerInfo.weaponPowerText.text = myShip.shotPower.ToString();
 
-            btnColor = Color.white;
-            switch (myWeapons[1].grade)
-            {
-                case 1: btnColor = Color.green; break;
-                case 2: btnColor = Color.blue; break;
-                case 3: btnColor = Color.red; break;
-            }
-            playerInfo.Weapon2.GetComponent<Image>().color = btnColor;
+//            playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
+//            shotBtn.GetComponentInChildren<Text>().text = myShip.curWeapon.name + "\n" + "["+ myShip.totalBullets +"]";
+//            playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
 
-            btnColor = Color.white;
-            switch (myWeapons[2].grade)
-            {
-                case 1: btnColor = Color.green; break;
-                case 2: btnColor = Color.blue; break;
-                case 3: btnColor = Color.red; break;
-            }
-            playerInfo.Weapon3.GetComponent<Image>().color = btnColor;
-
-
-            playerInfo.Weapon1.GetComponentInChildren<Text>().text = ammoNum1;
-            playerInfo.Weapon2.GetComponentInChildren<Text>().text = ammoNum2;
-            playerInfo.Weapon3.GetComponentInChildren<Text>().text = ammoNum3;
-
-            playerInfo.coolTimeText.text = Mathf.FloorToInt(myShip.moveTime * 100).ToString();
-
-            shotBtn.GetComponentInChildren<Text>().text = "SHOT!";
-
-            playerInfo.shotTimeText.text = Mathf.FloorToInt(myShip.curWeapon.shotTime * 100).ToString();
             playerInfo.timeLimitText.text = Mathf.FloorToInt(timeLimit).ToString();
             if(timeLimit <= 10)
             {
@@ -392,18 +310,14 @@ namespace Completed
             
             GameManager.instance.ShowObjs(transform.position, curDir, myShip.scopeRange);
             
-            if(myShip.startChangeWeapon)
+            if (myShip.curWeapon.canShot)
             {
-                myShip.UpdateWeaponChangeTime();
-            }
-            else if (myShip.curWeapon.canShot)
-            {
-                if (Input.GetKeyDown(KeyCode.Keypad4)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS3),0);
-                if (Input.GetKeyDown(KeyCode.Keypad7)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS4),0);
-                if (Input.GetKeyDown(KeyCode.Keypad5)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN3),1);
-                if (Input.GetKeyDown(KeyCode.Keypad8)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN4),1);
-                if (Input.GetKeyDown(KeyCode.Keypad6)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP3),2);
-                if (Input.GetKeyDown(KeyCode.Keypad9)) SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP4),2);
+                if (Input.GetKeyDown("1")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
+                if (Input.GetKeyDown("2")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
+                if (Input.GetKeyDown("3")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
+                if (Input.GetKeyDown("4")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
+                if (Input.GetKeyDown("5")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5));
+                if (Input.GetKeyDown("6")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6));
 
                 if (Input.GetKeyDown("i"))
                 {
@@ -420,61 +334,26 @@ namespace Completed
                     GameManager.instance.LayoutShop(transform.position);
                 }
 
-                if (Input.GetKeyDown("0"))
+                if (Input.GetKeyDown("7"))
                 {
-                    myShip.AddAmmo(0, 4);
-                }
-                if (Input.GetKeyDown("1"))
-                {
-                    myShip.AddAmmo(1, 2);
-                }
-                if (Input.GetKeyDown("2"))
-                {
-                    myShip.AddAmmo(2, 1);
-                }
-                if (Input.GetKeyDown("3"))
+                    myShip.AddPower(10);
+                }               
+                if (Input.GetKeyDown("8"))
                 {
                     myShip.RestoreShield(5);
                 }
-                if (Input.GetKeyDown("4"))
+                if (Input.GetKeyDown("9"))
                 {
                     myShip.ShieldUp();
                 }
-                if (Input.GetKeyDown("5"))
+                if (Input.GetKeyDown("0"))
                 {
                     myShip.SpeedUp();
-                }
-                if (Input.GetKeyDown("7"))
-                {
-                    myWeapons[0].ShotTimeUp(0.1f);
-                }
-                if (Input.GetKeyDown("8"))
-                {
-                    myWeapons[1].ShotTimeUp(0.1f);
-                }
-                if (Input.GetKeyDown("9"))
-                {
-                    myWeapons[2].ShotTimeUp(0.1f);
                 }
 
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    AttempAttack(myShip.curWeapon.bType);
-                }
-                else if (Input.GetKeyDown(KeyCode.Keypad1))
-                {
-                    myShip.SetWeapon(myWeapons[0]);
-                    UpdateWeaponBtn(1);
-                }
-                else if (Input.GetKeyDown(KeyCode.Keypad2))
-                {
-                    myShip.SetWeapon(myWeapons[1]);
-                    UpdateWeaponBtn(2);
-                }
-                else if (Input.GetKeyDown(KeyCode.Keypad3))
-                {
-                    myShip.SetWeapon(myWeapons[2]);
-                    UpdateWeaponBtn(3);
+                    AttempAttack();
                 }
             }
             else
@@ -531,10 +410,10 @@ namespace Completed
 
         public void AttempAttackAtSight()
         {
-            if (myShip.Shot(myShip.curWeapon.bType)) Attack(sight.transform.position);
+            AttempAttack();            
         }
 
-        public void  AttempAttack(int input)
+        public void  AttempAttack()
         {
             bool enableShot = false;
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
@@ -548,7 +427,7 @@ namespace Completed
             }
             if (enableShot == false) return;
 
-            if (myShip.Shot(input)) Attack(sight.transform.position);
+            if (myShip.Shot(myShip.curWeapon.consume)) Attack(sight.transform.position);
         }
 
         public bool CheckDirChanged(int xDir, int yDir)

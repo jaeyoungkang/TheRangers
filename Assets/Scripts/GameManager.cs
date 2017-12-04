@@ -39,7 +39,7 @@ namespace Completed
 
         public int money;
         public SpaceShip myShip;
-        public List<Weapon> myWeapons = new List<Weapon>();
+        public Weapon myWeapon;
 
         public int[] GenerateDropItemIds(int type)
         {
@@ -49,42 +49,13 @@ namespace Completed
                 return new int[3] {0,1,2 };
             }
             
-            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 3};
-            List<int> ItemSetB1 = new List<int> { 1, 1, 1, 3};
-            List<int> ItemSetC1 = new List<int> { 2, 2, 2, 3 };
-            List<int> pointer = ItemSetA1;
-            switch(type)
-            {
-                case 0: pointer = ItemSetA1; break;
-                case 1: pointer = ItemSetB1; break;
-                case 2: pointer = ItemSetC1; break;
-            }
-            dropIds[0] = pointer[Random.Range(0, pointer.Count)];
+            List<int> ItemSetA1 = new List<int> { 0,};
+            dropIds[0] = ItemSetA1 [Random.Range(0, ItemSetA1.Count)];
 
-            List<int> ItemSetA2 = new List<int> { 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, };
-            List<int> ItemSetB2 = new List<int> { 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, };
-            List<int> ItemSetC2 = new List<int> { 15, 15, 15, 15, 15, 15, 15, 15, 16, 16, };
-
-            if(GameManager.instance.curLevel.id >= 4)
-            {
-                ItemSetA2.Add(9);
-                ItemSetB2.Add(11);
-                ItemSetC2.Add(17);
-            }
-            switch (type)
-            {
-                case 0: pointer = ItemSetA2; break;
-                case 1: pointer = ItemSetB2; break;
-                case 2: pointer = ItemSetC2; break;
-            }
-            dropIds[1] = pointer[Random.Range(0, pointer.Count)];
-
-            List<int> ItemSetA3 = new List<int> { 19, 19, 19, 19, 19, 19, 19, 19, 20, 20 };
-            if (GameManager.instance.curLevel.id >= 5)
-            {
-                ItemSetA3.Add(21);
-            }
-
+            List<int> ItemSetA2 = new List<int> { 1};
+            dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA1.Count)];
+            
+            List<int> ItemSetA3 = new List<int> { 10, 10, 10, 10, 11, 11, 11, 11, 12, 13};
             dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
 
             return dropIds;
@@ -97,16 +68,7 @@ namespace Completed
             DropInfo dInfo = new DropInfo();
             dInfo.shop = true;
             dInfo.obj = item;
-            dInfo.ids = new int[10] {0,1,2,3,4,5,6,0,0,0 };
-
-            List<int> randomListA = new List<int> { 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 9, 9, 10 };
-            List<int> randomListB = new List<int> { 11, 11, 11, 11, 11, 11, 11, 11, 12, 13, 14 };
-            List<int> randomListC = new List<int> { 15, 15, 15, 15, 15, 15, 15, 15, 16, 17, 18 };
-
-            dInfo.ids[7] = randomListA[Random.Range(0, randomListA.Count)];
-            dInfo.ids[8] = randomListB[Random.Range(0, randomListB.Count)];
-            dInfo.ids[9] = randomListC[Random.Range(0, randomListC.Count)];
-            
+            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,8,9 };            
             dropItems.Add(dInfo);
         }
 
@@ -354,12 +316,10 @@ namespace Completed
         void ResetPlayerInfo()
         {
             money = 0;
+            myWeapon = lvEfx.GetWeapon(WEAPON.W1);
             myShip = new SpaceShip(2, 2, 5);
-            myShip.ReadyToDeparture(6, 2, 1);
-            myWeapons.Clear();
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WS1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WN1));
-            myWeapons.Add(GameManager.instance.lvEfx.GetWeapon(WEAPON.WP1));
+            myShip.ReadyToDeparture(10);            
+            myShip.SetWeapon(myWeapon);
         }
 
         //this is called only once, and the paramter tell it to be called only after the scene was loaded
@@ -461,7 +421,7 @@ namespace Completed
         }
 
         public void StartMission()
-		{
+		{            
             InitLevel(numberOfUniverse);
             ChangePage(PAGE.SPACE);			
             doingSetup = false;

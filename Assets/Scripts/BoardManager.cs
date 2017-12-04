@@ -173,33 +173,6 @@ namespace Completed
             GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);         
         }
 
-        void LayoutStructuresByFile(string mapData)
-        {
-            string[] stringSeparators = new string[] { "\r\n" };
-            string[] lines = mapData.Split(stringSeparators, System.StringSplitOptions.None);
-                        
-            int x = 0;
-            int y = lines.Length;
-            foreach(string str in lines)
-            {
-                y--;
-                x = 0;
-                string[] symbols = str.Split(',');
-                foreach(string s in symbols)
-                {
-                    Vector3 pos = new Vector3(x, y, 0);
-                    int value = Int32.Parse(s);
-                    int structureId = value % 10;
-                    int itemId = (value / 10) % 10;
-                    int unitId = value / 100;
-                    if (structureId != 0)
-                        LayoutStructure(pos, structureId);
-                    
-                    x++;                               
-                }                
-            }
-        }
-
         Vector3 GetRandomPosRefMap()
         {
             Vector3 rPos = new Vector3();
