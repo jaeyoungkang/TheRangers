@@ -13,8 +13,10 @@ namespace Completed
         
         public int indexReload = 0;
 
-        public int shield;
-        public int[] shieldInits = new int[] { 0, 5, 10, 12, 14, 16, 18, 20, 40 };
+        public int shield; 
+                                           // 0    1   2   3   4    5   
+                                           //lv1  lv2 lv3 lv4 lv5
+        public int[] shieldInits = new int[] { 5, 10, 15, 20, 30, 50};
         public int shieldLevel = 0;
 
         public float moveTime;
@@ -53,13 +55,12 @@ namespace Completed
         public void ShieldUp()
         {
             shieldLevel++;
-            if (shieldLevel > shieldInits.Length) shieldLevel = shieldInits.Length;
-            RestoreShield(shieldInits[shieldLevel]);
+            if (shieldLevel >= shieldInits.Length - 2) shieldLevel = shieldInits.Length - 2;
         }
 
-        public void RestoreShield(int restore)
+        public void RestoreShield()
         {
-            shield += restore;
+            shield += 4;
             if (shield > shieldInits[shieldLevel]) shield = shieldInits[shieldLevel];
         }
 

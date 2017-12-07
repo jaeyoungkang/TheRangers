@@ -55,7 +55,14 @@ namespace Completed
             List<int> ItemSetA2 = new List<int> { 1};
             dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA1.Count)];
             
-            List<int> ItemSetA3 = new List<int> { 10, 10, 10, 10, 11, 11, 11, 11, 12, 13};
+            List<int> ItemSetA3 = new List<int> { 4, 4, 4, 4, 5, 5, 5, 4, 6, 7 };
+            if (curLevel.id >= 3)
+            {
+                ItemSetA3.Add(6);
+                ItemSetA3.Add(7);
+                ItemSetA3.Add(8);
+                ItemSetA3.Add(9);
+            }
             dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
 
             return dropIds;
@@ -317,7 +324,7 @@ namespace Completed
         {
             money = 0;
             myWeapon = lvEfx.GetWeapon(WEAPON.W1);
-            myShip = new SpaceShip(2, 2, 5);
+            myShip = new SpaceShip(0, 2, 4);
             myShip.ReadyToDeparture(10);            
             myShip.SetWeapon(myWeapon);
         }
@@ -382,40 +389,47 @@ namespace Completed
                 case 1: eInfos.Add(0, 1); break;
                 case 2: eInfos.Add(0, 2); eInfos.Add(1, 1); break;
                 case 3: eInfos.Add(0, 5); eInfos.Add(1, 2); eInfos.Add(2, 1); break;
-                case 4: eInfos.Add(0, 5); eInfos.Add(1, 4); eInfos.Add(2, 2); break;
-                case 5: eInfos.Add(0, 5); eInfos.Add(1, 5); eInfos.Add(2, 3); break;
+                case 4: eInfos.Add(0, 5); eInfos.Add(1, 4); eInfos.Add(2, 3); break;
+                case 5: eInfos.Add(0, 10); eInfos.Add(1, 5); eInfos.Add(2, 5); break;
             }
 
             Dictionary<int, int> sInfos = new Dictionary<int, int>();
 
             switch (levelId)
             {
-                case 1: sInfos.Add(1, 10); sInfos.Add(3, 5); break;
-                case 2: sInfos.Add(1, 20); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
-                case 3: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 2); break;
-                case 4: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
-                case 5: sInfos.Add(1, 20); sInfos.Add(3, 7); sInfos.Add(4, 4); break;
+                case 1: sInfos.Add(1, 5); sInfos.Add(3, 3); break;
+                case 2: sInfos.Add(1, 15); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
+                case 3: sInfos.Add(1, 20); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
+                case 4: sInfos.Add(1, 30); sInfos.Add(3, 10); sInfos.Add(4, 5); break;
+                case 5: sInfos.Add(1, 30); sInfos.Add(3, 10); sInfos.Add(4, 5); break;
             }
 
             Dictionary<int, int> rInfos = new Dictionary<int, int>();
 
             switch (levelId)
             {
-                case 1: rInfos.Add(2, 5); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
+                case 1: rInfos.Add(2, 4); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
                 case 2: rInfos.Add(2, 8); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
                 case 3: rInfos.Add(2, 8); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
-                case 4: rInfos.Add(2, 8); rInfos.Add(3, 3); rInfos.Add(4, 1); break;
-                case 5: rInfos.Add(2, 8); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
+                case 4: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
+                case 5: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
             }
-            int colums = 20;
+            int colums = 10;
             int rows = 10;
-
-            if(levelId>1)
+            switch (levelId)
             {
-                rows = 20;
+                case 1: colums = 10; rows = 10; break;
+                case 2: colums = 20; rows = 10; break;
+                case 3: colums = 15; rows = 20; break;
+                case 4: colums = 20; rows = 20; break;
+                case 5: colums = 25; rows = 25; break;
             }
+            
+            float timeLimit = 100f;
+            if(levelId == 4) timeLimit = 150f;
+            else if (levelId > 3) timeLimit = 200f;
 
-            curLevel.Setup(levelId, rows, colums, levelId + 1, eInfos, sInfos, rInfos);
+            curLevel.Setup(levelId, timeLimit, rows, colums, levelId + 1, eInfos, sInfos, rInfos);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }

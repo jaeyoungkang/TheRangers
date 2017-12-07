@@ -68,6 +68,7 @@ namespace Completed
             {
                 ActivateItem(index);
                 player.money -= price;
+                OpenShopPanel();
             }
             else
             {
@@ -83,10 +84,15 @@ namespace Completed
             if (searchBox == null)
             {
                 searchBtn.enabled = false;
+                searchBtn.GetComponent<Image>().color = Color.white;
                 CloseSearchPanel();
                 CloseShopPanel();
             }
-            else searchBtn.enabled = true;                        
+            else
+            {
+                searchBtn.enabled = true;
+                searchBtn.GetComponent<Image>().color = Color.green;
+            }
         }
 
         void OnEnable()
@@ -109,8 +115,8 @@ namespace Completed
             switch (searchBox.ids[index])
             {
                 case 0: player.myShip.AddPower(10); break;
-                case 1: player.myShip.RestoreShield(4); break;
-                case 2: player.myShip.ShieldUp(); break;
+                case 1: player.myShip.RestoreShield(); break;
+                case 2: player.ShieldUp(); break;
                 case 3: player.myShip.SpeedUp(); break;
                 case 4: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1)); break;
                 case 5: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2)); break;
@@ -130,13 +136,34 @@ namespace Completed
             shopPanel.SetActive(true);
             for (int i = 0; i < 10; i++)
             {
+                ItemInfo item = itemInfos[searchBox.ids[i]];
+
+                if(item.id == 2)
+                {
+                    item = GetSheildUpgradeItem();
+                }
+
                 Color panelColor = Color.white;
-                if(itemInfos[searchBox.ids[i]].grade == 1) panelColor = green;
-                else if (itemInfos[searchBox.ids[i]].grade == 2) panelColor = blue;
-                else if (itemInfos[searchBox.ids[i]].grade == 3) panelColor = gold;
+                if(item.grade == 1) panelColor = green;
+                else if (item.grade == 2) panelColor = blue;
+                else if (item.grade == 3) panelColor = gold;
                 shopItemPanels[i].GetComponent<Image>().color = panelColor;
-                shopItemIcons[i].sprite = itemInfos[searchBox.ids[i]].image;
-                shopItemDescriptions[i].text = itemInfos[searchBox.ids[i]].desc +  "\n 가격[" + itemInfos[searchBox.ids[i]].price + "]";
+                shopItemIcons[i].sprite = item.image;
+                shopItemDescriptions[i].text = item.desc +  "\n 가격[" + item.price + "]";
+            }
+        }
+
+        public ItemInfo GetSheildUpgradeItem()
+        {
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            switch(player.myShip.shieldLevel)
+            {
+                case 0: return itemInfos[2];
+                case 1: return itemInfos[10];
+                case 2: return itemInfos[11];
+                case 3: return itemInfos[12];
+                default:
+                    return itemInfos[13];
             }
         }
 

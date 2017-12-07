@@ -11,6 +11,7 @@ namespace Completed
         public Dictionary<int, int> enemyInfo = new Dictionary<int, int>();
         public Dictionary<int, int> structureInfo = new Dictionary<int, int>();
 
+        public float timeLimit;
         public int missionItemCount;
         public int id;
         public int columns, rows;        
@@ -57,9 +58,10 @@ namespace Completed
             tiles.Add(obj);
         }
 
-        public void Setup(int levelId, int _rows, int _columns, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo, Dictionary<int, int> rInfo)
+        public void Setup(int levelId, float _timeLimit, int _rows, int _columns, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo, Dictionary<int, int> rInfo)
         {
             Init();
+            timeLimit = _timeLimit;
             enemyInfo = eInfo;
             structureInfo = sInfo;
             resourceInfo = rInfo;

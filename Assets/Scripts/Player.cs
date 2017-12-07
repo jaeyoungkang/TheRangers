@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿    using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
@@ -113,11 +113,14 @@ namespace Completed
 
         public void Init()
         {
-            timeLimit = 100;
+            timeLimit = GameManager.instance.curLevel.timeLimit;
             UpdateDirImage();
             money = GameManager.instance.money;
             missionItemCount = 0;
             myShip = GameManager.instance.myShip;
+
+            shield.GetComponent<SpriteRenderer>().color = GetSheildColor();
+            UpdateSheildAlpha();
 
             transform.position = Vector3.zero;
 
@@ -218,6 +221,27 @@ namespace Completed
             UpdateSightPos();
         }
 
+        public Color GetSheildColor()
+        {
+            Color shieldColor = Color.white;
+            switch (myShip.shieldLevel)
+            {
+                case 1: shieldColor = Color.green; break;
+                case 2: shieldColor = Color.blue; break;
+                case 3: shieldColor = Color.yellow; break;
+                case 4: shieldColor = Color.magenta; break;
+            }
+            shieldColor.a = 0.35f;
+
+            return shieldColor;
+        }
+
+        public void ShieldUp()
+        {
+            myShip.ShieldUp();
+            shield.GetComponent<SpriteRenderer>().color = GetSheildColor();
+        }
+
         private void UpdateDisplay()
         {
             if (display == null) return;
@@ -226,8 +250,9 @@ namespace Completed
             playerInfo.missionItemText.text = missionItemCount + "/" + GameManager.instance.curLevel.missionItemCount;
             playerInfo.moneyText.text = money.ToString();
             playerInfo.sheildText.text = myShip.shield + "/" + myShip.shieldInits[myShip.shieldLevel];
+            
+            playerInfo.sheildText.GetComponentInChildren<Image>().color = GetSheildColor();            
 
-                       
             Color btnColor = Color.white;
             switch (myShip.curWeapon.grade)
             {
@@ -324,6 +349,11 @@ namespace Completed
                     LoseHP(2);
                 }
 
+                if (Input.GetKeyDown("u"))
+                {
+                    money += 1000;
+                }
+
                 if (Input.GetKeyDown("o"))
                 {
                     GameManager.instance.DropItem(transform.position, 1);
@@ -340,11 +370,11 @@ namespace Completed
                 }               
                 if (Input.GetKeyDown("8"))
                 {
-                    myShip.RestoreShield(5);
+                    myShip.RestoreShield();
                 }
                 if (Input.GetKeyDown("9"))
                 {
-                    myShip.ShieldUp();
+                    ShieldUp();
                 }
                 if (Input.GetKeyDown("0"))
                 {
@@ -630,6 +660,7 @@ namespace Completed
                     }
                     else
                     {
+                        GameManager.instance.money = money;
                         GameManager.instance.NextUniverse();
                     }
                 }
@@ -662,21 +693,28 @@ namespace Completed
             }
         }
 
-        public System.Collections.IEnumerator ShieldEffect(SpaceShip myShip)
+        public void UpdateSheildAlpha()
         {
             Color sColor = shield.GetComponent<SpriteRenderer>().color;
-            sColor.a = 0.8f;
-            shield.GetComponent<SpriteRenderer>().color = sColor;
-            float shiledRate = (float)myShip.shield / (float)myShip.shieldInits[myShip.shieldLevel];
-            yield return new WaitForSeconds(0.2f);
             
+            float shiledRate = (float)myShip.shield / (float)myShip.shieldInits[myShip.shieldLevel];
             if (shiledRate > 0.8f) sColor.a = 0.35f;
             else if (shiledRate > 0.5f) sColor.a = 0.25f;
             else if (shiledRate > 0.2f) sColor.a = 0.15f;
             else sColor.a = 0.0f;
 
             shield.GetComponent<SpriteRenderer>().color = sColor;
+        }
 
+        public System.Collections.IEnumerator ShieldEffect(SpaceShip myShip)
+        {
+            Color sColor = shield.GetComponent<SpriteRenderer>().color;
+            sColor.a = 0.8f;
+            shield.GetComponent<SpriteRenderer>().color = sColor;
+            
+            yield return new WaitForSeconds(0.2f);
+
+            UpdateSheildAlpha();
         }
 
         public void LoseHP (int loss)

@@ -49,25 +49,25 @@ namespace Completed
 
             if (type == 0)
             {
-                myShip = new SpaceShip(1, 2, 6);
+                myShip = new SpaceShip(0, 2, 5);
                 myShip.ReadyToDeparture(50);
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
             }
             else if (type == 1)
             {
-                myShip = new SpaceShip(2, 2, 4);
+                myShip = new SpaceShip(1, 2, 4);
                 myShip.ReadyToDeparture(50);
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
             }
             else if (type == 2)
             {
-                myShip = new SpaceShip(3, 3, 0);
+                myShip = new SpaceShip(2, 3, 0);
                 myShip.ReadyToDeparture(50);
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
             }
             else if (type == 3)
             {
-                myShip = new SpaceShip(4, 5, 1);
+                myShip = new SpaceShip(3, 5, 1);
                 myShip.ReadyToDeparture(50);
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
             }
