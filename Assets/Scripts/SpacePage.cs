@@ -146,6 +146,10 @@ namespace Completed
                 {
                     item = GetSheildUpgradeItem();
                 }
+                if (item.id == 3)
+                {
+                    item = GetSpeedUpgradeItem();
+                }
 
                 Color panelColor = Color.white;
                 if(item.grade == 1) panelColor = green;
