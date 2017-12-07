@@ -129,8 +129,9 @@ namespace Completed
         void LayoutEnemiesRandomly(Dictionary<int, int> eInfos)
         {
             foreach(KeyValuePair<int,int> eInfo in eInfos)
-            {
-                for (int i = 0; i < eInfo.Value; i++)
+            {                                
+                int count = eInfo.Value + Random.Range(0, 2);
+                for (int i = 0; i < count; i++)
                 {
                     Vector3 rPos = GetRandomPosRefMap();
                     LayoutUnitById(rPos, eInfo.Key);

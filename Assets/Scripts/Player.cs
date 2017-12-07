@@ -370,7 +370,7 @@ namespace Completed
                 }               
                 if (Input.GetKeyDown("8"))
                 {
-                    myShip.RestoreShield();
+                    myShip.RestoreShield(4);
                 }
                 if (Input.GetKeyDown("9"))
                 {

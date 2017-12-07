@@ -29,7 +29,8 @@ namespace Completed
 
         public bool doingSetup = true;
 
-        public GameObject rootBox;
+        public GameObject lootBox;
+        public GameObject shopBox;
 
         public List<DropInfo> dropItems = new List<DropInfo>();
 
@@ -44,25 +45,35 @@ namespace Completed
         public int[] GenerateDropItemIds(int type)
         {
             int[] dropIds = new int[3];
-            if (type == 100)
-            {                
-                return new int[3] {0,1,2 };
-            }
-            
-            List<int> ItemSetA1 = new List<int> { 0,};
-            dropIds[0] = ItemSetA1 [Random.Range(0, ItemSetA1.Count)];
+            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 0 };
+            List<int> ItemSetA2 = new List<int> { 1, 1, 1, 1, 1 };
+            List<int> ItemSetA3 = new List<int> { 4, 4, 4, 4, 5, 5, 5, 5 };
 
-            List<int> ItemSetA2 = new List<int> { 1};
-            dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA1.Count)];
-            
-            List<int> ItemSetA3 = new List<int> { 4, 4, 4, 4, 5, 5, 5, 4, 6, 7 };
-            if (curLevel.id >= 3)
+            switch (type)
             {
-                ItemSetA3.Add(6);
-                ItemSetA3.Add(7);
-                ItemSetA3.Add(8);
-                ItemSetA3.Add(9);
+                case 0:
+                    ItemSetA1.Add(14);
+                    ItemSetA3.Add(4); ItemSetA3.Add(6);
+                    break;
+
+                case 1:
+                    ItemSetA2.Add(15);
+                    ItemSetA3.Add(5); ItemSetA3.Add(7);
+                    break;
+
+                case 2:
+                    ItemSetA2.Add(15); ItemSetA2.Add(15); ItemSetA2.Add(17);
+                    ItemSetA3.Add(7); ItemSetA3.Add(7); ItemSetA3.Add(9);
+                    break;
+
+                case 3:
+                    ItemSetA1.Add(14); ItemSetA1.Add(14); ItemSetA1.Add(16);
+                    ItemSetA3.Add(6); ItemSetA3.Add(6); ItemSetA3.Add(8);
+                    break;
             }
+
+            dropIds[0] = ItemSetA1[Random.Range(0, ItemSetA1.Count)];
+            dropIds[1] = ItemSetA2[Random.Range(0, ItemSetA2.Count)];
             dropIds[2] = ItemSetA3[Random.Range(0, ItemSetA3.Count)];
 
             return dropIds;
@@ -70,18 +81,30 @@ namespace Completed
 
         public void LayoutShop(Vector3 pos)
         {
-            GameObject item = Instantiate(rootBox, pos, Quaternion.identity);
+            GameObject item = Instantiate(shopBox, pos, Quaternion.identity);
             GameManager.instance.curLevel.SetMapOfItems(pos, 1);
             DropInfo dInfo = new DropInfo();
             dInfo.shop = true;
             dInfo.obj = item;
-            dInfo.ids = new int[10] {0,1,2,3,4,5,6,7,8,9 };            
+            if(GameManager.instance.curLevel.id <= 3)
+            {
+                dInfo.ids = new int[10] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            }
+            else if(GameManager.instance.curLevel.id == 4)
+            {
+                dInfo.ids = new int[10] { 14, 15, 2, 3, 4, 5, 6, 7, 8, 9 };
+            }
+            else if (GameManager.instance.curLevel.id == 5)
+            {
+                dInfo.ids = new int[10] { 16, 17, 2, 3, 4, 5, 6, 7, 8, 9 };
+            }
+
             dropItems.Add(dInfo);
         }
 
         public void DropItem(Vector3 dropPos, int type)
         {
-            GameObject item = Instantiate(rootBox, dropPos, Quaternion.identity);
+            GameObject item = Instantiate(lootBox, dropPos, Quaternion.identity);
             GameManager.instance.curLevel.SetMapOfItems(dropPos, 1);
             DropInfo dInfo = new DropInfo();
             dInfo.obj = item;
@@ -325,7 +348,7 @@ namespace Completed
             money = 0;
             myWeapon = lvEfx.GetWeapon(WEAPON.W1);
             myShip = new SpaceShip(0, 2, 4);
-            myShip.ReadyToDeparture(10);            
+            myShip.ReadyToDeparture(20);            
             myShip.SetWeapon(myWeapon);
         }
 

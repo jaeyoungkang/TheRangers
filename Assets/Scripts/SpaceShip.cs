@@ -49,7 +49,7 @@ namespace Completed
         public void SpeedUp()
         {
             speedLevel++;
-            if (speedLevel >= speed.Length) speedLevel = speed.Length;
+            if (speedLevel >= speed.Length - 2) speedLevel = speed.Length - 2;
         }
 
         public void ShieldUp()
@@ -58,9 +58,9 @@ namespace Completed
             if (shieldLevel >= shieldInits.Length - 2) shieldLevel = shieldInits.Length - 2;
         }
 
-        public void RestoreShield()
+        public void RestoreShield(int restore)
         {
-            shield += 4;
+            shield += restore;
             if (shield > shieldInits[shieldLevel]) shield = shieldInits[shieldLevel];
         }
 

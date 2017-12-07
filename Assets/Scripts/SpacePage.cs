@@ -115,7 +115,7 @@ namespace Completed
             switch (searchBox.ids[index])
             {
                 case 0: player.myShip.AddPower(10); break;
-                case 1: player.myShip.RestoreShield(); break;
+                case 1: player.myShip.RestoreShield(4); break;
                 case 2: player.ShieldUp(); break;
                 case 3: player.myShip.SpeedUp(); break;
                 case 4: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1)); break;
@@ -124,6 +124,10 @@ namespace Completed
                 case 7: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4)); break;
                 case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5)); break;
                 case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6)); break;
+                case 14: player.myShip.AddPower(15); break;
+                case 15: player.myShip.RestoreShield(6); break;
+                case 16: player.myShip.AddPower(20); break;
+                case 17: player.myShip.RestoreShield(8); break;
             }            
         }
 
@@ -164,6 +168,19 @@ namespace Completed
                 case 3: return itemInfos[12];
                 default:
                     return itemInfos[13];
+            }
+        }
+
+        public ItemInfo GetSpeedUpgradeItem()
+        {
+            Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            switch (player.myShip.speedLevel)
+            {
+                case 4: return itemInfos[3];
+                case 5: return itemInfos[18];
+                case 6: return itemInfos[19];
+                default:
+                    return itemInfos[3];
             }
         }
 
