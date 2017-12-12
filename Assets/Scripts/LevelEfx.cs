@@ -5,6 +5,15 @@ using UnityEngine;
 namespace Completed
 {
     public enum WEAPON { W1, W2, W3, W4, W5, W6 };
+    public class bulletInfo
+    {
+        public int damage;
+        public float speed;
+        public GameObject bullet;
+        public Vector3 targetPos = new Vector3();
+    }
+
+
     public class LevelEfx : MonoBehaviour
     {
         public GameObject[] bulletMInstances = new GameObject[20];
@@ -21,6 +30,8 @@ namespace Completed
         public GameObject explosionTile;
 
         int shotEffectIndex = 0;
+        
+        List<bulletInfo> bullets = new List<bulletInfo>();
 
         public Weapon GetWeapon(WEAPON index)
         {
@@ -33,6 +44,44 @@ namespace Completed
                 case WEAPON.W4: return new Weapon(5, 0.45f, 2, 0.2f, 10, "Power Gun A", 0, 1, 4);                
                 case WEAPON.W5: return new Weapon(4, 0.25f, 3, 0.2f, 20, "Speed Gun S", 1, 2, 4);
                 case WEAPON.W6: return new Weapon(6, 0.45f, 2, 0.2f, 10, "Power Gun S", 1, 2, 5);                
+            }
+        }
+
+        public void FireBullet(bulletInfo  bInfo)
+        {
+            bullets.Add(bInfo);            
+        }
+
+        public void Update()
+        {
+            List<bulletInfo> deleteBullet = new List<bulletInfo>();
+            foreach (bulletInfo bInfo in bullets)
+            {
+                Vector3 bulletPos = bInfo.bullet.transform.position;
+                Vector3 moveDir = bInfo.targetPos - bulletPos;
+                float length = moveDir.magnitude;
+                moveDir.Normalize();                
+                bulletPos += (moveDir * Time.deltaTime * bInfo.speed);
+                bInfo.bullet.transform.position = bulletPos;
+
+                if (length < 0.1f)
+                {
+                    Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+                    
+                    if (bInfo.targetPos == player.transform.position)
+                    {
+                        //                        StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
+                        player.LoseHP(bInfo.damage);
+                    }
+
+                    bInfo.bullet.SetActive(false);
+                    deleteBullet.Add(bInfo);
+                }
+            }
+
+            foreach (bulletInfo bInfo in deleteBullet)
+            {
+                bullets.Remove(bInfo);
             }
         }
 

@@ -8,16 +8,17 @@ namespace Completed
     public class SpaceShip
     {
         public int shotPower = 0;
+        public int[] shotPowerInit = new int[] { 20, 30, 40, 50};
+        public int shotPowerLevel = 0;
 
         public bool canMove = true;
         
         public int indexReload = 0;
-
-        public int shield; 
                                            // 0    1   2   3   4    5   
                                            //lv1  lv2 lv3 lv4 lv5
-        public int[] shieldInits = new int[] { 5, 10, 15, 20, 30, 50};
+        public int[] shieldInits = new int[] { 5, 10, 15, 20, 25, 30};
         public int shieldLevel = 0;
+        public int shield;
 
         public float moveTime;
                                            // 0   1     2    3      4     5       6      7   
@@ -39,11 +40,12 @@ namespace Completed
         public void SetWeapon(Weapon weapon)
         {
             curWeapon = weapon;
-        }
+        }        
 
-        public void InitWeaponAmmo(int total)
+        public void ShotPowerUp()
         {
-            shotPower = total;
+            shotPowerLevel++;
+            if (shotPowerLevel >= shotPowerInit.Length) shotPowerLevel = shotPowerInit.Length - 1;
         }
         
         public void SpeedUp()
@@ -67,12 +69,12 @@ namespace Completed
         public void AddPower(int addPower)
         {
             shotPower += addPower;
+            if (shotPower > shotPowerInit[shotPowerLevel]) shotPower = shotPowerInit[shotPowerLevel];
         }
 
-        public void ReadyToDeparture(int totalBulletType0)
-        {            
-            InitWeaponAmmo(totalBulletType0);
-
+        public void ReadyToDeparture()
+        {
+            shotPower = shotPowerInit[shotPowerLevel];
             shield = shieldInits[shieldLevel];
             moveTime = speed[speedLevel];
             scopeRange = scopeRangeInit;

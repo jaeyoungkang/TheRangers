@@ -23,6 +23,18 @@ namespace Completed
         public List<GameObject> tiles = new List<GameObject>();
         public List<Enemy> enemies = new List<Enemy>();
 
+        public Enemy GetEnemyByPos(Vector3 pos)
+        {
+            foreach (Enemy other in enemies)
+            {                
+                if (pos == other.transform.position)
+                    return other;
+
+            }
+
+            return null;
+        }
+
         public void AddEnemyToList(Enemy script)
         {
             enemies.Add(script);

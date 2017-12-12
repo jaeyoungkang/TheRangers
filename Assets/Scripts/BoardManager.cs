@@ -88,7 +88,9 @@ namespace Completed
             Vector3 randomPos = GetRandomPosRefMap();
             Instantiate(exit, randomPos, Quaternion.identity);
 
-//            if (Random.Range(0, 2) == 1)
+            int shopNum = 1;
+            if (curLevel.id == 10) shopNum = 4;
+            for (int i =0;i< shopNum; i++)
             {
                 randomPos = GetRandomPosRefMap();
                 GameManager.instance.LayoutShop(randomPos);
@@ -128,12 +130,13 @@ namespace Completed
 
         void LayoutEnemiesRandomly(Dictionary<int, int> eInfos)
         {
-            foreach(KeyValuePair<int,int> eInfo in eInfos)
+            foreach (KeyValuePair<int,int> eInfo in eInfos)
             {                                
                 int count = eInfo.Value + Random.Range(0, 2);
                 for (int i = 0; i < count; i++)
                 {
                     Vector3 rPos = GetRandomPosRefMap();
+                    if (rPos.x < 3 && rPos.y < 3) continue;
                     LayoutUnitById(rPos, eInfo.Key);
                 }
             }
@@ -171,7 +174,7 @@ namespace Completed
         void LayoutUnitById(Vector3 pos, int unitId)
         {
             Instantiate(enemyTiles[unitId], pos, Quaternion.identity);
-            GameManager.instance.curLevel.SetMapOfUnits(pos, unitId);         
+            GameManager.instance.curLevel.SetMapOfUnits(pos, unitId+10);         
         }
 
         Vector3 GetRandomPosRefMap()

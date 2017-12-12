@@ -117,7 +117,7 @@ namespace Completed
                 case 0: player.myShip.AddPower(10); break;
                 case 1: player.myShip.RestoreShield(4); break;
                 case 2: player.ShieldUp(); break;
-                case 3: player.myShip.SpeedUp(); break;
+                case 3: player.myShip.ShotPowerUp(); break;
                 case 4: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1)); break;
                 case 5: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2)); break;
                 case 6: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3)); break;
@@ -148,7 +148,7 @@ namespace Completed
                 }
                 if (item.id == 3)
                 {
-                    item = GetSpeedUpgradeItem();
+                    item = GetShotPowerUpgradeItem();
                 }
 
                 Color panelColor = Color.white;
@@ -175,14 +175,15 @@ namespace Completed
             }
         }
 
-        public ItemInfo GetSpeedUpgradeItem()
+        public ItemInfo GetShotPowerUpgradeItem()
         {
             Player player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            switch (player.myShip.speedLevel)
+            switch (player.myShip.shotPowerLevel)
             {
-                case 4: return itemInfos[3];
-                case 5: return itemInfos[18];
-                case 6: return itemInfos[19];
+                case 0: return itemInfos[3];
+                case 1: return itemInfos[18];
+                case 2: return itemInfos[19];
+                case 3: return itemInfos[29];
                 default:
                     return itemInfos[3];
             }

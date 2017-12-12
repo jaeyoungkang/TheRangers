@@ -21,6 +21,8 @@ namespace Completed
         public LevelEfx lvEfx = new LevelEfx();
 
         private GameObject gatewayPage;
+        private Text gatewaySubText;
+
         private Text universeText;
         public Text gameMessage;
         public float msgTimer = 0;
@@ -347,8 +349,8 @@ namespace Completed
         {
             money = 0;
             myWeapon = lvEfx.GetWeapon(WEAPON.W1);
-            myShip = new SpaceShip(0, 2, 4);
-            myShip.ReadyToDeparture(20);            
+            myShip = new SpaceShip(1, 2, 6);
+            myShip.ReadyToDeparture();
             myShip.SetWeapon(myWeapon);
         }
 
@@ -388,6 +390,8 @@ namespace Completed
                         
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
             universeText = GameObject.Find("GatewayText").GetComponent<Text>();
+            gatewaySubText = GameObject.Find("GatewaySubText").GetComponent<Text>();
+
             gameMessage.gameObject.SetActive(false);
 
             dropItems.Clear();
@@ -396,19 +400,42 @@ namespace Completed
 
         public void GoIntoGateway()
         {
+            InitLevel(numberOfUniverse);
             universeText.text = "제 " + numberOfUniverse + " 우주";
-            ChangePage(PAGE.GATEWAY);            
-            Invoke("StartMission", 2f);
-        }
 
+            string universeSizeText = "매우 큼";
+            if(curLevel.rows + curLevel.columns < 30)
+            {
+                universeSizeText = "작음";
+            }
+            else  if (curLevel.rows + curLevel.columns < 40)
+            {
+                universeSizeText = "보통";
+            }
+            else if (curLevel.rows + curLevel.columns < 50)
+            {
+                universeSizeText = "큼";
+            }
+
+            string missiondesc = string.Format("수집해야할 크리스탈 수 : {0}\n\n시간 제한 : {1}\n\n우주 크기 : {2}", curLevel.missionItemCount, curLevel.timeLimit, universeSizeText);
+            gatewaySubText.text = missiondesc + "\n\n" + "진입중...";
+            ChangePage(PAGE.GATEWAY);            
+            Invoke("StartMission", 4f);
+        }
+        
         void InitLevel(int levelId)
         {
+            if(numberOfUniverseEnd == 1)
+            {
+                levelId = 10;                
+            }
             doingSetup = true;
 
             Dictionary<int, int> eInfos = new Dictionary<int, int>();
 
             switch(levelId)
             {
+                case 10: eInfos.Add(0, 10); eInfos.Add(1, 5); eInfos.Add(2, 5); break;
                 case 1: eInfos.Add(0, 1); break;
                 case 2: eInfos.Add(0, 2); eInfos.Add(1, 1); break;
                 case 3: eInfos.Add(0, 5); eInfos.Add(1, 2); eInfos.Add(2, 1); break;
@@ -420,6 +447,7 @@ namespace Completed
 
             switch (levelId)
             {
+                case 10: sInfos.Add(1, 30); sInfos.Add(3, 10); sInfos.Add(4, 5); break;
                 case 1: sInfos.Add(1, 5); sInfos.Add(3, 3); break;
                 case 2: sInfos.Add(1, 15); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
                 case 3: sInfos.Add(1, 20); sInfos.Add(3, 6); sInfos.Add(4, 2); break;
@@ -431,6 +459,7 @@ namespace Completed
 
             switch (levelId)
             {
+                case 10: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
                 case 1: rInfos.Add(2, 4); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
                 case 2: rInfos.Add(2, 8); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
                 case 3: rInfos.Add(2, 8); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
@@ -441,6 +470,7 @@ namespace Completed
             int rows = 10;
             switch (levelId)
             {
+                case 10: colums = 40; rows = 40; break;
                 case 1: colums = 10; rows = 10; break;
                 case 2: colums = 20; rows = 10; break;
                 case 3: colums = 15; rows = 20; break;
@@ -452,14 +482,15 @@ namespace Completed
             if(levelId == 4) timeLimit = 150f;
             else if (levelId > 3) timeLimit = 200f;
 
-            curLevel.Setup(levelId, timeLimit, rows, colums, levelId + 1, eInfos, sInfos, rInfos);
+            int missionItemCount = levelId + 1;           
+
+            curLevel.Setup(levelId, timeLimit, rows, colums, missionItemCount, eInfos, sInfos, rInfos);
             boardScript.SetupScene(curLevel);
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Init();
         }
 
         public void StartMission()
-		{            
-            InitLevel(numberOfUniverse);
+		{               
             ChangePage(PAGE.SPACE);			
             doingSetup = false;
         }
@@ -475,6 +506,8 @@ namespace Completed
                     gameMessage.gameObject.SetActive(false);
                 }
 			}
+
+            lvEfx.Update();
 
             CameraChasePlayer();
             UpdateOtherPlayersScope();
@@ -542,7 +575,7 @@ namespace Completed
         {
             frontPage = GameObject.Find("FrontPage");
             spacePage = GameObject.Find("SpacePage");
-            gatewayPage = GameObject.Find("GatewayPage");
+            gatewayPage = GameObject.Find("GatewayPage");            
 
             ChangePage(PAGE.FRONT);
         }

@@ -9,9 +9,14 @@ public class PlayerInfo : MonoBehaviour {
     public Text moneyText;
     public Text timeLimitText;
 
+    public Image weaponPowerBar;
+    public Image weaponPowerBarBG;
+
+    public Image sheildBar;
+    public Image sheildBarBG;
     public Text sheildText;
     public Text weaponPowerText;
-    public Button weaponButton;
+    public GameObject weaponPanel;
 
     void Start () {
 		

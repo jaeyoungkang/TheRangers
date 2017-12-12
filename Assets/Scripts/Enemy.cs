@@ -13,13 +13,6 @@ namespace Completed
         Player player;
         public GameObject shield;
 
-        class bulletInfo
-        {
-            public GameObject bullet;
-            public Vector3 targetPos = new Vector3();
-        }
-
-        List<bulletInfo> bullets = new List<bulletInfo>();
 
         protected override void OnCantMove<T>(T component)
         {
@@ -50,25 +43,25 @@ namespace Completed
             if (type == 0)
             {
                 myShip = new SpaceShip(0, 2, 5);
-                myShip.ReadyToDeparture(50);
+                myShip.ReadyToDeparture();
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
             }
             else if (type == 1)
             {
                 myShip = new SpaceShip(1, 2, 4);
-                myShip.ReadyToDeparture(50);
+                myShip.ReadyToDeparture();
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
             }
             else if (type == 2)
             {
                 myShip = new SpaceShip(2, 3, 0);
-                myShip.ReadyToDeparture(50);
+                myShip.ReadyToDeparture();
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(3, 5, 1);
-                myShip.ReadyToDeparture(50);
+                myShip.ReadyToDeparture();
                 myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
             }
 
@@ -82,33 +75,7 @@ namespace Completed
 
             int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
             myShip.UpdateScope(value);
-
-            List<bulletInfo> deleteBullet = new List<bulletInfo>();
-            foreach(bulletInfo bInfo in bullets)
-            {
-                Vector3 bulletPos = bInfo.bullet.transform.position;
-                Vector3 moveDir = bInfo.targetPos - bulletPos;
-                float length = moveDir.sqrMagnitude;
-                moveDir.Normalize();
-                bulletPos += (moveDir * Time.deltaTime * myShip.curWeapon.bulletSpeed);
-                bInfo.bullet.transform.position = bulletPos;
-
-                if (length < 0.1f)
-                {
-                    bInfo.bullet.SetActive(false);
-                    if (bInfo.targetPos == player.transform.position)
-                    {
-//                        StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(bInfo.targetPos, myShip.curWeapon));
-                        player.LoseHP(myShip.curWeapon.weaponDamage);
-                    }
-                    deleteBullet.Add(bInfo);
-                }
-            }
-
-            foreach (bulletInfo bInfo in deleteBullet)
-            {
-                bullets.Remove(bInfo);
-            }
+                       
 
             if (myShip.canMove == false)
             {
@@ -166,12 +133,8 @@ namespace Completed
             }
 
             if (found)
-            {                
-                if (myShip.curWeapon.canShot)
-                {                    
-                    myShip.curWeapon.canShot = false;
-                    FireBullet(player.transform.position);                    
-                }              
+            {
+                Atttack();
             }
             else if (targetPos != Vector3.zero)
             {
@@ -208,20 +171,6 @@ namespace Completed
                 }
                 AttemptMove<Player>(xDir, yDir);
             }
-        }
-        
-        public void FireBullet(Vector3 targetPos)
-        {
-            int rValue = Random.Range(0, 3);
-            if (rValue == 0)
-            {
-                bulletInfo bInfo = new bulletInfo();
-                bInfo.bullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
-                bInfo.bullet.SetActive(true);
-                bInfo.bullet.transform.position = transform.position;
-                bInfo.targetPos = targetPos;
-                bullets.Add(bInfo);
-            }            
         }
 
         public bool CheckDirChanged(int xDir, int yDir)
@@ -305,7 +254,7 @@ namespace Completed
             nextPos.x += xDir;
             nextPos.y += yDir;
 
-            if (GameManager.instance.curLevel.GetMapOfUnits(nextPos) == 1)
+            if (GameManager.instance.curLevel.GetMapOfUnits(nextPos) != 0)
                 return;
 
             base.AttemptMove<T>(xDir, yDir);
@@ -313,7 +262,7 @@ namespace Completed
             if (Move(xDir, yDir, out hit))
             {
                 GameManager.instance.curLevel.SetMapOfUnits(transform.position, 0);
-                GameManager.instance.curLevel.SetMapOfUnits(nextPos, 1);
+                GameManager.instance.curLevel.SetMapOfUnits(nextPos, 10+type);
             }
         }
 
@@ -341,9 +290,8 @@ namespace Completed
             if (found)
             {
                 if (myShip.curWeapon.canShot)
-                {                    
-                    myShip.curWeapon.canShot = false;
-                    FireBullet(player.transform.position);
+                {
+                    Atttack();                    
                 }
             }
             else
@@ -365,6 +313,24 @@ namespace Completed
             }
         }
 
+        public void Atttack()
+        {
+            myShip.curWeapon.canShot = false;
+            int rValue = Random.Range(0, 2);
+
+            if (myShip.curWeapon.canShot && rValue == 0)
+            {
+                bulletInfo bInfo = new bulletInfo();
+                bInfo.bullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
+                bInfo.bullet.SetActive(true);
+                bInfo.bullet.transform.position = transform.position;
+                bInfo.targetPos = player.transform.position;
+                bInfo.damage = myShip.curWeapon.weaponDamage;
+                bInfo.speed = myShip.curWeapon.bulletSpeed;
+                GameManager.instance.lvEfx.FireBullet(bInfo);
+            }
+        }
+
         public void AutoMoveUnit01()
         {
             List<Vector3> showRange = GameManager.instance.GetShowRange(transform.position, curDir, myShip.scopeRange);
@@ -382,11 +348,7 @@ namespace Completed
 
             if (found)
             {
-                if (myShip.curWeapon.canShot)
-                {
-                    myShip.curWeapon.canShot = false;
-                    FireBullet(player.transform.position);
-                }
+                Atttack();
             }
             else
             {
