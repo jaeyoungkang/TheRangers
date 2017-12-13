@@ -86,7 +86,7 @@ namespace Completed
             LayoutEnemiesRandomly(curLevel.enemyInfo);
 
             Vector3 randomPos = GetRandomPosRefMap();
-            Instantiate(exit, randomPos, Quaternion.identity);
+            GameManager.instance.gateWay = Instantiate(exit, randomPos, Quaternion.identity);
 
             int shopNum = 1;
             if (curLevel.id == 10) shopNum = 4;

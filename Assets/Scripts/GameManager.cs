@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Completed
 {
-    public enum PAGE { FRONT, GATEWAY, SPACE };
+    public enum PAGE { FRONT, GATEWAY, SPACE, READY };
     public class DropInfo
     {
         public bool shop = false;
@@ -20,8 +20,9 @@ namespace Completed
         public Level curLevel = new Level();
         public LevelEfx lvEfx = new LevelEfx();
 
-        private GameObject gatewayPage;
+        public GameObject gateWay;        
         private Text gatewaySubText;
+        private Button readyBtn;
 
         private Text universeText;
         public Text gameMessage;
@@ -391,6 +392,9 @@ namespace Completed
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
             universeText = GameObject.Find("GatewayText").GetComponent<Text>();
             gatewaySubText = GameObject.Find("GatewaySubText").GetComponent<Text>();
+            readyBtn = GameObject.Find("ReadyButton").GetComponent<Button>();
+            readyBtn.onClick.RemoveAllListeners();
+            readyBtn.onClick.AddListener(GoIntoGateway);
 
             gameMessage.gameObject.SetActive(false);
 
@@ -419,7 +423,7 @@ namespace Completed
 
             string missiondesc = string.Format("수집해야할 크리스탈 수 : {0}\n\n시간 제한 : {1}\n\n우주 크기 : {2}", curLevel.missionItemCount, curLevel.timeLimit, universeSizeText);
             gatewaySubText.text = missiondesc + "\n\n" + "진입중...";
-            ChangePage(PAGE.GATEWAY);            
+            ChangePage(PAGE.GATEWAY);
             Invoke("StartMission", 4f);
         }
         
@@ -478,9 +482,9 @@ namespace Completed
                 case 5: colums = 25; rows = 25; break;
             }
             
-            float timeLimit = 100f;
-            if(levelId == 4) timeLimit = 150f;
-            else if (levelId > 3) timeLimit = 200f;
+            float timeLimit = 180f;
+            if(levelId == 4) timeLimit = 240f;
+            else if (levelId > 4) timeLimit = 300f;
 
             int missionItemCount = levelId + 1;           
 
@@ -569,11 +573,14 @@ namespace Completed
 		}
 
         GameObject frontPage;
+        GameObject readyPage;
         GameObject spacePage;
+        GameObject gatewayPage;
 
         public void InitPages()
         {
             frontPage = GameObject.Find("FrontPage");
+            readyPage = GameObject.Find("ReadyPage");
             spacePage = GameObject.Find("SpacePage");
             gatewayPage = GameObject.Find("GatewayPage");            
 
@@ -585,23 +592,30 @@ namespace Completed
             bool activeFront = false;
             bool activeGateway = false;
             bool activeSpace = false;
+            bool activeReady = false;
 
             switch (nextPage)
             {
                 case PAGE.FRONT: activeFront = true; break;
                 case PAGE.GATEWAY: activeGateway = true; break;
                 case PAGE.SPACE: activeSpace = true; break;
+                case PAGE.READY: activeReady = true; break;
             }
 
             frontPage.SetActive(activeFront);
             gatewayPage.SetActive(activeGateway);            
             spacePage.SetActive(activeSpace);
-            
+            readyPage.SetActive(activeReady);
         }
 
         public void ActivateRootBtn(Vector3 pos)
         {            
             spacePage.GetComponent<SpacePage>().ActivateSearchBtn(pos);
+        }
+
+        public void EnableGateway()
+        {
+            gateWay.GetComponent<SpriteRenderer>().color = Color.green;
         }
     }
 }

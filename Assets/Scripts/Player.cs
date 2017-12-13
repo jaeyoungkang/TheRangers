@@ -81,6 +81,9 @@ namespace Completed
 
         public GameObject display;
         public GameObject shield;
+        public GameObject textEfx;
+
+        bool startShowTextEfx = false;
 
         bool shoting = false;
         Vector3 enemyPos = new Vector3();
@@ -109,6 +112,8 @@ namespace Completed
 
         public void Init()
         {
+            textEfx.SetActive(false);
+
             timeLimit = GameManager.instance.curLevel.timeLimit;
             UpdateDirImage();
             money = GameManager.instance.money;
@@ -300,6 +305,18 @@ namespace Completed
                 LoseHP(2);
                 timeLimit = 10;
                 GameManager.instance.UpdateGameMssage("시간을 오바했다!", 1f);
+            }
+
+            if(startShowTextEfx)
+            {
+                Vector3 up = new Vector3(0, 1, 0);
+                up *= Time.deltaTime;
+                textEfx.transform.position += up;
+                if ( textEfx.transform.position.y - transform.position.y >= 1f)
+                {
+                    startShowTextEfx = false;
+                    textEfx.SetActive(false);
+                }
             }
 
             if (shoting)
@@ -603,6 +620,15 @@ namespace Completed
             {
                 missionItemCount++;
                 other.gameObject.SetActive(false);
+                if(missionItemCount == GameManager.instance.curLevel.missionItemCount)
+                {
+                    GameManager.instance.UpdateGameMssage("다음 우주로 가는 게이트웨이가 활성화 되었습니다.", 3f);
+                    GameManager.instance.EnableGateway();
+                }
+                startShowTextEfx = true;
+                textEfx.transform.position = Vector3.zero + transform.position;
+                textEfx.SetActive(true);
+
             }
             else if (other.tag == "Resource")
             {

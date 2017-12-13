@@ -26,13 +26,13 @@ namespace Completed
         void GoOuterUnivers()
         {
             GameManager.instance.numberOfUniverseEnd = 1;
-            GameManager.instance.GoIntoGateway();
+            GameManager.instance.ChangePage(PAGE.READY);
         }
 
         void GoInterUnivers()
         {
             GameManager.instance.numberOfUniverseEnd = 5;
-            GameManager.instance.GoIntoGateway();
+            GameManager.instance.ChangePage(PAGE.READY);
         }
 
         void ShowSelectButton()
