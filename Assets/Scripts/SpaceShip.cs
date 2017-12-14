@@ -16,7 +16,7 @@ namespace Completed
         public int indexReload = 0;
                                            // 0    1   2   3   4    5   
                                            //lv1  lv2 lv3 lv4 lv5
-        public int[] shieldInits = new int[] { 5, 10, 15, 20, 25, 30};
+        public int[] shieldInits = new int[] { 30, 60, 90, 120, 150, 200};
         public int shieldLevel = 0;
         public int shield;
 

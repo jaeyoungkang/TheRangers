@@ -95,6 +95,7 @@ namespace Completed
 
         public void LoseHP(int damage)
         {
+            GameManager.instance.lvEfx.ShowTextEfx(2, -damage, transform.position);
             if (myShip.Shield())
             {
                 myShip.Damaged(damage);
@@ -314,8 +315,7 @@ namespace Completed
         }
 
         public void Atttack()
-        {
-            myShip.curWeapon.canShot = false;
+        {            
             int rValue = Random.Range(0, 2);
 
             if (myShip.curWeapon.canShot && rValue == 0)
@@ -329,6 +329,7 @@ namespace Completed
                 bInfo.speed = myShip.curWeapon.bulletSpeed;
                 GameManager.instance.lvEfx.FireBullet(bInfo);
             }
+            myShip.curWeapon.canShot = false;
         }
 
         public void AutoMoveUnit01()

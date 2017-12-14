@@ -81,9 +81,6 @@ namespace Completed
 
         public GameObject display;
         public GameObject shield;
-        public GameObject textEfx;
-
-        bool startShowTextEfx = false;
 
         bool shoting = false;
         Vector3 enemyPos = new Vector3();
@@ -112,8 +109,6 @@ namespace Completed
 
         public void Init()
         {
-            textEfx.SetActive(false);
-
             timeLimit = GameManager.instance.curLevel.timeLimit;
             UpdateDirImage();
             money = GameManager.instance.money;
@@ -307,18 +302,6 @@ namespace Completed
                 GameManager.instance.UpdateGameMssage("시간을 오바했다!", 1f);
             }
 
-            if(startShowTextEfx)
-            {
-                Vector3 up = new Vector3(0, 1, 0);
-                up *= Time.deltaTime;
-                textEfx.transform.position += up;
-                if ( textEfx.transform.position.y - transform.position.y >= 1f)
-                {
-                    startShowTextEfx = false;
-                    textEfx.SetActive(false);
-                }
-            }
-
             if (shoting)
             {
                 Vector3 bulletPos = curBullet.transform.position;
@@ -347,12 +330,22 @@ namespace Completed
             
             if (myShip.curWeapon.canShot)
             {
-                if (Input.GetKeyDown("1")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
-                if (Input.GetKeyDown("2")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
-                if (Input.GetKeyDown("3")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
-                if (Input.GetKeyDown("4")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
-                if (Input.GetKeyDown("5")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5));
-                if (Input.GetKeyDown("6")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6));
+                //if (Input.GetKeyDown("1")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
+                //if (Input.GetKeyDown("2")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
+                //if (Input.GetKeyDown("3")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
+                //if (Input.GetKeyDown("4")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
+                //if (Input.GetKeyDown("5")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5));
+                //if (Input.GetKeyDown("6")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6));
+
+                if (Input.GetKeyDown("1")) GameManager.instance.lvEfx.ShowTextEfx(0, 1, transform.position);
+                if (Input.GetKeyDown("2")) GameManager.instance.lvEfx.ShowTextEfx(1, 10, transform.position);
+                if (Input.GetKeyDown("3")) GameManager.instance.lvEfx.ShowTextEfx(1, 40, transform.position);
+                if (Input.GetKeyDown("4")) GameManager.instance.lvEfx.ShowTextEfx(1, 100, transform.position);
+                if (Input.GetKeyDown("5")) GameManager.instance.lvEfx.ShowTextEfx(2, -10, transform.position);
+                if (Input.GetKeyDown("6")) GameManager.instance.lvEfx.ShowTextEfx(2, -20, transform.position);
+                if (Input.GetKeyDown("7")) GameManager.instance.lvEfx.ShowTextEfx(2, -30, transform.position);
+                if (Input.GetKeyDown("8")) GameManager.instance.lvEfx.ShowTextEfx(2, -40, transform.position);
+
 
                 if (Input.GetKeyDown("i"))
                 {
@@ -592,8 +585,7 @@ namespace Completed
 		{
 
 		}
-		
-		
+        
 		private void OnTriggerEnter2D (Collider2D other)
 		{
             if (other.tag == "Exit")
@@ -625,24 +617,24 @@ namespace Completed
                     GameManager.instance.UpdateGameMssage("다음 우주로 가는 게이트웨이가 활성화 되었습니다.", 3f);
                     GameManager.instance.EnableGateway();
                 }
-                startShowTextEfx = true;
-                textEfx.transform.position = Vector3.zero + transform.position;
-                textEfx.SetActive(true);
-
+                GameManager.instance.lvEfx.ShowTextEfx(0, 1, transform.position);
             }
             else if (other.tag == "Resource")
             {
                 if(other.name.Contains("gold"))
                 {
                     money += 100;
+                    GameManager.instance.lvEfx.ShowTextEfx(1, 100, transform.position);
                 }
                 else if (other.name.Contains("blue"))
                 {
                     money += 40;
+                    GameManager.instance.lvEfx.ShowTextEfx(1, 40, transform.position);
                 }
                 else if (other.name.Contains("bronze"))
                 {
                     money += 10;
+                    GameManager.instance.lvEfx.ShowTextEfx(1, 10, transform.position);
                 }
                 other.gameObject.SetActive(false);
             }
@@ -674,6 +666,7 @@ namespace Completed
 
         public void LoseHP (int loss)
 		{
+            GameManager.instance.lvEfx.ShowTextEfx(2, -loss, transform.position);
             if (myShip.Shield())
             {
                 myShip.Damaged(loss);

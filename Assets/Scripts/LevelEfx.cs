@@ -16,6 +16,18 @@ namespace Completed
 
     public class LevelEfx : MonoBehaviour
     {
+        public class TEXT_EFX_INFO
+        {
+            public GameObject obj;
+            public Vector3 startPos;
+        }
+        public List<TEXT_EFX_INFO> textEfxs = new List<TEXT_EFX_INFO>();
+
+        public GameObject textEfxA;
+        public GameObject textEfxB;
+        public GameObject textEfxC;
+        Dictionary<int, List<GameObject>> textEfxPool = new Dictionary<int, List<GameObject>>();
+
         public GameObject[] bulletMInstances = new GameObject[20];
         public GameObject bulletMTile;
         public GameObject[] bulletPInstances = new GameObject[20];
@@ -38,12 +50,12 @@ namespace Completed
             switch(index)
             {
                 default:
-                case WEAPON.W1: return new Weapon(2, 0.25f, 3, 0.2f, 20, "Speed Gun 1", 0, 0, 2);
-                case WEAPON.W2: return new Weapon(4, 0.45f, 2, 0.2f, 10, "Power Gun 1", 0, 0, 3);
-                case WEAPON.W3: return new Weapon(3, 0.25f, 3, 0.2f, 20, "Speed Gun A", 0, 1, 3);
-                case WEAPON.W4: return new Weapon(5, 0.45f, 2, 0.2f, 10, "Power Gun A", 0, 1, 4);                
-                case WEAPON.W5: return new Weapon(4, 0.25f, 3, 0.2f, 20, "Speed Gun S", 1, 2, 4);
-                case WEAPON.W6: return new Weapon(6, 0.45f, 2, 0.2f, 10, "Power Gun S", 1, 2, 5);                
+                case WEAPON.W1: return new Weapon(10, 0.25f, 3, 0.2f, 15, "Speed Gun 1", 0, 0, 2);
+                case WEAPON.W2: return new Weapon(20, 0.45f, 2, 0.2f, 10, "Power Gun 1", 1, 0, 3);
+                case WEAPON.W3: return new Weapon(20, 0.25f, 3, 0.2f, 15, "Speed Gun A", 0, 1, 3);
+                case WEAPON.W4: return new Weapon(30, 0.45f, 2, 0.2f, 10, "Power Gun A", 1, 1, 4);                
+                case WEAPON.W5: return new Weapon(30, 0.25f, 3, 0.2f, 15, "Speed Gun S", 0, 2, 4);
+                case WEAPON.W6: return new Weapon(40, 0.45f, 2, 0.2f, 10, "Power Gun S", 1, 2, 5);                
             }
         }
 
@@ -54,7 +66,6 @@ namespace Completed
 
         public void Update()
         {
-            List<bulletInfo> deleteBullet = new List<bulletInfo>();
             foreach (bulletInfo bInfo in bullets)
             {
                 Vector3 bulletPos = bInfo.bullet.transform.position;
@@ -75,42 +86,128 @@ namespace Completed
                     }
 
                     bInfo.bullet.SetActive(false);
-                    deleteBullet.Add(bInfo);
                 }
             }
 
-            foreach (bulletInfo bInfo in deleteBullet)
+            bullets.RemoveAll(item => item.bullet.activeSelf == false);
+
+            UpdateTextEfxs();
+        }
+
+        public void UpdateTextEfxs()
+        {
+            Vector3 up = new Vector3(0, 2, 0);
+            up *= Time.deltaTime;
+            foreach (TEXT_EFX_INFO info in textEfxs)
             {
-                bullets.Remove(bInfo);
+                info.obj.transform.position += up;
+                if (info.obj.transform.position.y - info.startPos.y >= 1.0f)
+                {
+                    info.obj.SetActive(false);
+                }
             }
+
+            textEfxs.RemoveAll(item => item.obj.activeSelf == false);
+        }
+
+        int[] efxIterators = new int[3] { 0, 0, 0 };
+        public Sprite[] efxIcons;
+        public Sprite[] efxTexts;
+
+        GameObject GetTextEfx(int type)
+        {
+            efxIterators[type]++;
+            if (efxIterators[type] == 10) efxIterators[type] = 0;
+
+            return textEfxPool[type][efxIterators[type]];
+        }
+
+        public void MakeTextEfxPool()
+        {
+            textEfxA.SetActive(false);
+            textEfxB.SetActive(false);
+            textEfxC.SetActive(false);
+
+            List<GameObject> textEfxAList = new List<GameObject>();
+            List<GameObject> textEfxBList = new List<GameObject>();
+            List<GameObject> textEfxCList = new List<GameObject>();
+            for (int i = 0; i < 10; i++)
+            {
+                textEfxAList.Add(Instantiate(textEfxA));
+                textEfxBList.Add(Instantiate(textEfxB));
+                textEfxCList.Add(Instantiate(textEfxC));
+            }
+
+            textEfxPool.Clear();
+            textEfxPool.Add(0, textEfxAList);
+            textEfxPool.Add(1, textEfxBList);
+            textEfxPool.Add(2, textEfxCList);
+        }
+
+        public void ShowTextEfx(int type, int number, Vector3 targetPos)
+        {
+            GameObject textEfx = GetTextEfx(type);
+            textEfx.transform.position = targetPos + new Vector3(0, 0.3f, 0);
+            textEfx.SetActive(true);
+
+            GameObject efxText = textEfx.transform.Find("TextImg").gameObject;
+            GameObject efxIcon = textEfx.transform.Find("Icon").gameObject;
+
+            if (type == 0 || type == 1)
+            {
+                Sprite icon = efxIcons[type];
+                efxIcon.GetComponent<SpriteRenderer>().sprite = icon;
+            }
+
+            Sprite numberImg = null;
+            switch (number)
+            {
+                case 1: numberImg = efxTexts[0]; break;
+                case 10: numberImg = efxTexts[1]; break;
+                case 40: numberImg = efxTexts[2]; break;
+                case 100: numberImg = efxTexts[3]; break;
+                case -10: numberImg = efxTexts[4]; break;
+                case -20: numberImg = efxTexts[5]; break;
+                case -30: numberImg = efxTexts[6]; break;
+                case -40: numberImg = efxTexts[7]; break;
+
+            }
+            efxText.GetComponent<SpriteRenderer>().sprite = numberImg;
+
+            TEXT_EFX_INFO info = new TEXT_EFX_INFO();
+            info.obj = textEfx;
+            info.startPos = targetPos;
+            textEfxs.Add(info);
         }
 
         public void Init()
         {
             for (int i = 0; i < shotInstances.Length; i++)
             {
-                shotInstances[i] = Instantiate(shotTile, transform.position, Quaternion.identity);
+                shotInstances[i] = Instantiate(shotTile);
                 shotInstances[i].SetActive(false);
             }
 
-            explosionInstance = Instantiate(explosionTile, transform.position, Quaternion.identity);
+            explosionInstance = Instantiate(explosionTile);
             explosionInstance.SetActive(false);
 
             for (int i = 0; i < bulletMInstances.Length; i++)
             {
-                bulletMInstances[i] = Instantiate(bulletMTile, transform.position, Quaternion.identity);
+                bulletMInstances[i] = Instantiate(bulletMTile);
                 bulletMInstances[i].SetActive(false);
             }
             for (int i = 0; i < bulletSInstances.Length; i++)
             {
-                bulletSInstances[i] = Instantiate(bulletSTile, transform.position, Quaternion.identity);
+                bulletSInstances[i] = Instantiate(bulletSTile);
                 bulletSInstances[i].SetActive(false);
             }
             for (int i = 0; i < bulletPInstances.Length; i++)
             {
-                bulletPInstances[i] = Instantiate(bulletPTile, transform.position, Quaternion.identity);
+                bulletPInstances[i] = Instantiate(bulletPTile);
                 bulletPInstances[i].SetActive(false);
             }
+
+            MakeTextEfxPool();
         }
 
         public IEnumerator ShowExplosionEffect(Vector3 targetPos)
