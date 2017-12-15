@@ -186,10 +186,10 @@ namespace Completed
             float width = 200;
             switch(myShip.shieldLevel)
             {
-                case 2: width = 300; break;
-                case 3: width = 400; break;
-                case 4: width = 500; break;
-                case 5: width = 600; break;
+                case 2: width = 280; break;
+                case 3: width = 360; break;
+                case 4: width = 440; break;
+                case 5: width = 520; break;
             }
 
             float rate = (float)myShip.shield/ (float)myShip.shieldInits[myShip.shieldLevel];
@@ -200,10 +200,10 @@ namespace Completed
             width = 200;
             switch (myShip.shotPowerLevel)
             {
-                case 1: width = 300; break;
-                case 2: width = 400; break;
-                case 3: width = 500; break;
-                case 4: width = 600; break;
+                case 1: width = 280; break;
+                case 2: width = 360; break;
+                case 3: width = 440; break;
+                case 4: width = 520; break;
             }
             rate = (float)myShip.shotPower / (float)myShip.shotPowerInit[myShip.shotPowerLevel];            
             playerInfo.weaponPowerBar.rectTransform.localScale = new Vector3(rate, 1, 1);

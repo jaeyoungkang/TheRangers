@@ -100,6 +100,9 @@ namespace Completed
             up *= Time.deltaTime;
             foreach (TEXT_EFX_INFO info in textEfxs)
             {
+                float acc = (info.startPos.y+1.5f) - info.obj.transform.position.y;
+                up *= acc;
+
                 info.obj.transform.position += up;
                 if (info.obj.transform.position.y - info.startPos.y >= 1.0f)
                 {
@@ -159,20 +162,23 @@ namespace Completed
                 efxIcon.GetComponent<SpriteRenderer>().sprite = icon;
             }
 
-            Sprite numberImg = null;
-            switch (number)
+            if (type == 1 || type == 2)
             {
-                case 1: numberImg = efxTexts[0]; break;
-                case 10: numberImg = efxTexts[1]; break;
-                case 40: numberImg = efxTexts[2]; break;
-                case 100: numberImg = efxTexts[3]; break;
-                case -10: numberImg = efxTexts[4]; break;
-                case -20: numberImg = efxTexts[5]; break;
-                case -30: numberImg = efxTexts[6]; break;
-                case -40: numberImg = efxTexts[7]; break;
+                Sprite numberImg = null;
+                switch (number)
+                {
+                    case 1: numberImg = efxTexts[0]; break;
+                    case 10: numberImg = efxTexts[1]; break;
+                    case 40: numberImg = efxTexts[2]; break;
+                    case 100: numberImg = efxTexts[3]; break;
+                    case -10: numberImg = efxTexts[4]; break;
+                    case -20: numberImg = efxTexts[5]; break;
+                    case -30: numberImg = efxTexts[6]; break;
+                    case -40: numberImg = efxTexts[7]; break;
 
+                }
+                efxText.GetComponent<SpriteRenderer>().sprite = numberImg;
             }
-            efxText.GetComponent<SpriteRenderer>().sprite = numberImg;
 
             TEXT_EFX_INFO info = new TEXT_EFX_INFO();
             info.obj = textEfx;
