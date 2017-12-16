@@ -115,7 +115,7 @@ namespace Completed
             switch (searchBox.ids[index])
             {
                 case 0: player.myShip.AddPower(10); break;
-                case 1: player.myShip.RestoreShield(4); break;
+                case 1: player.myShip.RestoreShield(10); break;
                 case 2: player.ShieldUp(); break;
                 case 3: player.myShip.ShotPowerUp(); break;
                 case 4: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1)); break;
@@ -125,9 +125,9 @@ namespace Completed
                 case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5)); break;
                 case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6)); break;
                 case 14: player.myShip.AddPower(15); break;
-                case 15: player.myShip.RestoreShield(6); break;
+                case 15: player.myShip.RestoreShield(20); break;
                 case 16: player.myShip.AddPower(20); break;
-                case 17: player.myShip.RestoreShield(8); break;
+                case 17: player.myShip.RestoreShield(30); break;
             }            
         }
 

@@ -272,6 +272,33 @@ namespace Completed
                     }                                        
 				}
 			}
+
+            foreach (Vector3 showPos in showRange)
+            {               
+                if (showPos == gateWay.transform.position)
+                {
+                    gateWay.GetComponent<SpriteRenderer>().sortingLayerName = "Map";
+                    break;
+                }
+
+                foreach(GameObject item in curLevel.items)
+                {
+                    if (showPos == item.transform.position)
+                    {
+                        item.GetComponent<SpriteRenderer>().sortingLayerName = "Map";
+                        break;
+                    }
+                }
+
+                foreach (DropInfo item in dropItems)
+                {
+                    if (showPos == item.obj.transform.position)
+                    {
+                        item.obj.GetComponent<SpriteRenderer>().sortingLayerName = "Map";
+                        break;
+                    }
+                }
+            }
         }
 
         public void ShowEnemyScope(List<Vector3> unitPositions, List<MOVE_DIR> dirs, List<int> ranges)
