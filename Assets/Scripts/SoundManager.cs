@@ -9,10 +9,11 @@ namespace Completed
 		public AudioSource musicSource;					//Drag a reference to the audio source which will play the music.
 		public static SoundManager instance = null;		//Allows other scripts to call functions from SoundManager.				
 		public float lowPitchRange = .95f;				//The lowest a sound effect will be randomly pitched.
-		public float highPitchRange = 1.05f;			//The highest a sound effect will be randomly pitched.
-		
-		
-		void Awake ()
+		public float highPitchRange = 1.05f;            //The highest a sound effect will be randomly pitched.
+
+        public AudioClip btnClickSound;
+
+        void Awake ()
 		{
 			//Check if there is already an instance of SoundManager
 			if (instance == null)
@@ -37,10 +38,15 @@ namespace Completed
 			//Play the clip.
 			efxSource.Play ();
 		}
-		
-		
-		//RandomizeSfx chooses randomly between various audio clips and slightly changes their pitch.
-		public void RandomizeSfx (params AudioClip[] clips)
+
+        public void PlaySingleBtn()
+        {
+            PlaySingle(btnClickSound);
+        }
+
+
+        //RandomizeSfx chooses randomly between various audio clips and slightly changes their pitch.
+        public void RandomizeSfx (params AudioClip[] clips)
 		{
 			//Generate a random number between 0 and the length of our array of clips passed in.
 			int randomIndex = Random.Range(0, clips.Length);

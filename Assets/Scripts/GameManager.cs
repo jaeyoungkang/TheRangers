@@ -18,7 +18,6 @@ namespace Completed
 	{
         public static GameManager instance = null;
         public Level curLevel = new Level();
-        public LevelEfx lvEfx = new LevelEfx();
 
         public GameObject gateWay;        
         private Text gatewaySubText;
@@ -155,7 +154,7 @@ namespace Completed
 
         public void DestroyOtherPlayer(GameObject target, int type)
         {
-            StartCoroutine(lvEfx.ShowExplosionEffect(target.transform.position));
+            StartCoroutine(EffectManager.instance.ShowExplosionEffect(target.transform.position));
 
             curLevel.RemoveOtherPlayer(target);
 
@@ -369,14 +368,12 @@ namespace Completed
             boardScript = GetComponent<BoardManager>();            
 
             InitGame();
-            ResetPlayerInfo();
-
         }
 
         void ResetPlayerInfo()
         {
             money = 0;
-            myWeapon = lvEfx.GetWeapon(WEAPON.W1);
+            myWeapon = EffectManager.instance.GetWeapon(WEAPON.W1);
             myShip = new SpaceShip(1, 2, 6);
             myShip.ReadyToDeparture();
             myShip.SetWeapon(myWeapon);
@@ -398,11 +395,13 @@ namespace Completed
             {
                 instance.InitGame();
                 instance.ResetPlayerInfo();
+                EffectManager.instance.Init();
             }
             else
             {
                 instance.InitGame();
                 instance.GoIntoGateway();
+                EffectManager.instance.Init();
             }
         }
 
@@ -412,8 +411,7 @@ namespace Completed
         }
 
         void InitGame()
-		{            
-            lvEfx.Init();
+		{
             curLevel.Init();
                         
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
@@ -429,8 +427,15 @@ namespace Completed
             InitPages();
         }
 
+        public void ReadyToDeparture()
+        {
+            instance.ResetPlayerInfo();
+            ChangePage(PAGE.READY);
+        }
+
         public void GoIntoGateway()
         {
+            SoundManager.instance.PlaySingleBtn();
             InitLevel(numberOfUniverse);
             universeText.text = "제 " + numberOfUniverse + " 우주";
 
@@ -537,9 +542,6 @@ namespace Completed
                     gameMessage.gameObject.SetActive(false);
                 }
 			}
-
-            lvEfx.Update();
-
             CameraChasePlayer();
             UpdateOtherPlayersScope();
         }

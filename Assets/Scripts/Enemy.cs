@@ -6,6 +6,8 @@ namespace Completed
 {
     public class Enemy : MovingObject
     {
+        public AudioClip destroySound;
+
         public int type = 0;
         public MOVE_DIR curDir = MOVE_DIR.RIGHT;
         public SpaceShip myShip;
@@ -44,25 +46,25 @@ namespace Completed
             {
                 myShip = new SpaceShip(0, 2, 5);
                 myShip.ReadyToDeparture();
-                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
+                myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W1));
             }
             else if (type == 1)
             {
                 myShip = new SpaceShip(1, 2, 4);
                 myShip.ReadyToDeparture();
-                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
+                myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W3));
             }
             else if (type == 2)
             {
                 myShip = new SpaceShip(2, 3, 0);
                 myShip.ReadyToDeparture();
-                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
+                myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W2));
             }
             else if (type == 3)
             {
                 myShip = new SpaceShip(3, 5, 1);
                 myShip.ReadyToDeparture();
-                myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
+                myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W4));
             }
 
             GameManager.instance.curLevel.AddEnemyToList(this);
@@ -95,7 +97,7 @@ namespace Completed
 
         public void LoseHP(int damage)
         {
-            GameManager.instance.lvEfx.ShowTextEfx(2, -damage, transform.position);
+            EffectManager.instance.ShowTextEfx(2, -damage, transform.position);
             if (myShip.Shield())
             {
                 myShip.Damaged(damage);
@@ -290,10 +292,7 @@ namespace Completed
 
             if (found)
             {
-                if (myShip.curWeapon.canShot)
-                {
-                    Atttack();                    
-                }
+                Atttack();                    
             }
             else
             {
@@ -316,18 +315,18 @@ namespace Completed
 
         public void Atttack()
         {            
-            int rValue = Random.Range(0, 2);
+            int rValue = Random.Range(0, 3);
 
             if (myShip.curWeapon.canShot && rValue == 0)
             {
                 bulletInfo bInfo = new bulletInfo();
-                bInfo.bullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
+                bInfo.bullet = EffectManager.instance.GetBullet(myShip.curWeapon.bType);
                 bInfo.bullet.SetActive(true);
                 bInfo.bullet.transform.position = transform.position;
                 bInfo.targetPos = player.transform.position;
                 bInfo.damage = myShip.curWeapon.weaponDamage;
                 bInfo.speed = myShip.curWeapon.bulletSpeed;
-                GameManager.instance.lvEfx.FireBullet(bInfo);
+                EffectManager.instance.FireBullet(bInfo);
             }
             myShip.curWeapon.canShot = false;
         }
@@ -371,6 +370,7 @@ namespace Completed
 
         private void Destoryed()
         {
+            SoundManager.instance.PlaySingle(destroySound);
             GameManager.instance.DestroyOtherPlayer(gameObject, type);
             GameManager.instance.curLevel.SetMapOfUnits(gameObject.transform.position, 0);
         }

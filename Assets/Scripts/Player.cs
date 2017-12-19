@@ -5,66 +5,20 @@ using System.Collections.Generic;
 
 namespace Completed
 {
-    public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };
-
-    [System.Serializable]
-    public class Weapon
-    {
-        public int consume = 1;
-        public int grade;
-        public int bType;
-        public int bulletSpeed = 30;
-
-        public int weaponDamage = 4;
-
-        public bool canShot = true;
-
-        public float shotTime;
-        public float shotTimeInit = 1f;
-
-        public int shotAniSpeed = 1;
-        public float aniDelay = 0.3f;
-
-        public string name;
-
-        public Weapon(int _damage, float _shotTime, int _shotAniSpeed, float _aniDelay, int _bulletSpeed, string _name, int _bType, int _grade, int _consume)
-        {
-            weaponDamage = _damage;
-            shotTimeInit = _shotTime;
-            shotAniSpeed = _shotAniSpeed;
-            aniDelay = _aniDelay;
-            bulletSpeed = _bulletSpeed;
-            name = _name;
-            bType = _bType;
-            grade = _grade;
-            consume = _consume;
-            Init();
-        }
-
-        public void Init()
-        {
-            shotTime = shotTimeInit;
-        }
-
-        public void ShotTimeUp(float addSpeed)
-        {
-            shotTimeInit -= addSpeed;
-            Init();
-        }
-
-        public void UpdateWeaponCooling()
-        {
-            shotTime -= Time.deltaTime;
-            if (shotTime <= 0)
-            {
-                shotTime = shotTimeInit;
-                canShot = true;
-            }
-        }
-    }
+    public enum MOVE_DIR { UP, DOWN, LEFT, RIGHT };    
 
     public class Player : MovingObject
     {
+        public AudioClip shotSound1;
+        public AudioClip itemSound1;
+        public AudioClip itemSound2;
+
+        public AudioClip getSound;
+        public AudioClip clearSound;
+        public AudioClip destroySound;
+        public AudioClip gameOverSound;
+
+
         public SpaceShip myShip;
         public GameObject sight;
 
@@ -105,6 +59,7 @@ namespace Completed
         void LockDir()
         {
             bLockDir = !bLockDir;
+            SoundManager.instance.PlaySingleBtn();
         }
 
         public void Init()
@@ -115,8 +70,7 @@ namespace Completed
             missionItemCount = 0;
             myShip = GameManager.instance.myShip;
 
-            shield.GetComponent<SpriteRenderer>().color = GetSheildColor();
-            UpdateSheildAlpha();
+            shield.GetComponent<SpriteRenderer>().color = GetSheildColor();            
 
             transform.position = Vector3.zero;
 
@@ -317,7 +271,7 @@ namespace Completed
                     shoting = false;
                     curBullet.GetComponent<SpriteRenderer>().color = Color.white;
                     curBullet.SetActive(false);
-//                    StartCoroutine(GameManager.instance.lvEfx.ShowShotEffect(enemyPos, myShip.curWeapon));
+                    StartCoroutine(EffectManager.instance.ShowShotEffect(enemyPos));
                     GameManager.instance.curLevel.AttackOtherPlayer(enemyPos);
                 }
             }
@@ -330,21 +284,21 @@ namespace Completed
             
             if (myShip.curWeapon.canShot)
             {
-                //if (Input.GetKeyDown("1")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1));
-                //if (Input.GetKeyDown("2")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2));
-                //if (Input.GetKeyDown("3")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3));
-                //if (Input.GetKeyDown("4")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4));
-                //if (Input.GetKeyDown("5")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5));
-                //if (Input.GetKeyDown("6")) myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6));
+                if (Input.GetKeyDown("1")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W1));
+                if (Input.GetKeyDown("2")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W2));
+                //if (Input.GetKeyDown("3")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W3));
+                //if (Input.GetKeyDown("4")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W4));
+                //if (Input.GetKeyDown("5")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W5));
+                //if (Input.GetKeyDown("6")) myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W6));
 
-                if (Input.GetKeyDown("1")) GameManager.instance.lvEfx.ShowTextEfx(0, 1, transform.position);
-                if (Input.GetKeyDown("2")) GameManager.instance.lvEfx.ShowTextEfx(1, 10, transform.position);
-                if (Input.GetKeyDown("3")) GameManager.instance.lvEfx.ShowTextEfx(1, 40, transform.position);
-                if (Input.GetKeyDown("4")) GameManager.instance.lvEfx.ShowTextEfx(1, 100, transform.position);
-                if (Input.GetKeyDown("5")) GameManager.instance.lvEfx.ShowTextEfx(2, -10, transform.position);
-                if (Input.GetKeyDown("6")) GameManager.instance.lvEfx.ShowTextEfx(2, -20, transform.position);
-                if (Input.GetKeyDown("7")) GameManager.instance.lvEfx.ShowTextEfx(2, -30, transform.position);
-                if (Input.GetKeyDown("8")) GameManager.instance.lvEfx.ShowTextEfx(2, -40, transform.position);
+                //if (Input.GetKeyDown("1")) EffectManager.instance.ShowTextEfx(0, 1, transform.position);
+                //if (Input.GetKeyDown("2")) EffectManager.instance.ShowTextEfx(1, 10, transform.position);
+                if (Input.GetKeyDown("3")) EffectManager.instance.ShowTextEfx(1, 40, transform.position);
+                if (Input.GetKeyDown("4")) EffectManager.instance.ShowTextEfx(1, 100, transform.position);
+                if (Input.GetKeyDown("5")) EffectManager.instance.ShowTextEfx(2, -10, transform.position);
+                if (Input.GetKeyDown("6")) EffectManager.instance.ShowTextEfx(2, -20, transform.position);
+                if (Input.GetKeyDown("7")) EffectManager.instance.ShowTextEfx(2, -30, transform.position);
+                if (Input.GetKeyDown("8")) EffectManager.instance.ShowTextEfx(2, -40, transform.position);
 
 
                 if (Input.GetKeyDown("i"))
@@ -437,7 +391,7 @@ namespace Completed
             }
             else if(Input.GetKeyUp(KeyCode.Tab))
             {
-///                LockDir();
+//                LockDir();
             }
 
             if (horizontal != 0 || vertical != 0)
@@ -448,6 +402,7 @@ namespace Completed
 
         public void ChangeTarget()
         {
+            SoundManager.instance.PlaySingleBtn();
             targetIter++;
             if (targetIter >= targetEnemies.Count) targetIter = 0;
             UpdateTarget();
@@ -533,7 +488,7 @@ namespace Completed
         {
             if(shoting == false)
             {
-                curBullet = GameManager.instance.lvEfx.GetBullet(myShip.curWeapon.bType);
+                curBullet = EffectManager.instance.GetBullet(myShip.curWeapon.bType);
                 shoting = true;
                 curBullet.transform.position = transform.position;
                 enemyPos = attackPos;
@@ -547,7 +502,9 @@ namespace Completed
                 }
 
                 curBullet.GetComponent<SpriteRenderer>().color = bulletColor;
-                curBullet.SetActive(true);                
+                curBullet.SetActive(true);
+
+                SoundManager.instance.PlaySingle(shotSound1);
             }            
         }
         
@@ -617,26 +574,28 @@ namespace Completed
                     GameManager.instance.UpdateGameMssage("다음 우주로 가는 게이트웨이가 활성화 되었습니다.", 3f);
                     GameManager.instance.EnableGateway();
                 }
-                GameManager.instance.lvEfx.ShowTextEfx(0, 1, transform.position);
+                EffectManager.instance.ShowTextEfx(0, 1, transform.position);
+                SoundManager.instance.PlaySingle(itemSound2);
             }
             else if (other.tag == "Resource")
             {
                 if(other.name.Contains("gold"))
                 {
                     money += 100;
-                    GameManager.instance.lvEfx.ShowTextEfx(1, 100, transform.position);
+                    EffectManager.instance.ShowTextEfx(1, 100, transform.position);
                 }
                 else if (other.name.Contains("blue"))
                 {
                     money += 40;
-                    GameManager.instance.lvEfx.ShowTextEfx(1, 40, transform.position);
+                    EffectManager.instance.ShowTextEfx(1, 40, transform.position);
                 }
                 else if (other.name.Contains("bronze"))
                 {
                     money += 10;
-                    GameManager.instance.lvEfx.ShowTextEfx(1, 10, transform.position);
+                    EffectManager.instance.ShowTextEfx(1, 10, transform.position);
                 }
                 other.gameObject.SetActive(false);
+                SoundManager.instance.PlaySingle(itemSound1);
             }
         }
 
@@ -666,7 +625,7 @@ namespace Completed
 
         public void LoseHP (int loss)
 		{
-            GameManager.instance.lvEfx.ShowTextEfx(2, -loss, transform.position);
+            EffectManager.instance.ShowTextEfx(2, -loss, transform.position);
             if (myShip.Shield())
             {
                 myShip.Damaged(loss);
@@ -680,8 +639,8 @@ namespace Completed
 		
 		private void Destoryed()
 		{
-//                SoundManager.instance.PlaySingle(gameOverSound);
-                SoundManager.instance.musicSource.Stop();
+                SoundManager.instance.PlaySingle(gameOverSound);
+//                SoundManager.instance.musicSource.Stop();
                 GameManager.instance.GameOver();
 
 

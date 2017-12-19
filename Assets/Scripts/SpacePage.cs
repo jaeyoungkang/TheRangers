@@ -16,8 +16,15 @@ namespace Completed
     }
     public class SpacePage : MonoBehaviour
     {
+        public AudioClip getSound;
+
+        public GameObject upgradePanel;
         public GameObject shopPanel;
         public GameObject searchPanel;
+
+        public Button openUpgradePanelBtn;
+        public Button closeUpgradePanelBtn;
+
         public Button closeShopBtn;
         public Button[] getItemBtns;
         public Image[] itemBgs;
@@ -41,6 +48,9 @@ namespace Completed
 
         void Start()
         {
+            openUpgradePanelBtn.onClick.AddListener(OpenUpgradePanel);
+            closeUpgradePanelBtn.onClick.AddListener(CloseUpgradePanel);
+
             closeShopBtn.onClick.AddListener(CloseShopPanel);
             backBtn.onClick.AddListener(GameManager.instance.Restart);
             searchBtn.onClick.AddListener(OpenSearchPanel);
@@ -106,7 +116,7 @@ namespace Completed
         {
             ActivateItem(index);
             GameManager.instance.ReomveDropItem(searchBox);
-            CloseSearchPanel();
+            CloseSearchPanel();            
         }
 
         public void ActivateItem(int index)
@@ -118,21 +128,24 @@ namespace Completed
                 case 1: player.myShip.RestoreShield(10); break;
                 case 2: player.ShieldUp(); break;
                 case 3: player.myShip.ShotPowerUp(); break;
-                case 4: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W1)); break;
-                case 5: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W2)); break;
-                case 6: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W3)); break;
-                case 7: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W4)); break;
-                case 8: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W5)); break;
-                case 9: player.myShip.SetWeapon(GameManager.instance.lvEfx.GetWeapon(WEAPON.W6)); break;
+                case 4: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W1)); break;
+                case 5: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W2)); break;
+                case 6: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W3)); break;
+                case 7: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W4)); break;
+                case 8: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W5)); break;
+                case 9: player.myShip.SetWeapon(EffectManager.instance.GetWeapon(WEAPON.W6)); break;
                 case 14: player.myShip.AddPower(15); break;
                 case 15: player.myShip.RestoreShield(20); break;
                 case 16: player.myShip.AddPower(20); break;
                 case 17: player.myShip.RestoreShield(30); break;
-            }            
+            }
+
+            SoundManager.instance.PlaySingle(getSound);
         }
 
         public void OpenShopPanel()
         {
+            SoundManager.instance.PlaySingleBtn();
             Color blue = new Color(0, 0f, 0.8f);
             Color green = new Color(0, 0.8f, 0.0f);
             Color gold = new Color(0.9f, 0.9f, 0.0f);
@@ -189,6 +202,18 @@ namespace Completed
             }
         }
 
+        public void OpenUpgradePanel()
+        {
+            SoundManager.instance.PlaySingleBtn();
+            upgradePanel.SetActive(true);
+        }
+
+        public void CloseUpgradePanel()
+        {
+            SoundManager.instance.PlaySingleBtn();
+            upgradePanel.SetActive(false);
+        }
+
         public void CloseShopPanel()
         {
             shopPanel.SetActive(false);
@@ -201,6 +226,7 @@ namespace Completed
 
         public void OpenDropItemPanel()
         {
+            SoundManager.instance.PlaySingleBtn();
             Color blue = new Color(0, 0f, 0.8f);
             Color green = new Color(0, 0.8f, 0.0f);
             Color gold = new Color(0.9f, 0.9f, 0.0f);
@@ -221,6 +247,7 @@ namespace Completed
 
         public void OpenSearchPanel()
         {
+            SoundManager.instance.PlaySingleBtn();
             if (searchBox.shop)
             {
                 OpenShopPanel();

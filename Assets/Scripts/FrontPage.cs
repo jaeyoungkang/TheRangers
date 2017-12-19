@@ -25,18 +25,21 @@ namespace Completed
 
         void GoOuterUnivers()
         {
+            SoundManager.instance.PlaySingleBtn();
             GameManager.instance.numberOfUniverseEnd = 1;
-            GameManager.instance.ChangePage(PAGE.READY);
+            GameManager.instance.ReadyToDeparture();
         }
 
         void GoInterUnivers()
         {
+            SoundManager.instance.PlaySingleBtn();
             GameManager.instance.numberOfUniverseEnd = 5;
-            GameManager.instance.ChangePage(PAGE.READY);
+            GameManager.instance.ReadyToDeparture();
         }
 
         void ShowSelectButton()
         {
+            SoundManager.instance.PlaySingleBtn();
             startBtn.gameObject.SetActive(false);
             interUniverseBtn.gameObject.SetActive(true);
             outerUniverseBtn.gameObject.SetActive(true);
