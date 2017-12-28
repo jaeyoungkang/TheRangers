@@ -17,10 +17,12 @@ namespace Completed
         public int columns, rows;        
         public int[,] mapOfUnits;
         public int[,] mapOfStructures;
+        public int[,] mapOfShelters;
         public int[,] mapOfItems;
 
         public List<GameObject> items = new List<GameObject>();
         public List<GameObject> tiles = new List<GameObject>();
+        public List<GameObject> structures = new List<GameObject>();
         public List<Enemy> enemies = new List<Enemy>();
 
         public Enemy GetEnemyByPos(Vector3 pos)
@@ -70,6 +72,11 @@ namespace Completed
             tiles.Add(obj);
         }
 
+        public void AddStructure(GameObject obj)
+        {
+            structures.Add(obj);
+        }
+
         public void Setup(int levelId, float _timeLimit, int _rows, int _columns, int _missionItemCount, Dictionary<int, int> eInfo, Dictionary<int, int> sInfo, Dictionary<int, int> rInfo)
         {
             Init();
@@ -92,6 +99,7 @@ namespace Completed
             enemies.Clear();
             tiles.Clear();
             items.Clear();
+            structures.Clear();
             enemyInfo.Clear();
         }
 
@@ -146,17 +154,45 @@ namespace Completed
 
         public void MakeGameMapOfStructures(int columns, int rows)
         {
+            mapOfShelters = new int[columns, rows];
             mapOfStructures = new int[columns, rows];
             for (int i = 0; i < columns; i++)
             {
                 for (int j = 0; j < rows; j++)
                 {
                     mapOfStructures[i, j] = 0;
+                    mapOfShelters[i, j] = 0;
                 }
             }
         }
+        
+        public void SetMapOfShelters(Vector3 pos, int value)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
 
-        public void SetMapOfStructures(Vector3 pos, int value)
+            if (x < 0 || mapOfShelters.GetUpperBound(0) < x)
+                return;
+            if (y < 0 || mapOfShelters.GetUpperBound(1) < y)
+                return;
+
+            mapOfShelters[x, y] = value;
+        }
+
+        public int GetMapOfShelters(Vector3 pos)
+        {
+            int x = (int)pos.x;
+            int y = (int)pos.y;
+
+            if (x < 0 || mapOfShelters.GetUpperBound(0) < x)
+                return 1;
+            if (y < 0 || mapOfShelters.GetUpperBound(1) < y)
+                return 1;
+
+            return mapOfShelters[x, y];
+        }
+
+        public void SetMapOfRadors(Vector3 pos, int value)
         {
             int x = (int)pos.x;
             int y = (int)pos.y;
@@ -169,7 +205,7 @@ namespace Completed
             mapOfStructures[x, y] = value;
         }
 
-        public int GetMapOfStructures(Vector3 pos)
+        public int GetMapOfRadors(Vector3 pos)
         {
             int x = (int)pos.x;
             int y = (int)pos.y;

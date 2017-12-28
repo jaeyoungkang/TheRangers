@@ -75,9 +75,8 @@ namespace Completed
         {
             if (GameManager.instance.doingSetup) return;
 
-            int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
-            myShip.UpdateScope(value);
-                       
+            int value = GameManager.instance.curLevel.GetMapOfRadors(transform.position);
+            myShip.UpdateScope(value);                       
 
             if (myShip.canMove == false)
             {
@@ -126,7 +125,6 @@ namespace Completed
             bool found = false;
             foreach (Vector3 pos in showRange)
             {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
                 if (player.transform.position == pos)
                 {
                     found = true;
@@ -282,7 +280,6 @@ namespace Completed
             bool found = false;
             foreach (Vector3 pos in showRange)
             {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
                 if (player.transform.position == pos)
                 {
                     found = true;
@@ -338,7 +335,6 @@ namespace Completed
             bool found = false;
             foreach (Vector3 pos in showRange)
             {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
                 if (player.transform.position == pos)
                 {
                     found = true;

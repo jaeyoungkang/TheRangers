@@ -61,31 +61,32 @@ namespace Completed
         public int[] GenerateDropItemIds(int type)
         {
             int[] dropIds = new int[3];
-            List<int> ItemSetA1 = new List<int> { 0, 0, 0, 0, 0 };
-            List<int> ItemSetA2 = new List<int> { 1, 1, 1, 1, 1 };
-            List<int> ItemSetA3 = new List<int> { 4, 4, 4, 4, 5, 5, 5, 5 };
+            List<int> ItemSetA1 = new List<int> { 14, 14, 14, 14, 14 }; // 탄창
+            List<int> ItemSetA2 = new List<int> { 15, 15, 15, 15, 15 }; // 실드
+            List<int> ItemSetA3 = new List<int> { 4, 4, 4, 4, 5, 5, 5, 5 }; // 무기
 
             switch (type)
             {
-                case 0:
-                    ItemSetA1.Add(14);
-                    ItemSetA3.Add(4); ItemSetA3.Add(6);
-                    break;
+                case 0: ItemSetA1.Add(16); break;
+                case 1: break;
+                case 2: break;
+                case 3: ItemSetA1.Add(16); ItemSetA1.Add(16); ItemSetA1.Add(21); break;
+            }
 
-                case 1:
-                    ItemSetA2.Add(15);
-                    ItemSetA3.Add(5); ItemSetA3.Add(7);
-                    break;
+            switch (type)
+            {
+                case 0: break;
+                case 1: ItemSetA2.Add(17); break;
+                case 2: ItemSetA2.Add(17); ItemSetA2.Add(17); ItemSetA2.Add(22); break;
+                case 3: break;
+            }
 
-                case 2:
-                    ItemSetA2.Add(15); ItemSetA2.Add(15); ItemSetA2.Add(17);
-                    ItemSetA3.Add(7); ItemSetA3.Add(7); ItemSetA3.Add(9);
-                    break;
-
-                case 3:
-                    ItemSetA1.Add(14); ItemSetA1.Add(14); ItemSetA1.Add(16);
-                    ItemSetA3.Add(6); ItemSetA3.Add(6); ItemSetA3.Add(8);
-                    break;
+            switch (type)
+            {
+                case 0: ItemSetA3.Add(4); ItemSetA3.Add(6); break;
+                case 1: ItemSetA3.Add(5); ItemSetA3.Add(7); break;
+                case 2: ItemSetA3.Add(7); ItemSetA3.Add(7); ItemSetA3.Add(9); break;
+                case 3: ItemSetA3.Add(6); ItemSetA3.Add(6); ItemSetA3.Add(8); break;
             }
 
             dropIds[0] = ItemSetA1[Random.Range(0, ItemSetA1.Count)];
@@ -243,7 +244,7 @@ namespace Completed
 		{
             List<Vector3> showRange = GetShowRange(playerPos, dir, range);
 
-            if(curLevel.GetMapOfStructures(playerPos) == 1)
+            if(curLevel.GetMapOfShelters(playerPos) != 0)
             {
                 Vector3 viewPos = playerPos;
                 switch (dir)
@@ -263,7 +264,6 @@ namespace Completed
                                 
                 foreach (Vector3 showPos in showRange)
                 {
-                    if (curLevel.GetMapOfStructures(showPos) == 1) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -286,6 +286,31 @@ namespace Completed
 				}
 			}
 
+            foreach (GameObject obj in curLevel.structures)
+            {
+                bool bShow = false;
+
+                foreach (Vector3 showPos in showRange)
+                {
+                    if (showPos == obj.transform.position)
+                    {
+                        bShow = true;
+                        break;
+                    }
+                }
+
+                SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+                if (renderer)
+                {
+                    if (obj.transform.position != playerPos)
+                    {
+                        Color color = Color.white;
+                        if (bShow) color.a = 0.6f;
+                        renderer.color = color;
+                    }
+                }
+            }
+
             foreach (Vector3 showPos in showRange)
             {               
                 if (showPos == gateWay.transform.position)
@@ -294,7 +319,7 @@ namespace Completed
                     break;
                 }
 
-                foreach(GameObject item in curLevel.items)
+                foreach (GameObject item in curLevel.items)
                 {
                     if (showPos == item.transform.position)
                     {
@@ -325,7 +350,7 @@ namespace Completed
 
                 showRange.AddRange(GetShowRange(unitPos, dir, range));
 
-                if (curLevel.GetMapOfStructures(unitPos) == 1)
+                if (curLevel.GetMapOfShelters(unitPos) != 0)
                 {
                     Vector3 viewPos = unitPos;
                     switch (dir)
@@ -346,7 +371,6 @@ namespace Completed
 
                 foreach (Vector3 showPos in showRange)
                 {
-                    if (curLevel.GetMapOfStructures(showPos) == 1) continue;
                     if (showPos == obj.transform.position)
                     {
                         bShow = true;
@@ -388,7 +412,7 @@ namespace Completed
         {
             money = 0;
             myWeapon = EffectManager.instance.GetWeapon(WEAPON.W1);
-            myShip = new SpaceShip(1, 2, 6);
+            myShip = new SpaceShip(0, 2, 6);
             myShip.ReadyToDeparture();
             myShip.SetWeapon(myWeapon);
         }
@@ -472,11 +496,7 @@ namespace Completed
             purchase50Button = GameObject.Find("Purchase50Button").GetComponent<Button>();
             purchase50Button.onClick.RemoveAllListeners();
             purchase50Button.onClick.AddListener(() => AddTry(50));
-
-
             
-
-
             purchasePanel = GameObject.Find("PurchasePanel");
             purchasePanel.SetActive(false);
 
@@ -544,11 +564,11 @@ namespace Completed
             switch(levelId)
             {
                 case 10: eInfos.Add(0, 10); eInfos.Add(1, 5); eInfos.Add(2, 5); break;
-                case 1: eInfos.Add(0, 1); break;
-                case 2: eInfos.Add(0, 2); eInfos.Add(1, 1); break;
-                case 3: eInfos.Add(0, 5); eInfos.Add(1, 2); eInfos.Add(2, 1); break;
-                case 4: eInfos.Add(0, 5); eInfos.Add(1, 4); eInfos.Add(2, 3); break;
-                case 5: eInfos.Add(0, 10); eInfos.Add(1, 5); eInfos.Add(2, 5); break;
+//                case 1: eInfos.Add(0, 3); break;
+                case 2: eInfos.Add(0, 1); break;
+                case 3: eInfos.Add(0, 1); eInfos.Add(1, 1); break;
+                case 4: eInfos.Add(0, 3); eInfos.Add(1, 2); eInfos.Add(2, 1); break;
+                case 5: eInfos.Add(0, 5); eInfos.Add(1, 3); eInfos.Add(2, 2); break;
             }
 
             Dictionary<int, int> sInfos = new Dictionary<int, int>();
@@ -569,9 +589,9 @@ namespace Completed
             {
                 case 10: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
                 case 1: rInfos.Add(2, 4); rInfos.Add(3, 0); rInfos.Add(4, 0); break;
-                case 2: rInfos.Add(2, 8); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
-                case 3: rInfos.Add(2, 8); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
-                case 4: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
+                case 2: rInfos.Add(2, 6); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
+                case 3: rInfos.Add(2, 6); rInfos.Add(3, 1); rInfos.Add(4, 0); break;
+                case 4: rInfos.Add(2, 10); rInfos.Add(3, 2); rInfos.Add(4, 1); break;
                 case 5: rInfos.Add(2, 10); rInfos.Add(3, 3); rInfos.Add(4, 2); break;
             }
             int colums = 10;
@@ -734,7 +754,7 @@ namespace Completed
 
         public void EnableGateway()
         {
-            gateWay.GetComponent<SpriteRenderer>().color = Color.green;
+            gateWay.GetComponent<SpriteRenderer>().color = Color.white;
         }
     }
 }

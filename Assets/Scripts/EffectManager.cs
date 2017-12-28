@@ -164,6 +164,8 @@ namespace Completed
 
         public void UpdateTextEfxs()
         {
+            textEfxs.RemoveAll(item => item.obj == null);
+
             Vector3 up = new Vector3(0, 2, 0);
             up *= Time.deltaTime;
             foreach (TEXT_EFX_INFO info in textEfxs)
@@ -178,6 +180,7 @@ namespace Completed
                 }
             }
 
+            
             textEfxs.RemoveAll(item => item.obj.activeSelf == false);
         }
 
@@ -215,7 +218,7 @@ namespace Completed
             textEfxPool.Add(2, textEfxCList);
         }
 
-        public void ShowTextEfx(int type, int number, Vector3 targetPos)
+        public void ShowTextEfx(int type, int number, Vector3 targetPos, int extra = 0)
         {
             GameObject textEfx = GetTextEfx(type);
             textEfx.transform.position = targetPos + new Vector3(0, 0.3f, 0);
@@ -225,10 +228,11 @@ namespace Completed
             GameObject efxIcon = textEfx.transform.Find("Icon").gameObject;
 
             if (type == 0 || type == 1)
-            {
+            {                
                 Sprite icon = efxIcons[type];
+                if (extra == 1) icon = efxIcons[2];
                 efxIcon.GetComponent<SpriteRenderer>().sprite = icon;
-            }
+            }            
 
             if (type == 1 || type == 2)
             {

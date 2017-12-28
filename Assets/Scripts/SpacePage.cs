@@ -25,6 +25,7 @@ namespace Completed
         public Button openUpgradePanelBtn;
         public Button closeUpgradePanelBtn;
 
+        public Button closeSearchBtn;
         public Button closeShopBtn;
         public Button[] getItemBtns;
         public Image[] itemBgs;
@@ -51,6 +52,7 @@ namespace Completed
             openUpgradePanelBtn.onClick.AddListener(OpenUpgradePanel);
             closeUpgradePanelBtn.onClick.AddListener(CloseUpgradePanel);
 
+            closeSearchBtn.onClick.AddListener(CloseSearchPanel);
             closeShopBtn.onClick.AddListener(CloseShopPanel);
             backBtn.onClick.AddListener(GameManager.instance.Restart);
             searchBtn.onClick.AddListener(OpenSearchPanel);

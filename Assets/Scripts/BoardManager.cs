@@ -98,22 +98,16 @@ namespace Completed
 
         }
 
-        void LayoutStructure(Vector3 pos, int range)
+        void LayoutStructure(Vector3 pos, int value)
         {
             GameObject tileChoice = radarTile;
-            if (range == 1) tileChoice = shelterTile;
+            if (value == 1) tileChoice = shelterTile;
             GameObject obj = Instantiate(tileChoice, pos, Quaternion.identity);
-            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-            if (renderer)
-            {
-                renderer.sortingLayerName = "Map";
-                if(range == 5)
-                {
-                    renderer.color = Color.yellow;
-                }
-            }
+            
+            if (value == 1) GameManager.instance.curLevel.SetMapOfShelters(pos, 3);
+            else GameManager.instance.curLevel.SetMapOfRadors(pos, value); 
 
-            GameManager.instance.curLevel.SetMapOfStructures(pos, range);
+            GameManager.instance.curLevel.AddStructure(obj);
         }
 
         void LayoutStructuresRandomly(Dictionary<int, int> sInfos)
@@ -123,7 +117,7 @@ namespace Completed
                 for (int i = 0; i < sInfo.Value; i++)
                 {
                     Vector3 rPos = GetRandomPosRefMap();
-                    LayoutStructure(rPos, sInfo.Key);
+                    LayoutStructure(rPos, sInfo.Key);                    
                 }
             }
         }
@@ -183,7 +177,8 @@ namespace Completed
             while (true)
             {
                 rPos = RandomPosition();
-                if (GameManager.instance.curLevel.GetMapOfStructures(rPos) == 0)
+                if (GameManager.instance.curLevel.GetMapOfRadors(rPos) == 0 &&
+                    GameManager.instance.curLevel.GetMapOfShelters(rPos) == 0)
                     break;
             }            
 

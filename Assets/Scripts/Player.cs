@@ -140,10 +140,11 @@ namespace Completed
             float width = 200;
             switch(myShip.shieldLevel)
             {
-                case 2: width = 280; break;
-                case 3: width = 360; break;
-                case 4: width = 440; break;
-                case 5: width = 520; break;
+                case 1: width = 280; break;
+                case 2: width = 360; break;
+                case 3: width = 440; break;
+                case 4: width = 520; break;
+                case 5: width = 600; break;
             }
 
             float rate = (float)myShip.shield/ (float)myShip.shieldInits[myShip.shieldLevel];
@@ -209,12 +210,6 @@ namespace Completed
                 sight.SetActive(false);
             }
 
-            if (targetEnemy && GameManager.instance.curLevel.GetMapOfStructures(targetEnemy.transform.position) == 1)
-            {
-                targetEnemy = null;
-                sight.SetActive(false);
-                ChangeTarget();
-            }
         }
 
         public List<Enemy> targetEnemies = new List<Enemy>();
@@ -228,8 +223,6 @@ namespace Completed
 
             foreach (Vector3 pos in showRange)
             {
-                if (GameManager.instance.curLevel.GetMapOfStructures(pos) == 1) continue;
-
                 int value = GameManager.instance.curLevel.GetMapOfUnits(pos);
                 if (value != 0 && value != 1)
                 {
@@ -245,7 +238,7 @@ namespace Completed
 		{
             if (GameManager.instance.doingSetup) return;
             UpdateDisplay();
-            int value = GameManager.instance.curLevel.GetMapOfStructures(transform.position);
+            int value = GameManager.instance.curLevel.GetMapOfRadors(transform.position);
             myShip.UpdateScope(value);
             timeLimit -= Time.deltaTime;
 
@@ -625,6 +618,27 @@ namespace Completed
 
         public void LoseHP (int loss)
 		{
+            int shelterHP = GameManager.instance.curLevel.GetMapOfShelters(transform.position);
+            if (shelterHP > 0)
+            {
+                shelterHP--;
+                GameManager.instance.curLevel.SetMapOfShelters(transform.position, shelterHP);
+                EffectManager.instance.ShowTextEfx(0, 0, transform.position, 1);
+
+                if (shelterHP == 0)
+                {
+                    foreach (GameObject obj in GameManager.instance.curLevel.structures)
+                    {
+                        if (obj.transform.position == transform.position)
+                        {
+                            obj.SetActive(false);
+                        }
+                    }
+                    GameManager.instance.curLevel.structures.RemoveAll(item => item.activeSelf == false);                    
+                }
+                return;
+            }
+
             EffectManager.instance.ShowTextEfx(2, -loss, transform.position);
             if (myShip.Shield())
             {
