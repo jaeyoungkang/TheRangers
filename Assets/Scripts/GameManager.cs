@@ -16,12 +16,26 @@ namespace Completed
 
     public class GameManager : MonoBehaviour
 	{
+        public int tryCount = 3;
+
         public static GameManager instance = null;
         public Level curLevel = new Level();
 
-        public GameObject gateWay;        
+        public GameObject gateWay;
         private Text gatewaySubText;
+        private Text tryText;
+
+        private Text readyDescribeText;
+
         private Button readyBtn;
+        private Button adBtn;
+        private Button purchaseBtn;
+
+        private Button purchase10Button;
+        private Button purchase30Button;
+        private Button purchase50Button;        
+        private Button closePurchaseButton;
+        private GameObject purchasePanel;
 
         private Text universeText;
         public Text gameMessage;
@@ -410,6 +424,16 @@ namespace Completed
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
         }
 
+        void HidePurchasePanel()
+        {
+            purchasePanel.SetActive(false);
+        }
+
+        void ShowPurchasePanel()
+        {
+            purchasePanel.SetActive(true);
+        }
+
         void InitGame()
 		{
             curLevel.Init();
@@ -417,9 +441,44 @@ namespace Completed
             gameMessage = GameObject.Find("Msg").GetComponent<Text>();
             universeText = GameObject.Find("GatewayText").GetComponent<Text>();
             gatewaySubText = GameObject.Find("GatewaySubText").GetComponent<Text>();
+            tryText = GameObject.Find("TryText").GetComponent<Text>();
+            readyDescribeText = GameObject.Find("ReadyDescribeText").GetComponent<Text>();
+            readyDescribeText.transform.localPosition = new Vector3(0, -500, 0);
+
+            adBtn = GameObject.Find("AdButton").GetComponent<Button>();
+            adBtn.onClick.RemoveAllListeners();
+            adBtn.onClick.AddListener(()=> AddTry(1));
+            purchaseBtn = GameObject.Find("PurchaseButton").GetComponent<Button>();
+            purchaseBtn.onClick.RemoveAllListeners();
+            purchaseBtn.onClick.AddListener(ShowPurchasePanel);
+
             readyBtn = GameObject.Find("ReadyButton").GetComponent<Button>();
             readyBtn.onClick.RemoveAllListeners();
             readyBtn.onClick.AddListener(GoIntoGateway);
+
+            
+            closePurchaseButton = GameObject.Find("ClosePurchaseButton").GetComponent<Button>();
+            closePurchaseButton.onClick.RemoveAllListeners();
+            closePurchaseButton.onClick.AddListener(HidePurchasePanel);
+
+            purchase10Button = GameObject.Find("Purchase10Button").GetComponent<Button>();
+            purchase10Button.onClick.RemoveAllListeners();
+            purchase10Button.onClick.AddListener(() => AddTry(10));
+
+            purchase30Button = GameObject.Find("Purchase30Button").GetComponent<Button>();
+            purchase30Button.onClick.RemoveAllListeners();
+            purchase30Button.onClick.AddListener(() => AddTry(30));
+
+            purchase50Button = GameObject.Find("Purchase50Button").GetComponent<Button>();
+            purchase50Button.onClick.RemoveAllListeners();
+            purchase50Button.onClick.AddListener(() => AddTry(50));
+
+
+            
+
+
+            purchasePanel = GameObject.Find("PurchasePanel");
+            purchasePanel.SetActive(false);
 
             gameMessage.gameObject.SetActive(false);
 
@@ -433,8 +492,21 @@ namespace Completed
             ChangePage(PAGE.READY);
         }
 
+        public void AddTry(int count)
+        {
+            tryCount += count;
+        }
+
+        public void DiscountTry()
+        {
+            tryCount--;
+            if (tryCount < 0) tryCount = 0;
+        }
+
         public void GoIntoGateway()
         {
+            DiscountTry();
+
             SoundManager.instance.PlaySingleBtn();
             InitLevel(numberOfUniverse);
             universeText.text = "제 " + numberOfUniverse + " 우주";
@@ -456,7 +528,7 @@ namespace Completed
             string missiondesc = string.Format("수집해야할 크리스탈 수 : {0}\n\n시간 제한 : {1}\n\n우주 크기 : {2}", curLevel.missionItemCount, curLevel.timeLimit, universeSizeText);
             gatewaySubText.text = missiondesc + "\n\n" + "진입중...";
             ChangePage(PAGE.GATEWAY);
-            Invoke("StartMission", 4f);
+            Invoke("StartMission", 3f);
         }
         
         void InitLevel(int levelId)
@@ -530,9 +602,27 @@ namespace Completed
             ChangePage(PAGE.SPACE);			
             doingSetup = false;
         }
-        
-		void Update()
+
+        void DescribeRolling()
+        {
+            Vector3 rolling = new Vector3(0, 30, 0);
+            rolling *= Time.deltaTime;
+            readyDescribeText.transform.position += rolling;
+            if(readyDescribeText.transform.position.y > 1000 )
+            {
+                readyDescribeText.transform.localPosition = new Vector3(0, -500, 0);
+            }
+        }
+
+
+        void Update()
 		{
+            tryText.text = "도전 가능 횟수 : " + tryCount;
+            if(readyPage.activeSelf == true)
+            {
+                DescribeRolling();
+            }
+
             if (doingSetup) return;
 			if (msgTimer >= 0) {
 				msgTimer -= Time.deltaTime;
